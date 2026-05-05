@@ -10,6 +10,15 @@ import { ContainerNode } from './ContainerNode';
 import { edgeTypes } from './CustomEdge';
 import { mapIgnitionToReactFlowEdges } from './EdgeUtils';
 import { useArchitectureFlowHandlers } from './useArchitectureFlowHandlers';
+import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
+
+const SwapIcon = ({ image }: { image: string }) => {
+    const scopeId = React.useMemo(() => nextSvgScopeId(), []);
+    const svgHtml = React.useMemo(() => extractSvgMarkup(image, scopeId), [image, scopeId]);
+    if (svgHtml) return <div id={scopeId} style={{ width: '100%', height: '100%', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: svgHtml }} />;
+    const dataUri = toSafeDataUri(image);
+    return dataUri ? <img src={dataUri} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null;
+};
 
 // ─── Shared UI primitives ─────────────────────────────────────────────────────
 
@@ -221,7 +230,7 @@ const mapIgnitionToReactFlowNodes = (
                 zIndex: isContainer ? (nodeData.zIndex ?? -1) : 1000,
                 style: isContainer ? { width: nodeData.width || 300, height: nodeData.height || 300 } : undefined,
                 data: {
-                    label: nodeData.label || 'Unknown', b64Image: nodeData.b64Image || '', text: nodeData.text || '', tooltip: nodeData.tooltip || '', configs: nodeData.configs || {},
+                    label: nodeData.label || 'Unknown', image: nodeData.image || '', text: nodeData.text || '', tooltip: nodeData.tooltip || '', configs: nodeData.configs || {},
                     style: nodeData.style || {}, labelStyle: nodeData.labelStyle || {}, textStyle: nodeData.textStyle || {},
                     paletteId: nodeData.paletteId || 'unknown', inactive: nodeData.inactive || false,
                     hideHandles: nodeData.hideHandles, globalHideHandles, handleCount: globalHandleCount,
@@ -647,7 +656,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                                         <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '150px' }}>
                                                             {validSwapItems.map(targetItem => (
                                                                 <div key={targetItem.id} style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center' }} onClick={() => handleNodeSwap(targetItem.id)}>
-                                                                    <div style={{ width: '16px', height: '16px', marginRight: '6px', display: 'flex', alignItems: 'center' }}>{targetItem.b64Image && <img src={targetItem.b64Image.startsWith('data:') ? targetItem.b64Image : `data:image/svg+xml,${encodeURIComponent(targetItem.b64Image)}`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />}</div>
+                                                                    <div style={{ width: '16px', height: '16px', marginRight: '6px', display: 'flex', alignItems: 'center' }}>{targetItem.image && <SwapIcon image={targetItem.image} />}</div>
                                                                     <span>{targetItem.label}</span>
                                                                 </div>
                                                             ))}

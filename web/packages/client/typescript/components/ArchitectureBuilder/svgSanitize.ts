@@ -1,0 +1,132 @@
+import DOMPurify from 'dompurify';
+
+/**
+ * Tightly-scoped DOMPurify config for user-supplied SVG icons.
+ *
+ * USE_PROFILES.svg    — allowlist-only: only known-safe SVG tags/attributes
+ *                       are permitted. All on* event handlers, <script>,
+ *                       <iframe>, <object>, and <embed> are stripped automatically.
+ * FORBID_TAGS         — defense-in-depth block of executable/external-loading
+ *                       elements (already not in the SVG allowlist).
+ * FORBID_ATTR         — removes href and xlink:href from every element, blocking
+ *                       external resource fetches and data exfiltration via
+ *                       <image href>, <use xlink:href>, <a href>, etc.
+ *
+ * NOTE: <style> is intentionally NOT forbidden. SVGs exported from Illustrator,
+ * Inkscape, and most design tools use <style> blocks with class-based fills.
+ * DOMPurify's SVG profile processes <style> content and removes dangerous CSS
+ * constructs. CSS class collisions between multiple inline SVGs are handled
+ * separately via scopeSvgStyles().
+ */
+const SVG_CONFIG: DOMPurify.Config = {
+    USE_PROFILES: { svg: true, svgFilters: true },
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'link', 'base', 'meta'],
+    FORBID_ATTR: ['href', 'xlink:href'],
+};
+
+let _scopeCounter = 0;
+/** Returns a stable, unique DOM-safe ID for scoping one SVG's styles. */
+export function nextSvgScopeId(): string {
+    return `svgi${++_scopeCounter}`;
+}
+
+const _sanitizeCache = new Map<string, string>();
+
+/** Sanitize a raw SVG markup string and return clean SVG markup. Results are cached by input string. */
+export function sanitizeSvg(raw: string): string {
+    const cached = _sanitizeCache.get(raw);
+    if (cached !== undefined) return cached;
+    const result = DOMPurify.sanitize(raw, SVG_CONFIG) as string;
+    _sanitizeCache.set(raw, result);
+    return result;
+}
+
+/**
+ * Scope class-selector rules inside <style> blocks to a container ID so that
+ * multiple inline SVGs with identical class names (e.g. .cls-1 from Illustrator)
+ * do not interfere with each other.
+ *
+ * Only simple class selectors (`.foo`, `.foo, .bar`) are prefixed; element
+ * selectors, pseudo-classes, and @-rules are left untouched.
+ */
+function scopeSvgStyles(markup: string, scopeId: string): string {
+    return markup.replace(
+        /(<style[^>]*>)([\s\S]*?)(<\/style>)/gi,
+        (_, open, css, close) => {
+            const scoped = css.replace(
+                /(\.[\w-]+(?:\s*,\s*\.[\w-]+)*)\s*\{/g,
+                (_, selectors: string) => {
+                    const prefixed = selectors.trim()
+                        .split(',')
+                        .map((s: string) => `#${scopeId} ${s.trim()}`)
+                        .join(', ');
+                    return `${prefixed} {`;
+                }
+            );
+            return `${open}${scoped}${close}`;
+        }
+    );
+}
+
+/**
+ * Force the root <svg> element to fill its container (width/height → 100%).
+ * The viewBox is preserved so aspect ratio is maintained automatically.
+ */
+function makeSvgResponsive(markup: string): string {
+    return markup
+        .replace(/(<svg\b[^>]*?)\swidth="[^"]*"/i, '$1')
+        .replace(/(<svg\b[^>]*?)\sheight="[^"]*"/i, '$1')
+        .replace(/(<svg\b)/i, '$1 width="100%" height="100%"');
+}
+
+/**
+ * Decode any supported image value, sanitize it, scope its styles, and return
+ * clean SVG markup ready for inline rendering via dangerouslySetInnerHTML.
+ *
+ * Accepts raw SVG markup only: "<svg ...>...</svg>"
+ *
+ * Returns null if the value is not raw SVG markup, is empty, or is empty after
+ * sanitization. Pass scopeId (from nextSvgScopeId()) to isolate <style> blocks.
+ *
+ * Always returns null on any error — never throws — so a bad SVG degrades
+ * gracefully (no image shown) rather than crashing the React render tree.
+ */
+export function extractSvgMarkup(value: string, scopeId?: string): string | null {
+    if (!value) return null;
+    try {
+        if (!/^\s*</.test(value)) return null;
+
+        let clean = sanitizeSvg(value);
+        if (!clean) return null;
+
+        clean = makeSvgResponsive(clean);
+        if (scopeId) clean = scopeSvgStyles(clean, scopeId);
+
+        return clean || null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Return a safe data URI for use in <img src> or as a drag-ghost source.
+ * Raw SVG markup is sanitized before encoding. Non-SVG data URIs pass through.
+ * Returns null for unrecognised or empty values.
+ *
+ * Use this only where a URL is required (drag ghost images).
+ * For normal rendering, prefer extractSvgMarkup() + dangerouslySetInnerHTML.
+ */
+export function toSafeDataUri(value: string): string | null {
+    if (!value) return null;
+
+    // Non-SVG data URIs (PNG, JPEG, GIF …) carry no executable markup.
+    if (value.startsWith('data:')) return value;
+
+    // Raw SVG markup
+    if (/^\s*</.test(value)) {
+        const clean = sanitizeSvg(value);
+        return clean ? `data:image/svg+xml,${encodeURIComponent(clean)}` : null;
+    }
+
+    return null;
+}
