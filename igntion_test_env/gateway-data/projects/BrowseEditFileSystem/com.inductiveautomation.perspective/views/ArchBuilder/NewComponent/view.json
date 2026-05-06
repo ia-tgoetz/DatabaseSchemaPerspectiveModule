@@ -36,162 +36,277 @@
     }
   },
   "params": {
+    "index": "value",
     "lists": {
       "categories": [
         "Gateways",
-        "Misc",
-        "Data",
+        "IIOT",
+        "Clients",
         "Zones",
-        "Endpoints",
-        "Infrastructure",
-        "Edge"
+        "COMMS",
+        "Databases",
+        "Network",
+        "Enterprise",
+        "Cloud Environments",
+        "Devices/OPC"
       ],
-      "connectionTypes": {
-        "client": {
-          "arrow": false,
-          "color": "var(--neutral-60)",
-          "docs": "https://docs.inductiveautomation.com/docs/8.1/ignition-modules/perspective/perspective-sessions",
-          "label": "Client",
-          "multiple": false
-        },
-        "db": {
-          "arrow": false,
-          "color": "#34A853",
-          "docs": "https://docs.inductiveautomation.com/docs/8.1/platform/database-connections",
-          "label": "DB",
-          "multiple": true
-        },
-        "device-driver": {
-          "arrow": false,
-          "color": "var(--seq-3)",
-          "docs": "https://docs.inductiveautomation.com/docs/8.1/ignition-modules/opc-ua/opc-ua-drivers",
-          "label": "Device Driver",
-          "multiple": true
-        },
-        "gateway-network": {
-          "arrow": true,
-          "color": "var(--ignition-orange)",
-          "docs": "https://docs.inductiveautomation.com/docs/8.1/platform/gateway-network",
-          "label": "Gateway Network",
-          "multiple": false
-        },
-        "kafka": {
-          "arrow": false,
-          "color": "#00ACAC",
-          "docs": "https://docs.inductiveautomation.com/docs/8.3/ignition-modules/cloud-connector-modules/kafka",
-          "label": "Kafka",
-          "multiple": true
-        },
-        "mongodb": {
-          "arrow": false,
-          "color": "green",
-          "docs": "https://docs.inductiveautomation.com/docs/8.1/ignition-modules/cloud-connector-modules/mongodb",
-          "label": "MongoDB",
-          "multiple": true
-        },
-        "mqtt": {
-          "arrow": false,
-          "color": "var(--cirrusLink)",
-          "docs": "https://docs.chariot.io/display/CLD80/Cirrus+Link+Ignition+Modules",
-          "label": "MQTT",
-          "multiple": true
-        },
-        "opc-com": {
-          "arrow": false,
-          "color": "#FFE7BA",
-          "docs": "https://docs.inductiveautomation.com/docs/8.1/ignition-modules/opc-ua/third-party-opc-servers/opc-com",
-          "label": "OPC-COM",
-          "multiple": true
-        },
-        "opc-ua": {
-          "arrow": false,
-          "color": "#FFE7BA",
-          "docs": "https://docs.inductiveautomation.com/docs/8.1/ignition-modules/opc-ua",
-          "label": "OPC-UA",
-          "multiple": true
-        },
-        "rest": {
-          "arrow": true,
-          "color": "#f59e0b",
-          "docs": "https://docs.inductiveautomation.com/docs/8.1/ignition-modules/webdev",
-          "label": "REST API",
-          "multiple": true
-        },
-        "standard": {
-          "arrow": false,
-          "color": "var(--neutral-100)",
-          "docs": "https://docs.inductiveautomation.com/docs/8.1/platform/gateway/status/connections",
-          "label": "Standard",
-          "multiple": true
-        }
-      },
-      "ids": [
-        "container",
+      "connectionTypes": [
         "standard",
-        "Connector",
-        "server",
-        "Comms",
-        "Device",
-        "Kafka",
-        "ReverseProxy",
-        "Label",
-        "edge-iiot",
-        "LoadBalancer",
-        "Custom",
-        "Usersource",
-        "fourIR",
-        "Firewall",
-        "cloud",
-        "OPCUA",
-        "edge-panel",
-        "Note",
-        "Database",
-        "MongoDB",
-        "Client"
+        "rest",
+        "gateway-network",
+        "opc-ua",
+        "mqtt",
+        "kafka",
+        "client",
+        "opc-com",
+        "mongodb",
+        "device-driver",
+        "db"
       ],
-      "labels": [
-        "Standard Gateway",
-        "Connector",
-        "Load Balancer",
-        "Server",
-        "Device",
-        "OPC-UA Server",
-        "Kafka",
-        "Label",
-        "Custom",
-        "Edge IIOT Gateway",
-        "Firewall",
-        "Reverse Proxy",
-        "Cloud Gateway",
-        "Area / Site",
-        "Note",
-        "Database",
-        "MongoDB",
-        "Edge Panel Gateway",
-        "Client",
-        "4IR",
-        "Communication",
-        "User Source"
+      "types": [
+        {
+          "label": "Area / Site",
+          "value": "container"
+        },
+        {
+          "label": "Standard",
+          "value": "standard"
+        },
+        {
+          "label": "Edge IIOT Gateway",
+          "value": "edge-iiot"
+        },
+        {
+          "label": "Edge Panel Gateway",
+          "value": "edge-panel"
+        },
+        {
+          "label": "Cloud Gateway",
+          "value": "cloud"
+        },
+        {
+          "label": "SQL DB",
+          "value": "SQLDB"
+        },
+        {
+          "label": "Postgres",
+          "value": "Postgres"
+        },
+        {
+          "label": "MySQL",
+          "value": "MySQL"
+        },
+        {
+          "label": "SQL Server",
+          "value": "MSSQL"
+        },
+        {
+          "label": "MariaDB",
+          "value": "MariaDB"
+        },
+        {
+          "label": "Oracle",
+          "value": "Oracle"
+        },
+        {
+          "label": "SQLite",
+          "value": "SQLite"
+        },
+        {
+          "label": "Snowflake",
+          "value": "Snowflake"
+        },
+        {
+          "label": "AzureSQL",
+          "value": "AzureSQL"
+        },
+        {
+          "label": "RDS",
+          "value": "RDS"
+        },
+        {
+          "label": "TigerData",
+          "value": "TigerData"
+        },
+        {
+          "label": "MongoDB",
+          "value": "MongoDB"
+        },
+        {
+          "label": "QuestDB",
+          "value": "QuestDB"
+        },
+        {
+          "label": "OPC-UA",
+          "value": "opc-ua"
+        },
+        {
+          "label": "Device",
+          "value": "DeviceBlue"
+        },
+        {
+          "label": "Device",
+          "value": "DeviceOrange"
+        },
+        {
+          "label": "Device",
+          "value": "DeviceGray"
+        },
+        {
+          "label": "Device",
+          "value": "DevicePurple"
+        },
+        {
+          "label": "Desktop Client 1",
+          "value": "KBBlueLeft"
+        },
+        {
+          "label": "Desktop Client 2",
+          "value": "KBWhiteLeft"
+        },
+        {
+          "label": "Laptop Client 1",
+          "value": "LTBlueLeft"
+        },
+        {
+          "label": "Laptop Client 2",
+          "value": "LTWhiteLeft"
+        },
+        {
+          "label": "Blank Panel",
+          "value": "BlankPanel"
+        },
+        {
+          "label": "Panel 1",
+          "value": "BluePanel"
+        },
+        {
+          "label": "Panel 2",
+          "value": "WhitePanel"
+        },
+        {
+          "label": "Phone 1",
+          "value": "BluePhone"
+        },
+        {
+          "label": "Phone 2",
+          "value": "WhitePhone"
+        },
+        {
+          "label": "MQTT Broker",
+          "value": "Broker"
+        },
+        {
+          "label": "MQTT Distributor",
+          "value": "Distributor"
+        },
+        {
+          "label": "IIOT Bridge",
+          "value": "IIOTBridge"
+        },
+        {
+          "label": "CHARIOT",
+          "value": "Chariot"
+        },
+        {
+          "label": "Mosquitto",
+          "value": "Mosquitto"
+        },
+        {
+          "label": "HiveMQ",
+          "value": "HiveMQ"
+        },
+        {
+          "label": "EMQX",
+          "value": "EMQX"
+        },
+        {
+          "label": "Internet",
+          "value": "internet-cloud"
+        },
+        {
+          "label": "AWS",
+          "value": "aws-cloud"
+        },
+        {
+          "label": "Azure",
+          "value": "azure-cloud"
+        },
+        {
+          "label": "Google Cloud",
+          "value": "gcp-cloud"
+        },
+        {
+          "label": "LIMs",
+          "value": "lims-system"
+        },
+        {
+          "label": "Cell Tower",
+          "value": "cell-tower"
+        },
+        {
+          "label": "Satellite",
+          "value": "satellite"
+        },
+        {
+          "label": "Reverse Proxy",
+          "value": "reverse-proxy"
+        },
+        {
+          "label": "Load Balancer",
+          "value": "load-balancer"
+        },
+        {
+          "label": "Router",
+          "value": "router"
+        },
+        {
+          "label": "Switch",
+          "value": "switch"
+        },
+        {
+          "label": "ERP",
+          "value": "erp-system"
+        },
+        {
+          "label": "MES",
+          "value": "mes-system"
+        }
       ]
     },
     "paletteItem": {
-      "b64Image": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48c3ZnIGlkPSJMYXllcl8yIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgMjIxLjQzIDMxNC4zOSI+PGRlZnM+PHN0eWxlPi5jbHMtMSwuY2xzLTIsLmNscy0ze2ZpbGw6bm9uZTt9LmNscy0ye2NsaXAtcGF0aDp1cmwoI2NsaXBwYXRoLTEpO30uY2xzLTR7ZmlsbDojZjc5NDM1O30uY2xzLTV7ZmlsbDojZmZmO30uY2xzLTZ7ZmlsbDojYWNjY2UyO30uY2xzLTd7ZmlsbDojMzU1OTgwO30uY2xzLTh7ZmlsbDojMmY0NjY2O30uY2xzLTN7Y2xpcC1wYXRoOnVybCgjY2xpcHBhdGgpO308L3N0eWxlPjxjbGlwUGF0aCBpZD0iY2xpcHBhdGgiPjxyZWN0IGNsYXNzPSJjbHMtMSIgd2lkdGg9IjIyMS40MyIgaGVpZ2h0PSIzMTQuMzkiLz48L2NsaXBQYXRoPjxjbGlwUGF0aCBpZD0iY2xpcHBhdGgtMSI+PHJlY3QgY2xhc3M9ImNscy0xIiB3aWR0aD0iMjIxLjQzIiBoZWlnaHQ9IjMxNC4zOSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGlkPSJMYXllcl8xLTIiPjxnIGlkPSJTZXJ2ZXJfQmx1ZV8tX0xlZnQiPjxnIGNsYXNzPSJjbHMtMyI+PHBvbHlnb24gY2xhc3M9ImNscy03IiBwb2ludHM9IjcyLjEyIDEyNy44NSA3Mi4xMyAzMTQuMzkgMjIxLjQzIDIyOC4xOSAyMjEuNDMgNDEuNjQgNzIuMTIgMTI3Ljg1Ii8+PHBvbHlnb24gY2xhc3M9ImNscy02IiBwb2ludHM9IjE0OS4zMiAwIDAgODYuMjEgNzIuMTIgMTI3Ljg1IDIyMS40MyA0MS42NCAxNDkuMzIgMCIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtOCIgcG9pbnRzPSIwIDI3Mi43NCA3Mi4xMiAzMTQuMzkgNzIuMTIgMTI3Ljg1IDAgODYuMjEgMCAyNzIuNzQiLz48ZyBjbGFzcz0iY2xzLTIiPjxwYXRoIGNsYXNzPSJjbHMtNCIgZD0ibTEzNS4xNCwyMDkuOWMxLjY1LTIuMzcsMy41MS00LjA3LDUuNTctNS4xLDIuMDctMS4wNCwzLjgyLTEuMTUsNS4yMy0uMzEsMS40Mi44MywyLjA0LDIuMzIsMS44OSw0LjQ4LS4xNiwyLjE3LTEuMDUsNC4zNS0yLjcsNi41OC0xLjYzLDIuMjItMy40OSwzLjg1LTUuNTUsNC44OC0yLjA4LDEuMDQtMy44MywxLjIyLTUuMjQuNTItMS40Mi0uNy0yLjA2LTIuMTEtMS45LTQuMjguMTYtMi4xNiwxLjA2LTQuNDMsMi43MS02Ljc4Ii8+PHBhdGggY2xhc3M9ImNscy00IiBkPSJtMTg0LjUyLDExOC4wOGMtLjctMS4xMy0xLjc5LTEuNjktMy4yOC0xLjY4LTEuNS4wMy0zLjA3LjYxLTQuNzQsMS43Ny0xLjY3LDEuMTYtMy4xLDMuMTUtNC4zMiw1Ljk3LS4yMS41Mi0uNzgsMi4wNS0xLjcyLDQuNTktLjk0LDIuNTYtMi4xMSw1Ljc5LTMuNTUsOS43LTEuNDMsMy45MS0zLjA1LDguMzEtNC44NywxMy4yMS0xLjgxLDQuODktMy42OSwxMC4wMi01LjYzLDE1LjM5LTEuOTQsNS4zNi0zLjksMTAuNzctNS44OCwxNi4yNS0xLjk0LDUuMzUtMy43OSwxMC40NC01LjUzLDE1LjI2LjgzLS4xMiwxLjYzLS4xMiwyLjM3LDAsMy42LTcuMzMsNy40NC0xNS4xNSwxMS41Mi0yMy40NSw0LjEzLTguNCw3Ljk3LTE2LjI1LDExLjUyLTIzLjU1LDMuNTUtNy4zMSw2LjU3LTEzLjUxLDkuMDUtMTguNjIsMi41LTUuMTEsMy45Mi04LjA4LDQuMjgtOC45MSwxLjIxLTIuODIsMS40Ni00LjguNzctNS45MyIvPjxwYXRoIGNsYXNzPSJjbHMtNCIgZD0ibTEzNS4wNSwyMDQuMzljLTEuMTQtMy44Ny0yLjA2LTYuOTctMi43OC05LjMyLS43MS0yLjM2LTEuMzItNC4yMy0xLjc4LTUuNTgtLjQ4LTEuMzYtLjg1LTIuMzMtMS4xMy0yLjkzLS4yNy0uNi0uNTMtMS4xLS43OS0xLjQ3LS42MS0uOTMtMS41LTEuMjQtMi42OS0uOTYtMS4xOS4zMS0yLjQ2LDEuMTctMy44LDIuNTgtMS4zNCwxLjQyLTIuMjQsMi44NS0yLjY4LDQuMjctLjQ1LDEuNDItLjM2LDIuNi4yNCwzLjUyLjI2LjM4LjU5LjgsMS4wMSwxLjI0LjQxLjQ2LDEuMTEsMS4xLDIuMDgsMS45My45Ny44MywyLjMxLDEuOTEsNC4wMywzLjIzLDEuNzEsMS4zMiwzLjk5LDMuMDUsNi44Myw1LjE3LjQ4LS41OS45Ny0xLjE1LDEuNDgtMS42OCIvPjxwYXRoIGNsYXNzPSJjbHMtNSIgZD0ibTU4LjYyLDE1Mi4yNWMtLjQ5LDAtLjk5LS4xMi0xLjQ0LS4zOWwtNDUuMjUtMjYuMTRjLTEuMzgtLjgtMS44NS0yLjU2LTEuMDYtMy45NC44LTEuMzgsMi41Ni0xLjg1LDMuOTQtMS4wNmw0NS4yNSwyNi4xNGMxLjM4LjgsMS44NSwyLjU2LDEuMDYsMy45NC0uNTMuOTMtMS41MSwxLjQ0LTIuNSwxLjQ0Ii8+PHBhdGggY2xhc3M9ImNscy01IiBkPSJtNTguNjIsMTY3LjIxYy0uNDksMC0uOTktLjEyLTEuNDQtLjM5bC00NS4yNS0yNi4xM2MtMS4zOC0uOC0xLjg1LTIuNTYtMS4wNi0zLjk0LjgtMS4zOCwyLjU2LTEuODUsMy45NC0xLjA2bDQ1LjI1LDI2LjEzYzEuMzguOCwxLjg1LDIuNTYsMS4wNiwzLjk0LS41My45My0xLjUxLDEuNDQtMi41LDEuNDQiLz48cGF0aCBjbGFzcz0iY2xzLTUiIGQ9Im01OC42MiwxODIuMTdjLS40OSwwLS45OS0uMTItMS40NC0uMzlsLTQ1LjI1LTI2LjEyYy0xLjM4LS44LTEuODUtMi41Ni0xLjA2LTMuOTQuOC0xLjM4LDIuNTYtMS44NSwzLjk0LTEuMDZsNDUuMjUsMjYuMTJjMS4zOC44LDEuODUsMi41NiwxLjA2LDMuOTQtLjUzLjkzLTEuNTEsMS40NC0yLjUsMS40NCIvPjwvZz48L2c+PC9nPjwvZz48L3N2Zz4\u003d",
-      "category": "Databases",
-      "id": "SQLDB",
-      "label": "SQL DB",
+      "category": "Gateways",
+      "id": "standard",
+      "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMiAyMiIgcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQiIHN0eWxlPSJmbGV4OiAxIDEgMzAwcHg7Ij4NCiAgPGRlZnMgLz4NCiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTk3LjUyNjE4LC0xMDYuMjY5NjgpIj4NCiAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtNjcuMzI3MzYsLTkyLjkyMDA5NCkiPg0KICAgICAgPGcgdHJhbnNmb3JtPSJtYXRyaXgoMC40MTU3NDc5OSwwLDAsMC40MTU3NDc5OSwxMzUuODA4MjIsMTMxLjMyODMzKSI+DQogICAgICAgIDxyZWN0IGhlaWdodD0iNTIuNDU1NzIzIiByeT0iMi41MzI2OTg2IiB3aWR0aD0iNTIuNDU1NzIzIiB4PSI3MC4wOTMyNzciIHk9IjE2My40NTc4MiIgc3R5bGU9ImZpbGw6IHJnYigyMSwgMTA5LCAxNTEpOyBmaWxsLW9wYWNpdHk6IDE7IHN0cm9rZTogcmdiKDE1LCAxMDksIDE1MSk7IHN0cm9rZS1kYXNoYXJyYXk6IG5vbmU7IHN0cm9rZS1saW5lY2FwOiByb3VuZDsgc3Ryb2tlLWxpbmVqb2luOiByb3VuZDsgc3Ryb2tlLW1pdGVybGltaXQ6IDQ7IHN0cm9rZS1vcGFjaXR5OiAxOyBzdHJva2Utd2lkdGg6IDAuNDYwOTQ5OyIgLz4NCiAgICAgICAgPHBhdGggZD0ibSA4NC43NjcxMDUsMTc1Ljg5NjI1IGMgOC4wNjQ4MzcsMTcuMjM4MTggMTkuNDI4Mjg1LDEzLjEzNDY2IDIzLjY1MTk4NSwwLjEzNDk1IiBzdHlsZT0iZmlsbDogdHJhbnNwYXJlbnQ7IHN0cm9rZTogcmdiKDI1NSwgMjU1LCAyNTUpOyBzdHJva2UtZGFzaGFycmF5OiBub25lOyBzdHJva2UtbGluZWNhcDogYnV0dDsgc3Ryb2tlLWxpbmVqb2luOiBtaXRlcjsgc3Ryb2tlLW1pdGVybGltaXQ6IDQ7IHN0cm9rZS1vcGFjaXR5OiAxOyBzdHJva2Utd2lkdGg6IDAuODk2ODg3OyIgLz4NCiAgICAgICAgPHBhdGggZD0ibSA3My4wOTA5NjksMTg5LjU2ODAxIC0wLjAxNDI3LDIuOTA0NzYgNDYuNDg4ODgxLDAuMDc0NyB2IC0zLjA3NDQ0IHoiIHN0eWxlPSJmaWxsOiByZ2IoMjU1LCAyNTUsIDI1NSk7IGZpbGwtb3BhY2l0eTogMTsgc3Ryb2tlOiB0cmFuc3BhcmVudDsgc3Ryb2tlLWxpbmVjYXA6IGJ1dHQ7IHN0cm9rZS1saW5lam9pbjogbWl0ZXI7IHN0cm9rZS1vcGFjaXR5OiAxOyBzdHJva2Utd2lkdGg6IDAuMzU2ODQ0cHg7IiAvPg0KICAgICAgICA8cGF0aCBkPSJtIDc0LjQ0MTkwOSwxOTAuNjQ0MjUgLTAuMDA4NCwwLjkxMzUzIDQzLjc3MTUzMSwwLjAzMTYgdiAtMS4wMTQyNCB6IiBzdHlsZT0iZmlsbDogcmdiKDIzNiwgMjM2LCAyNDYpOyBmaWxsLW9wYWNpdHk6IDE7IHN0cm9rZTogdHJhbnNwYXJlbnQ7IHN0cm9rZS1saW5lY2FwOiBidXR0OyBzdHJva2UtbGluZWpvaW46IG1pdGVyOyBzdHJva2Utb3BhY2l0eTogMTsgc3Ryb2tlLXdpZHRoOiAwLjM1Njg0NHB4OyIgLz4NCiAgICAgICAgPGcgdHJhbnNmb3JtPSJtYXRyaXgoMS4zMjc3MjQ5LDAsMCwxLjM3MDAxMiw1MC4yNTkzNDEsLTkyLjY2MjMxMykiPg0KICAgICAgICAgIDxwYXRoIGQ9Im0gMjUuMDkyMDkzLDE5NS42OTI5MiAtMi4zNjUxMzksMjAuNzk3NDEgaCA1Ljc3NTMyIGwgLTIuMjIwOTU2LC0yMC43Mjg5MyAtMS4yOTUyMjcsMC4wMDUiIHN0eWxlPSJmaWxsOiByZ2IoMjU1LCAyNTUsIDI1NSk7IGZpbGwtb3BhY2l0eTogMTsgc3Ryb2tlOiB0cmFuc3BhcmVudDsgc3Ryb2tlLWxpbmVjYXA6IGJ1dHQ7IHN0cm9rZS1saW5lam9pbjogbWl0ZXI7IHN0cm9rZS1vcGFjaXR5OiAxOyBzdHJva2Utd2lkdGg6IDAuMjY0NTgzcHg7IiAvPg0KICAgICAgICAgIDxwYXRoIGQ9Im0gMjUuNjE0MTA1LDE5Ny4wMzM3MiAtMS40Mzk1ODIsMTguMzg3MzkgaCAzLjAxMDAzNSB6IiBzdHlsZT0iZmlsbDogcmdiKDIzNiwgMjM2LCAyNDYpOyBmaWxsLW9wYWNpdHk6IDE7IHN0cm9rZTogcmdiKDIzNiwgMjM2LCAyNDYpOyBzdHJva2UtbGluZWNhcDogYnV0dDsgc3Ryb2tlLWxpbmVqb2luOiBtaXRlcjsgc3Ryb2tlLW9wYWNpdHk6IDE7IHN0cm9rZS13aWR0aDogMC4yNjQ1ODNweDsiIC8+DQogICAgICAgIDwvZz4NCiAgICAgICAgPGcgdHJhbnNmb3JtPSJtYXRyaXgoMS4zMjc3MjQ5LDAsMCwxLjM3MDAxMiw3NC42NzI3MzgsLTkyLjY2MjMxMykiPg0KICAgICAgICAgIDxwYXRoIGQ9Im0gMjUuMDkyMDkzLDE5NS42OTI5MiAtMi4zNjUxMzksMjAuNzk3NDEgaCA1Ljc3NTMyIEwgMjYuMjgxMzE4LDE5NS43NjE0IiBzdHlsZT0iZmlsbDogcmdiKDI1NSwgMjU1LCAyNTUpOyBmaWxsLW9wYWNpdHk6IDE7IHN0cm9rZTogdHJhbnNwYXJlbnQ7IHN0cm9rZS1saW5lY2FwOiBidXR0OyBzdHJva2UtbGluZWpvaW46IG1pdGVyOyBzdHJva2Utb3BhY2l0eTogMTsgc3Ryb2tlLXdpZHRoOiAwLjI2NDU4M3B4OyIgLz4NCiAgICAgICAgICA8cGF0aCBkPSJtIDI1LjYxNDEwNSwxOTcuMDMzNzIgLTEuNDM5NTgyLDE4LjM4NzM5IGggMy4wMTAwMzUgeiIgc3R5bGU9ImZpbGw6IHJnYigyMzYsIDIzNiwgMjQ2KTsgZmlsbC1vcGFjaXR5OiAxOyBzdHJva2U6IHJnYigyMzYsIDIzNiwgMjQ2KTsgc3Ryb2tlLWxpbmVjYXA6IGJ1dHQ7IHN0cm9rZS1saW5lam9pbjogbWl0ZXI7IHN0cm9rZS1vcGFjaXR5OiAxOyBzdHJva2Utd2lkdGg6IDAuMjY0NTgzcHg7IiAvPg0KICAgICAgICA8L2c+DQogICAgICAgIDxwYXRoIGQ9Im0gMTA5LjE1Njg0LDE3Ni4yMjI5MiBjIDEuOTUxMTksNS40Njk1MiA0LjMyOTI2LDExLjgzMjcyIDkuOTYwMjcsMTMuNzA4NjciIHN0eWxlPSJmaWxsOiB0cmFuc3BhcmVudDsgc3Ryb2tlOiByZ2IoMjU1LCAyNTUsIDI1NSk7IHN0cm9rZS1kYXNoYXJyYXk6IG5vbmU7IHN0cm9rZS1saW5lY2FwOiBidXR0OyBzdHJva2UtbGluZWpvaW46IG1pdGVyOyBzdHJva2UtbWl0ZXJsaW1pdDogNDsgc3Ryb2tlLW9wYWNpdHk6IDE7IHN0cm9rZS13aWR0aDogMC44OTY4ODc7IiAvPg0KICAgICAgICA8cGF0aCBkPSJtIDgzLjk4ODQ2NSwxNzUuODYzMDIgYyAtMS45NTExODYsNS40Njk1MiAtMy45MzY2NDEsMTIuMTI3MTggLTEwLjYxNDYyNywxNC4yNjQ4OCIgc3R5bGU9ImZpbGw6IHRyYW5zcGFyZW50OyBzdHJva2U6IHJnYigyNTUsIDI1NSwgMjU1KTsgc3Ryb2tlLWRhc2hhcnJheTogbm9uZTsgc3Ryb2tlLWxpbmVjYXA6IGJ1dHQ7IHN0cm9rZS1saW5lam9pbjogbWl0ZXI7IHN0cm9rZS1taXRlcmxpbWl0OiA0OyBzdHJva2Utb3BhY2l0eTogMTsgc3Ryb2tlLXdpZHRoOiAwLjg5Njg4NzsiIC8+DQogICAgICA8L2c+DQogICAgPC9nPg0KICA8L2c+DQo8L3N2Zz4NCg\u003d\u003d",
+      "label": "Standard",
       "supportedConnections": [
-        "db"
+        "gateway-network",
+        "device-driver",
+        "client",
+        "db",
+        "opc-ua",
+        "mqtt",
+        "rest",
+        "opc-com",
+        "mongodb",
+        "kafka",
+        "standard"
       ],
       "swappableWith": [
-        "Oracle",
-        "Kafka"
+        "edge-iiot",
+        "edge-panel",
+        "cloud"
       ],
-      "tooltip": ""
-    },
-    "svg": "\u003c?xml version\u003d\"1.0\" encoding\u003d\"UTF-8\"?\u003e\u003csvg id\u003d\"Layer_2\" xmlns\u003d\"http://www.w3.org/2000/svg\" xmlns:xlink\u003d\"http://www.w3.org/1999/xlink\" viewBox\u003d\"0 0 221.43 314.39\"\u003e\u003cdefs\u003e\u003cstyle\u003e.cls-1,.cls-2,.cls-3{fill:none;}.cls-2{clip-path:url(#clippath-1);}.cls-4{fill:#f79435;}.cls-5{fill:#fff;}.cls-6{fill:#accce2;}.cls-7{fill:#355980;}.cls-8{fill:#2f4666;}.cls-3{clip-path:url(#clippath);}\u003c/style\u003e\u003cclipPath id\u003d\"clippath\"\u003e\u003crect class\u003d\"cls-1\" width\u003d\"221.43\" height\u003d\"314.39\"/\u003e\u003c/clipPath\u003e\u003cclipPath id\u003d\"clippath-1\"\u003e\u003crect class\u003d\"cls-1\" width\u003d\"221.43\" height\u003d\"314.39\"/\u003e\u003c/clipPath\u003e\u003c/defs\u003e\u003cg id\u003d\"Layer_1-2\"\u003e\u003cg id\u003d\"Server_Blue_-_Left\"\u003e\u003cg class\u003d\"cls-3\"\u003e\u003cpolygon class\u003d\"cls-7\" points\u003d\"72.12 127.85 72.13 314.39 221.43 228.19 221.43 41.64 72.12 127.85\"/\u003e\u003cpolygon class\u003d\"cls-6\" points\u003d\"149.32 0 0 86.21 72.12 127.85 221.43 41.64 149.32 0\"/\u003e\u003cpolygon class\u003d\"cls-8\" points\u003d\"0 272.74 72.12 314.39 72.12 127.85 0 86.21 0 272.74\"/\u003e\u003cg class\u003d\"cls-2\"\u003e\u003cpath class\u003d\"cls-4\" d\u003d\"m135.14,209.9c1.65-2.37,3.51-4.07,5.57-5.1,2.07-1.04,3.82-1.15,5.23-.31,1.42.83,2.04,2.32,1.89,4.48-.16,2.17-1.05,4.35-2.7,6.58-1.63,2.22-3.49,3.85-5.55,4.88-2.08,1.04-3.83,1.22-5.24.52-1.42-.7-2.06-2.11-1.9-4.28.16-2.16,1.06-4.43,2.71-6.78\"/\u003e\u003cpath class\u003d\"cls-4\" d\u003d\"m184.52,118.08c-.7-1.13-1.79-1.69-3.28-1.68-1.5.03-3.07.61-4.74,1.77-1.67,1.16-3.1,3.15-4.32,5.97-.21.52-.78,2.05-1.72,4.59-.94,2.56-2.11,5.79-3.55,9.7-1.43,3.91-3.05,8.31-4.87,13.21-1.81,4.89-3.69,10.02-5.63,15.39-1.94,5.36-3.9,10.77-5.88,16.25-1.94,5.35-3.79,10.44-5.53,15.26.83-.12,1.63-.12,2.37,0,3.6-7.33,7.44-15.15,11.52-23.45,4.13-8.4,7.97-16.25,11.52-23.55,3.55-7.31,6.57-13.51,9.05-18.62,2.5-5.11,3.92-8.08,4.28-8.91,1.21-2.82,1.46-4.8.77-5.93\"/\u003e\u003cpath class\u003d\"cls-4\" d\u003d\"m135.05,204.39c-1.14-3.87-2.06-6.97-2.78-9.32-.71-2.36-1.32-4.23-1.78-5.58-.48-1.36-.85-2.33-1.13-2.93-.27-.6-.53-1.1-.79-1.47-.61-.93-1.5-1.24-2.69-.96-1.19.31-2.46,1.17-3.8,2.58-1.34,1.42-2.24,2.85-2.68,4.27-.45,1.42-.36,2.6.24,3.52.26.38.59.8,1.01,1.24.41.46,1.11,1.1,2.08,1.93.97.83,2.31,1.91,4.03,3.23,1.71,1.32,3.99,3.05,6.83,5.17.48-.59.97-1.15,1.48-1.68\"/\u003e\u003cpath class\u003d\"cls-5\" d\u003d\"m58.62,152.25c-.49,0-.99-.12-1.44-.39l-45.25-26.14c-1.38-.8-1.85-2.56-1.06-3.94.8-1.38,2.56-1.85,3.94-1.06l45.25,26.14c1.38.8,1.85,2.56,1.06,3.94-.53.93-1.51,1.44-2.5,1.44\"/\u003e\u003cpath class\u003d\"cls-5\" d\u003d\"m58.62,167.21c-.49,0-.99-.12-1.44-.39l-45.25-26.13c-1.38-.8-1.85-2.56-1.06-3.94.8-1.38,2.56-1.85,3.94-1.06l45.25,26.13c1.38.8,1.85,2.56,1.06,3.94-.53.93-1.51,1.44-2.5,1.44\"/\u003e\u003cpath class\u003d\"cls-5\" d\u003d\"m58.62,182.17c-.49,0-.99-.12-1.44-.39l-45.25-26.12c-1.38-.8-1.85-2.56-1.06-3.94.8-1.38,2.56-1.85,3.94-1.06l45.25,26.12c1.38.8,1.85,2.56,1.06,3.94-.53.93-1.51,1.44-2.5,1.44\"/\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/svg\u003e"
+      "tooltip": "Edge IIOT Gateway",
+      "typeId": "standard"
+    }
   },
   "propConfig": {
     "custom.paletteItem": {
+      "persistent": true
+    },
+    "params.index": {
+      "paramDirection": "input",
       "persistent": true
     },
     "params.lists": {
@@ -200,16 +315,6 @@
     },
     "params.paletteItem": {
       "paramDirection": "inout",
-      "persistent": true
-    },
-    "params.svg": {
-      "binding": {
-        "config": {
-          "path": "/root/SVG/TextArea_0.props.text"
-        },
-        "type": "property"
-      },
-      "paramDirection": "output",
       "persistent": true
     }
   },
@@ -226,14 +331,14 @@
               "component": {
                 "onFileReceived": {
                   "config": {
-                    "script": "\t\n\timport base64\n\t\n\tdef convert_svg_to_markdown(svg_string):\n\t    \"\"\"\n\t    Takes a raw SVG string, encodes it to Base64, and returns \n\t    the fully formatted Markdown image string.\n\t    \"\"\"\n\t    # 1. Encode the raw string into Base64\n\t    # We encode to utf-8 first to ensure any special characters are handled correctly\n\t    encoded_bytes \u003d base64.b64encode(svg_string.encode(\u0027utf-8\u0027))\n\t    \n\t    # In Jython 2.7, b64encode returns a string, but it\u0027s safe to cast just in case\n\t    base64_string \u003d str(encoded_bytes)\n\t    \n\t    # 2. Construct the Data URI and Markdown syntax\n\t    markdown_output \u003d \"data:image/svg+xml;base64,\" + base64_string\n\t    \n\t    return markdown_output\n\t\n\t# --- TEST IT OUT ---\n\tself.getSibling(\"TextArea_0\").props.text\u003devent.file.getString()\n\t# Paste your exact SVG string inside the triple quotes\n\tmy_raw_svg \u003d \"\"\"{}\"\"\".format(event.file.getString())\n\t\n\t# Run the function\n\tself.view.params.paletteItem.b64Image\u003dconvert_svg_to_markdown(my_raw_svg)\n\t\n\t# Print the result so you can copy and paste it into your Markdown component\n"
+                    "script": "\tisSVG\u003dFalse\n\tfrom java.util import Base64\n\tif isSVG:\n\t\tself.view.params.paletteItem.image\u003devent.file.getString()\n\telse:\n\t\t\n\t\tfile_bytes \u003d event.file.getBytes()\n\t\tfile_name \u003d event.file.name\n\t\t\n\t\t# 2. Extract the file extension (e.g., \u0027my_image.png\u0027 -\u003e \u0027png\u0027)\n\t\text \u003d file_name.split(\u0027.\u0027)[-1].lower()\n\t\t\n\t\t# 3. Determine the correct MIME type based on the extension\n\t\tif ext in [\u0027jpg\u0027, \u0027jpeg\u0027]:\n\t\t    mime_type \u003d \u0027image/jpeg\u0027\n\t\telif ext \u003d\u003d \u0027svg\u0027:\n\t\t    mime_type \u003d \u0027image/svg+xml\u0027\n\t\telse:\n\t\t    # Defaults to things like \u0027image/png\u0027, \u0027image/gif\u0027, etc.\n\t\t    mime_type \u003d \u0027image/\u0027 + ext \n\t\t    \n\t\t# 4. Encode the Java byte array to a Base64 string\n\t\tb64_string \u003d Base64.getEncoder().encodeToString(file_bytes)\n\t\t\n\t\t# 5. Construct the final Data URI string\n\t\tdata_uri \u003d \"data:{};base64,{}\".format(mime_type, b64_string)\n\t\n\t\tself.view.params.paletteItem.image\u003ddata_uri\n"
                   },
                   "scope": "G",
                   "type": "script"
                 },
                 "onUploadsCleared": {
                   "config": {
-                    "script": "\tself.view.params.paletteItem.b64Image\u003d\"\"\n\tself.getSibling(\"TextArea_0\").props.text\u003d\"\""
+                    "script": "\tself.view.params.paletteItem.image\u003d\"\"\n"
                   },
                   "scope": "G",
                   "type": "script"
@@ -248,30 +353,11 @@
             },
             "props": {
               "supportedFileTypes": [
-                "svg"
+                "svg",
+                "png"
               ]
             },
             "type": "ia.input.fileupload"
-          },
-          {
-            "meta": {
-              "name": "B64"
-            },
-            "position": {
-              "basis": "240px",
-              "grow": 1
-            },
-            "propConfig": {
-              "props.text": {
-                "binding": {
-                  "config": {
-                    "path": "view.params.paletteItem.b64Image"
-                  },
-                  "type": "property"
-                }
-              }
-            },
-            "type": "ia.input.text-area"
           },
           {
             "meta": {
@@ -281,17 +367,44 @@
               "basis": "240px",
               "grow": 1
             },
-            "props": {
-              "text": "\u003c?xml version\u003d\"1.0\" encoding\u003d\"UTF-8\"?\u003e\u003csvg id\u003d\"Layer_2\" xmlns\u003d\"http://www.w3.org/2000/svg\" xmlns:xlink\u003d\"http://www.w3.org/1999/xlink\" viewBox\u003d\"0 0 221.43 314.39\"\u003e\u003cdefs\u003e\u003cstyle\u003e.cls-1,.cls-2,.cls-3{fill:none;}.cls-2{clip-path:url(#clippath-1);}.cls-4{fill:#f79435;}.cls-5{fill:#fff;}.cls-6{fill:#accce2;}.cls-7{fill:#355980;}.cls-8{fill:#2f4666;}.cls-3{clip-path:url(#clippath);}\u003c/style\u003e\u003cclipPath id\u003d\"clippath\"\u003e\u003crect class\u003d\"cls-1\" width\u003d\"221.43\" height\u003d\"314.39\"/\u003e\u003c/clipPath\u003e\u003cclipPath id\u003d\"clippath-1\"\u003e\u003crect class\u003d\"cls-1\" width\u003d\"221.43\" height\u003d\"314.39\"/\u003e\u003c/clipPath\u003e\u003c/defs\u003e\u003cg id\u003d\"Layer_1-2\"\u003e\u003cg id\u003d\"Server_Blue_-_Left\"\u003e\u003cg class\u003d\"cls-3\"\u003e\u003cpolygon class\u003d\"cls-7\" points\u003d\"72.12 127.85 72.13 314.39 221.43 228.19 221.43 41.64 72.12 127.85\"/\u003e\u003cpolygon class\u003d\"cls-6\" points\u003d\"149.32 0 0 86.21 72.12 127.85 221.43 41.64 149.32 0\"/\u003e\u003cpolygon class\u003d\"cls-8\" points\u003d\"0 272.74 72.12 314.39 72.12 127.85 0 86.21 0 272.74\"/\u003e\u003cg class\u003d\"cls-2\"\u003e\u003cpath class\u003d\"cls-4\" d\u003d\"m135.14,209.9c1.65-2.37,3.51-4.07,5.57-5.1,2.07-1.04,3.82-1.15,5.23-.31,1.42.83,2.04,2.32,1.89,4.48-.16,2.17-1.05,4.35-2.7,6.58-1.63,2.22-3.49,3.85-5.55,4.88-2.08,1.04-3.83,1.22-5.24.52-1.42-.7-2.06-2.11-1.9-4.28.16-2.16,1.06-4.43,2.71-6.78\"/\u003e\u003cpath class\u003d\"cls-4\" d\u003d\"m184.52,118.08c-.7-1.13-1.79-1.69-3.28-1.68-1.5.03-3.07.61-4.74,1.77-1.67,1.16-3.1,3.15-4.32,5.97-.21.52-.78,2.05-1.72,4.59-.94,2.56-2.11,5.79-3.55,9.7-1.43,3.91-3.05,8.31-4.87,13.21-1.81,4.89-3.69,10.02-5.63,15.39-1.94,5.36-3.9,10.77-5.88,16.25-1.94,5.35-3.79,10.44-5.53,15.26.83-.12,1.63-.12,2.37,0,3.6-7.33,7.44-15.15,11.52-23.45,4.13-8.4,7.97-16.25,11.52-23.55,3.55-7.31,6.57-13.51,9.05-18.62,2.5-5.11,3.92-8.08,4.28-8.91,1.21-2.82,1.46-4.8.77-5.93\"/\u003e\u003cpath class\u003d\"cls-4\" d\u003d\"m135.05,204.39c-1.14-3.87-2.06-6.97-2.78-9.32-.71-2.36-1.32-4.23-1.78-5.58-.48-1.36-.85-2.33-1.13-2.93-.27-.6-.53-1.1-.79-1.47-.61-.93-1.5-1.24-2.69-.96-1.19.31-2.46,1.17-3.8,2.58-1.34,1.42-2.24,2.85-2.68,4.27-.45,1.42-.36,2.6.24,3.52.26.38.59.8,1.01,1.24.41.46,1.11,1.1,2.08,1.93.97.83,2.31,1.91,4.03,3.23,1.71,1.32,3.99,3.05,6.83,5.17.48-.59.97-1.15,1.48-1.68\"/\u003e\u003cpath class\u003d\"cls-5\" d\u003d\"m58.62,152.25c-.49,0-.99-.12-1.44-.39l-45.25-26.14c-1.38-.8-1.85-2.56-1.06-3.94.8-1.38,2.56-1.85,3.94-1.06l45.25,26.14c1.38.8,1.85,2.56,1.06,3.94-.53.93-1.51,1.44-2.5,1.44\"/\u003e\u003cpath class\u003d\"cls-5\" d\u003d\"m58.62,167.21c-.49,0-.99-.12-1.44-.39l-45.25-26.13c-1.38-.8-1.85-2.56-1.06-3.94.8-1.38,2.56-1.85,3.94-1.06l45.25,26.13c1.38.8,1.85,2.56,1.06,3.94-.53.93-1.51,1.44-2.5,1.44\"/\u003e\u003cpath class\u003d\"cls-5\" d\u003d\"m58.62,182.17c-.49,0-.99-.12-1.44-.39l-45.25-26.12c-1.38-.8-1.85-2.56-1.06-3.94.8-1.38,2.56-1.85,3.94-1.06l45.25,26.12c1.38.8,1.85,2.56,1.06,3.94-.53.93-1.51,1.44-2.5,1.44\"/\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/g\u003e\u003c/svg\u003e"
+            "propConfig": {
+              "props.text": {
+                "binding": {
+                  "config": {
+                    "bidirectional": true,
+                    "path": "view.params.paletteItem.image"
+                  },
+                  "type": "property"
+                }
+              }
             },
             "type": "ia.input.text-area"
+          },
+          {
+            "meta": {
+              "name": "Label"
+            },
+            "position": {
+              "basis": "50px"
+            },
+            "propConfig": {
+              "props.text": {
+                "binding": {
+                  "config": {
+                    "path": "view.params.index"
+                  },
+                  "type": "property"
+                }
+              }
+            },
+            "type": "ia.display.label"
           }
         ],
         "meta": {
           "name": "SVG"
         },
         "position": {
-          "basis": "200px"
+          "basis": "150px"
         },
         "props": {
           "style": {
@@ -485,7 +598,7 @@
                   },
                   "transforms": [
                     {
-                      "code": "\tkeys\u003dsorted(value.keys())\n\treturn [{\"value\": item, \"label\": item} for item in keys]\n",
+                      "code": "\tkeys\u003dsorted(value)\n\treturn [{\"value\": item, \"label\": item} for item in keys]\n",
                       "type": "script"
                     }
                   ],
@@ -557,19 +670,9 @@
               "props.options": {
                 "binding": {
                   "config": {
-                    "struct": {
-                      "selectType": "{../TypeID.props.value}",
-                      "types": "{view.params.lists.ids}"
-                    },
-                    "waitOnAll": true
+                    "path": "view.params.lists.types"
                   },
-                  "transforms": [
-                    {
-                      "code": "\treturn [{\"value\": item, \"label\": item} for item in sorted(value[\u0027types\u0027]) if item !\u003d value[\u0027selectType\u0027]]",
-                      "type": "script"
-                    }
-                  ],
-                  "type": "expr-struct"
+                  "type": "property"
                 }
               },
               "props.value": {

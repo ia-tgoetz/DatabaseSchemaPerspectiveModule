@@ -4,9 +4,9 @@
       "title": "",
       "viewPath": "ArchBuilder/Main"
     },
-    "/images": {
+    "/arc": {
       "title": "",
-      "viewPath": "Images"
+      "viewPath": "ArchBuilder/ArchBuilder"
     }
   },
   "sharedDocks": {

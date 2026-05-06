@@ -80,20 +80,33 @@ function makeSvgResponsive(markup: string): string {
 }
 
 /**
- * Decode any supported image value, sanitize it, scope its styles, and return
- * clean SVG markup ready for inline rendering via dangerouslySetInnerHTML.
+ * Decode any supported SVG value, sanitize it (with caching), scope its styles,
+ * and return clean SVG markup ready for inline rendering via dangerouslySetInnerHTML.
  *
- * Accepts raw SVG markup only: "<svg ...>...</svg>"
+ * Accepted inputs:
+ *   - Raw SVG markup:            "<svg ...>...</svg>"  → rendered inline
+ *   - Base64 data URI:           "data:image/svg+xml;base64,<b64>"  → cache-warmed, returns null (use <img>)
+ *   - URL-encoded data URI:      "data:image/svg+xml,<encoded>"     → cache-warmed, returns null (use <img>)
  *
- * Returns null if the value is not raw SVG markup, is empty, or is empty after
- * sanitization. Pass scopeId (from nextSvgScopeId()) to isolate <style> blocks.
+ * Base64 and URL-encoded inputs are decoded and run through DOMPurify to prime
+ * the sanitization cache, but return null so callers fall back to <img> rendering.
+ * This avoids inline SVG rendering issues with complex clipPath/filter SVGs while
+ * still benefiting from the cache when the same content arrives as raw markup.
  *
- * Always returns null on any error — never throws — so a bad SVG degrades
- * gracefully (no image shown) rather than crashing the React render tree.
+ * Always returns null on any error — never throws.
  */
 export function extractSvgMarkup(value: string, scopeId?: string): string | null {
     if (!value) return null;
     try {
+        if (value.startsWith('data:image/svg+xml;base64,')) {
+            const b64 = value.slice('data:image/svg+xml;base64,'.length);
+            sanitizeSvg(decodeURIComponent(escape(atob(b64))));
+            return null;
+        }
+        if (value.startsWith('data:image/svg+xml,')) {
+            sanitizeSvg(decodeURIComponent(value.slice('data:image/svg+xml,'.length)));
+            return null;
+        }
         if (!/^\s*</.test(value)) return null;
 
         let clean = sanitizeSvg(value);
