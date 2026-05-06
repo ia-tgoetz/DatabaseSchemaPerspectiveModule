@@ -210,6 +210,7 @@ const extractDeep = (obj: any): any => {
 
 const mapIgnitionToReactFlowNodes = (
     ignitionNodes: any,
+    paletteItems: any[],
     handleGearClick: (id: string) => void,
     handleResizeEnd: (id: string, x: number, y: number, w: number, h: number) => void,
     handleTextChange: (id: string, text: string) => void,
@@ -224,13 +225,15 @@ const mapIgnitionToReactFlowNodes = (
         .filter(([id, nodeData]: any) => nodeData !== null && nodeData !== undefined)
         .map(([id, nodeData]: any) => {
             const isContainer = nodeData.paletteId === 'container';
+            const palette = paletteItems.find((p: any) => p.id === nodeData.paletteId);
+            const paletteImage = (nodeData.useOverrideImage && palette?.overrideImage) ? palette.overrideImage : palette?.image || '';
             return {
                 id, type: isContainer ? 'container' : 'architecture', selected: id === selectedId,
                 position: { x: nodeData.x || 0, y: nodeData.y || 0 },
                 zIndex: isContainer ? (nodeData.zIndex ?? -1) : 1000,
                 style: isContainer ? { width: nodeData.width || 300, height: nodeData.height || 300 } : undefined,
                 data: {
-                    label: nodeData.label || 'Unknown', image: nodeData.image || '', text: nodeData.text || '', tooltip: nodeData.tooltip || '', configs: nodeData.configs || {},
+                    label: nodeData.label || 'Unknown', image: paletteImage || nodeData.image || '', text: nodeData.text || '', tooltip: nodeData.tooltip || '', configs: nodeData.configs || {},
                     style: nodeData.style || {}, labelStyle: nodeData.labelStyle || {}, textStyle: nodeData.textStyle || {},
                     paletteId: nodeData.paletteId || 'unknown', inactive: nodeData.inactive || false,
                     hideHandles: nodeData.hideHandles, globalHideHandles, handleCount: globalHandleCount,
@@ -375,7 +378,8 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         const enrichedNodes: any = {};
         Object.keys(rawNodesDict).forEach(id => {
             if (!rawNodesDict[id]) return;
-            enrichedNodes[id] = { ...rawNodesDict[id], ...nodeEnrichments[id] };
+            const { image: _image, ...nodeWithoutImage } = rawNodesDict[id];
+            enrichedNodes[id] = { ...nodeWithoutImage, ...nodeEnrichments[id] };
         });
         props.store.props.write('nodes', enrichedNodes);
     }, [rawNodesDict, rawEdgesDict, props.store]);
@@ -435,8 +439,8 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     }, [selectedId, rawEdgesDict]);
 
     const flowNodes = React.useMemo(
-        () => mapIgnitionToReactFlowNodes(rawNodesDict, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled),
-        [rawNodesDict, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled]
+        () => mapIgnitionToReactFlowNodes(rawNodesDict, paletteItems, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled),
+        [rawNodesDict, paletteItems, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled]
     );
     const flowEdges = React.useMemo(
         () => mapIgnitionToReactFlowEdges(rawEdgesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth),

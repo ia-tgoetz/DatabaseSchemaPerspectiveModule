@@ -24,6 +24,7 @@ export interface PaletteItem {
     label: string;
     tooltip?: string;
     image: string;
+    overrideImage?: string;
     supportedConnections?: string[];
     defaultConfigs?: any;
     hideHandles?: boolean;

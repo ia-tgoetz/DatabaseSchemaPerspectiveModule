@@ -462,7 +462,7 @@ export const useArchitectureFlowHandlers = ({
         if (store?.props) {
             const newNodeId = generateShortId();
             const newNodeData: any = {
-                paletteId: paletteItem.id, typeId: paletteItem.typeId, label: paletteItem.label, image: paletteItem.image, tooltip: paletteItem.tooltip,
+                paletteId: paletteItem.id, typeId: paletteItem.typeId, label: paletteItem.label, tooltip: paletteItem.tooltip,
                 x: dropX, y: dropY,
                 hideHandles: paletteItem.hideHandles === true, style: initialStyle, labelStyle: initialLabelStyle, configs: initialConfigs, supportedConnections: paletteItem.supportedConnections || [],
             };
@@ -499,7 +499,8 @@ export const useArchitectureFlowHandlers = ({
         if (store?.props) {
             const nextNodes = { ...rawNodesDict };
             const existingNode = nextNodes[contextMenu.id];
-            nextNodes[contextMenu.id] = { ...existingNode, paletteId: newItem.id, typeId: newItem.typeId, label: newItem.label, image: newItem.image, tooltip: newItem.tooltip, supportedConnections: newItem.supportedConnections || [] };
+            const { image: _img, ...existingNodeWithoutImage } = existingNode;
+            nextNodes[contextMenu.id] = { ...existingNodeWithoutImage, paletteId: newItem.id, typeId: newItem.typeId, label: newItem.label, tooltip: newItem.tooltip, supportedConnections: newItem.supportedConnections || [] };
             const nextEdges = { ...rawEdgesDict };
             let edgesChanged = false;
             Object.keys(nextEdges).forEach(edgeId => {
