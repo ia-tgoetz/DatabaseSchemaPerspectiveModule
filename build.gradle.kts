@@ -38,6 +38,7 @@ ignitionModule {
     moduleVersion.set("${project.version}")
     moduleDescription.set("A Group of React Flow Based Perspective Components For Visualizing")
     requiredIgnitionVersion.set("8.3.0")
+    freeModule.set(true)
     license.set("license.html")
 
     // If we depend on other module being loaded/available, then we specify IDs of the module we depend on,

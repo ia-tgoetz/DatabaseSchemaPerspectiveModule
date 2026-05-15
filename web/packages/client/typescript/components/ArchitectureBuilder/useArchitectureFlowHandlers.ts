@@ -462,9 +462,19 @@ export const useArchitectureFlowHandlers = ({
         if (store?.props) {
             const newNodeId = generateShortId();
             const newNodeData: any = {
-                paletteId: paletteItem.id, typeId: paletteItem.typeId, label: paletteItem.label, tooltip: paletteItem.tooltip,
-                x: dropX, y: dropY,
-                hideHandles: paletteItem.hideHandles === true, style: initialStyle, labelStyle: initialLabelStyle, configs: initialConfigs, supportedConnections: paletteItem.supportedConnections || [],
+                paletteId: paletteItem.id, 
+                typeId: paletteItem.typeId, 
+                label: paletteItem.label, 
+                tooltip: paletteItem.tooltip,
+                x: dropX, 
+                y: dropY,
+                hideHandles: paletteItem.hideHandles === true, 
+                style: initialStyle, 
+                labelStyle: initialLabelStyle, 
+                configs: initialConfigs, 
+                supportedConnections: paletteItem.supportedConnections || [],
+                useOverrideImage: paletteItem.useOverrideImage || false,
+                inactive: paletteItem.inactive || false,
             };
             if (paletteItem.id === 'container') { newNodeData.width = 300; newNodeData.height = 300; newNodeData.zIndex = -1; }
             const nextNodes = { ...rawNodesDict };
