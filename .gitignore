@@ -2,6 +2,7 @@
 ### Java
 *.class
 .vscode
+reactflow-module/convert_arch.py
 # Package Files #
 #*.jar
 #*.war
