@@ -2,6 +2,8 @@
 ### Java
 *.class
 .vscode
+*convert_arch.py
+*OldArchFormat/*
 # Package Files #
 #*.jar
 #*.war

@@ -73,7 +73,7 @@ All props are defined in `architecturebuilder.props.json`.
   "category": "Ignition",
   "label": "Gateway",
   "tooltip": "Ignition Gateway Server",
-  "b64Image": "<svg>...</svg>",
+  "image": "<svg>...</svg>",
   "supportedConnections": ["network", "db"],
   "defaultConfigs": {},
   "hideHandles": false,
@@ -98,7 +98,7 @@ Node data is stored in `props.nodes` as a flat dictionary keyed by short hex IDs
 | `paletteId` | string | Palette item ID this node was created from. `"container"` for zones. |
 | `typeId` | string | Semantic type identifier (e.g. `"gateway"`, `"database"`). |
 | `label` | string | Display name shown in the node's label tab. |
-| `b64Image` | string | SVG markup or base64 data URI for the node icon. |
+| `image` | string | SVG markup or base64 data URI for the node icon. |
 | `tooltip` | string | Hover tooltip text. |
 | `x` | number | Canvas X position. |
 | `y` | number | Canvas Y position. |
@@ -388,7 +388,7 @@ Nodes with `paletteId` of `"Note"` or `"Label"` render a `<textarea>` instead of
 
 ### Custom SVG Images
 
-Both `b64Image` and drag ghost images support raw SVG markup (detected by leading `<`) or `data:` URIs. Raw SVG is encoded as a `data:image/svg+xml,` URL.
+Both `image` and drag ghost images support raw SVG markup (detected by leading `<`) or `data:` URIs. Raw SVG is encoded as a `data:image/svg+xml,` URL.
 
 ### Snap to Grid
 

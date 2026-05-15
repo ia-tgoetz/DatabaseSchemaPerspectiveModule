@@ -1,10 +1,11 @@
 import React from 'react';
 // @ts-ignore
 import { Handle, Position, NodeProps } from 'reactflow';
+import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
 
 export interface ArchitectureNodeData {
     label: string;
-    b64Image: string;
+    image: string;
     text?: string;
     tooltip?: string;
     configs?: any;
@@ -23,17 +24,24 @@ export interface ArchitectureNodeData {
 
 const TEXT_PALETTE_IDS = new Set(['Note', 'Label']);
 
-const toImgSrc = (value: string): string | null => {
-    if (!value) return null;
-    if (value.startsWith('data:')) return value;
-    if (/^\s*</.test(value)) return `data:image/svg+xml,${encodeURIComponent(value)}`;
-    return null;
-};
-
 const NodeImage = ({ src }: { src: string }) => {
-    const imgSrc = toImgSrc(src);
-    if (!imgSrc) return null;
-    return <img src={imgSrc} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+    // Stable per-instance ID — useMemo with [] never re-runs, unlike useRef(fn()) which
+    // evaluates fn() on every render (only the first result is kept, but the counter still
+    // increments wastefully on each call).
+    const scopeId = React.useMemo(() => nextSvgScopeId(), []);
+    // Memoize DOMPurify work so it only runs when src changes, not on every re-render.
+    const svgHtml = React.useMemo(() => extractSvgMarkup(src, scopeId), [src, scopeId]);
+    if (svgHtml) {
+        return (
+            <div
+                id={scopeId}
+                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+                dangerouslySetInnerHTML={{ __html: svgHtml }}
+            />
+        );
+    }
+    const dataUri = toSafeDataUri(src);
+    return dataUri ? <img src={dataUri} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null;
 };
 
 export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureNodeData>) => {
@@ -140,12 +148,12 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
                     }}
                 />
             ) : (
-                data.b64Image && (
+                data.image && (
                     <div
                         className="arch-node-svg-wrapper"
                         style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0, zIndex: 1, backgroundColor: imageBg || undefined }}
                     >
-                        <NodeImage src={data.b64Image} />
+                        <NodeImage src={data.image} />
                     </div>
                 )
             )}

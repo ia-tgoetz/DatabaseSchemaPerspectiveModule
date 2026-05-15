@@ -1,16 +1,20 @@
 import React, { useState, useMemo } from 'react';
-
-const toImgSrc = (value: string): string | null => {
-    if (!value) return null;
-    if (value.startsWith('data:')) return value;
-    if (/^\s*</.test(value)) return `data:image/svg+xml,${encodeURIComponent(value)}`;
-    return null;
-};
+import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
 
 const PaletteThumb = ({ src }: { src: string }) => {
-    const imgSrc = toImgSrc(src);
-    if (!imgSrc) return null;
-    return <img src={imgSrc} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />;
+    const scopeId = React.useMemo(() => nextSvgScopeId(), []);
+    const svgHtml = React.useMemo(() => extractSvgMarkup(src, scopeId), [src, scopeId]);
+    if (svgHtml) {
+        return (
+            <div
+                id={scopeId}
+                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+                dangerouslySetInnerHTML={{ __html: svgHtml }}
+            />
+        );
+    }
+    const dataUri = toSafeDataUri(src);
+    return dataUri ? <img src={dataUri} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null;
 };
 
 export interface PaletteItem {
@@ -19,7 +23,8 @@ export interface PaletteItem {
     category?: string;
     label: string;
     tooltip?: string;
-    b64Image: string;
+    image: string;
+    overrideImage?: string;
     supportedConnections?: string[];
     defaultConfigs?: any;
     hideHandles?: boolean;
@@ -63,7 +68,7 @@ export const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, 
         onDragStartItem(item);
         event.dataTransfer.effectAllowed = 'move';
 
-        const imgSrc = toImgSrc(item.b64Image);
+        const imgSrc = toSafeDataUri(item.image);
         if (imgSrc) {
             const ghost = document.createElement('div');
             ghost.style.cssText = 'position:fixed;top:-200px;left:-200px;width:150px;height:150px;pointer-events:none;';
@@ -96,7 +101,7 @@ export const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, 
                                         onClick={() => onItemClick(item)}
                                         style={{ border: '1px dashed var(--neutral-50)', backgroundColor: 'var(--neutral-30)', padding: '10px', marginBottom: '8px', cursor: 'grab', display: 'flex', alignItems: 'center', borderRadius: '4px', fontWeight: 'bold', ...itemStyle }}
                                     >
-                                        <div style={{ width: '20px', height: '20px', marginRight: '10px', backgroundColor: imageBg || undefined }}><PaletteThumb src={item.b64Image} /></div>
+                                        <div style={{ width: '20px', height: '20px', marginRight: '10px', backgroundColor: imageBg || undefined }}><PaletteThumb src={item.image} /></div>
                                         <span style={{ color: 'var(--neutral-90)', fontSize: '14px', ...labelStyle }}>{item.label}</span>
                                     </div>
                                 );
@@ -124,7 +129,7 @@ export const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, 
                                                     onClick={() => onItemClick(item)}
                                                     style={{ border: '1px solid var(--neutral-40)', backgroundColor: 'var(--neutral-10)', padding: '8px', marginBottom: '8px', cursor: 'grab', display: 'flex', alignItems: 'center', borderRadius: '4px', ...itemStyle }}
                                                 >
-                                                    <div style={{ width: '20px', height: '20px', marginRight: '10px', backgroundColor: imageBg || undefined }}><PaletteThumb src={item.b64Image} /></div>
+                                                    <div style={{ width: '20px', height: '20px', marginRight: '10px', backgroundColor: imageBg || undefined }}><PaletteThumb src={item.image} /></div>
                                                     <span style={{ color: 'var(--neutral-90)', fontSize: '14px', ...labelStyle }}>{item.label}</span>
                                                 </div>
                                             );

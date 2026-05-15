@@ -227,7 +227,7 @@ export const useArchitectureFlowHandlers = ({
 
     const handlePaletteItemClick = React.useCallback((item: any) => {
         if (componentEvents) {
-            componentEvents.fireComponentEvent('onPaletteItemClick', { id: item.id, typeId: item.typeId, label: item.label, category: item.category, tooltip: item.tooltip, b64Image: item.b64Image, supportedConnections: item.supportedConnections, swappableWith: item.swappableWith, defaultConfigs: item.defaultConfigs, hideHandles: item.hideHandles, style: item.style, labelStyle: item.labelStyle });
+            componentEvents.fireComponentEvent('onPaletteItemClick', { id: item.id, typeId: item.typeId, label: item.label, category: item.category, tooltip: item.tooltip, image: item.image, supportedConnections: item.supportedConnections, swappableWith: item.swappableWith, defaultConfigs: item.defaultConfigs, hideHandles: item.hideHandles, style: item.style, labelStyle: item.labelStyle });
         }
     }, [componentEvents]);
 
@@ -462,9 +462,19 @@ export const useArchitectureFlowHandlers = ({
         if (store?.props) {
             const newNodeId = generateShortId();
             const newNodeData: any = {
-                paletteId: paletteItem.id, typeId: paletteItem.typeId, label: paletteItem.label, b64Image: paletteItem.b64Image, tooltip: paletteItem.tooltip,
-                x: dropX, y: dropY,
-                hideHandles: paletteItem.hideHandles === true, style: initialStyle, labelStyle: initialLabelStyle, configs: initialConfigs, supportedConnections: paletteItem.supportedConnections || [],
+                paletteId: paletteItem.id, 
+                typeId: paletteItem.typeId, 
+                label: paletteItem.label, 
+                tooltip: paletteItem.tooltip,
+                x: dropX, 
+                y: dropY,
+                hideHandles: paletteItem.hideHandles === true, 
+                style: initialStyle, 
+                labelStyle: initialLabelStyle, 
+                configs: initialConfigs, 
+                supportedConnections: paletteItem.supportedConnections || [],
+                useOverrideImage: paletteItem.useOverrideImage || false,
+                inactive: paletteItem.inactive || false,
             };
             if (paletteItem.id === 'container') { newNodeData.width = 300; newNodeData.height = 300; newNodeData.zIndex = -1; }
             const nextNodes = { ...rawNodesDict };
@@ -499,7 +509,8 @@ export const useArchitectureFlowHandlers = ({
         if (store?.props) {
             const nextNodes = { ...rawNodesDict };
             const existingNode = nextNodes[contextMenu.id];
-            nextNodes[contextMenu.id] = { ...existingNode, paletteId: newItem.id, typeId: newItem.typeId, label: newItem.label, b64Image: newItem.b64Image, tooltip: newItem.tooltip, supportedConnections: newItem.supportedConnections || [] };
+            const { image: _img, ...existingNodeWithoutImage } = existingNode;
+            nextNodes[contextMenu.id] = { ...existingNodeWithoutImage, paletteId: newItem.id, typeId: newItem.typeId, label: newItem.label, tooltip: newItem.tooltip, supportedConnections: newItem.supportedConnections || [] };
             const nextEdges = { ...rawEdgesDict };
             let edgesChanged = false;
             Object.keys(nextEdges).forEach(edgeId => {
