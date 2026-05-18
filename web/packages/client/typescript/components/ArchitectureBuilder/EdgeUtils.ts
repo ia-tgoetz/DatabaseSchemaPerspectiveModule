@@ -126,6 +126,7 @@ export const mapIgnitionToReactFlowEdges = (
                     waypoints: edgeData.waypoints || [],
                     showLabel: edgeData.showLabel === true,
                     isSelected,
+                    animation: edgeData.animation || 'none',
                     snapEnabled: snapEnabled ?? true,
                     snapPixels: snapPixels ?? 15,
                     onWaypointsChange: onWaypointsChange

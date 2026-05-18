@@ -704,10 +704,10 @@
           {
             "custom": {
               "onclick": {
-                "action": "toggleLink",
-                "id": "I3ca0fa1a",
-                "paletteId": "container",
-                "type": "node"
+                "id": "I4df1dc1c",
+                "paletteId": "standard",
+                "type": "node",
+                "typeId": "standard"
               }
             },
             "events": {
@@ -922,24 +922,6 @@
                 "areas": [
                   {
                     "areas": [],
-                    "id": "Ib99428d6",
-                    "label": "Git Action Deploy",
-                    "nodes": [
-                      {
-                        "id": "I6772a8fc",
-                        "label": "edge-site-dallas",
-                        "typeId": "edge-iiot"
-                      },
-                      {
-                        "id": "Ia04f36e5",
-                        "label": "edge-east",
-                        "typeId": "edge-iiot"
-                      }
-                    ],
-                    "typeId": "container"
-                  },
-                  {
-                    "areas": [],
                     "id": "I3ca0fa1a",
                     "label": "Manually Deploy",
                     "nodes": [
@@ -990,6 +972,24 @@
                       {
                         "id": "I3c9ecfb6",
                         "label": "Edges",
+                        "typeId": "edge-iiot"
+                      }
+                    ],
+                    "typeId": "container"
+                  },
+                  {
+                    "areas": [],
+                    "id": "Ib99428d6",
+                    "label": "Git Action Deploy",
+                    "nodes": [
+                      {
+                        "id": "I6772a8fc",
+                        "label": "edge-site-dallas",
+                        "typeId": "edge-iiot"
+                      },
+                      {
+                        "id": "Ia04f36e5",
+                        "label": "edge-east",
                         "typeId": "edge-iiot"
                       }
                     ],

@@ -148,10 +148,79 @@ export const CustomEdge = ({
     // ─── Render ───────────────────────────────────────────────────────────
 
     const segHandlePts: Waypoint[] = [{ x: sourceX, y: sourceY }, ...pinnedWaypoints, { x: targetX, y: targetY }];
+    const animation = data?.animation ?? 'none';
+    
+    // Shared overlay style for particles
+    const overlayBaseStyle: React.CSSProperties = { 
+        ...style, 
+        fill: 'none', 
+        stroke: 'rgba(255, 255, 255, 0.95)', 
+        strokeWidth: Math.max(3, (style?.strokeWidth || 6) * 0.5), 
+        pointerEvents: 'none',
+        strokeLinecap: 'round'
+    };
 
     return (
         <>
-            <BaseEdge path={edgePath} markerEnd={markerEnd} style={{ ...style, fill: 'none' }} interactionWidth={interactionWidth} />
+            {/* 1. Base solid edge (always rendered, keeps the arrow) */}
+            <BaseEdge
+                path={edgePath}
+                markerEnd={markerEnd}
+                style={{ ...style, fill: 'none' }}
+                interactionWidth={interactionWidth}
+            />
+
+            {/* 2. Animation Layers (Overlays) */}
+            {animation === 'forward' && (
+                <BaseEdge
+                    path={edgePath}
+                    style={{
+                        ...overlayBaseStyle,
+                        strokeDasharray: '10 90',
+                        animation: 'arch-flow-forward 0.75s linear infinite',
+                            filter: `
+                            drop-shadow(1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(-1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px 1px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px -1px 0px rgba(0, 0, 0, 1))
+                            `
+                    }}
+                />
+            )}
+            {animation === 'bidirectional' && (
+                <>
+                    <BaseEdge
+                        path={edgePath}
+                        style={{
+                            ...overlayBaseStyle,
+                            strokeDasharray: '10 90',
+                            animation: 'arch-flow-forward 0.75s linear infinite',
+                            filter: `
+                            drop-shadow(1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(-1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px 1px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px -1px 0px rgba(0, 0, 0, 1))
+                            `
+                        }}
+                    />
+                    <BaseEdge
+                        path={edgePath}
+                        style={{
+                            ...overlayBaseStyle,
+                            strokeDasharray: '10 90',
+                            strokeDashoffset: 50,
+                            animation: 'arch-flow-reverse 0.75s linear infinite',
+                            filter: `
+                            drop-shadow(1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(-1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px 1px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px -1px 0px rgba(0, 0, 0, 1))
+                            `
+                        }}
+                    />
+                </>
+            )}
+
             {label && showLabel && (
                 <EdgeLabelRenderer>
                     <div

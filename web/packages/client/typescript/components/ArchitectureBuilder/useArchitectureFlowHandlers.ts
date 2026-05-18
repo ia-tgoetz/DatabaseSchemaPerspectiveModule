@@ -215,6 +215,19 @@ export const useArchitectureFlowHandlers = ({
         closeContextMenu();
     }, [contextMenu, componentEvents, rawEdgesDict, connectionTypes, store, closeContextMenu]);
 
+    const handleAnimationChange = React.useCallback((newAnimation: string) => {
+        if (!contextMenu || contextMenu.type !== 'edge') return;
+        if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `animation:${newAnimation}` });
+        if (store?.props) {
+            const nextEdges = { ...rawEdgesDict };
+            if (nextEdges[contextMenu.id]) {
+                nextEdges[contextMenu.id].animation = newAnimation;
+                store.props.write('edges', nextEdges);
+            }
+        }
+        closeContextMenu();
+    }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
+
     // ─── Node handlers ───────────────────────────────────────────────────────
 
     const handleGearClick = React.useCallback((id: string) => {
@@ -739,6 +752,7 @@ export const useArchitectureFlowHandlers = ({
         onPaneContextMenu,
         // Context menu
         handleNodeSwap,
+        handleAnimationChange,
         handleContextMenuAction,
     };
 };

@@ -41,4 +41,9 @@ public class GatewayHook extends AbstractGatewayModuleHook {
     public Optional<String> getMountedResourceFolder() {
         return Optional.of("mounted");
     }
+
+    @Override
+    public boolean isFreeModule() {
+       return true;
+   }
 }
