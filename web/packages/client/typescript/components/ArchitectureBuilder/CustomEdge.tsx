@@ -148,10 +148,61 @@ export const CustomEdge = ({
     // ─── Render ───────────────────────────────────────────────────────────
 
     const segHandlePts: Waypoint[] = [{ x: sourceX, y: sourceY }, ...pinnedWaypoints, { x: targetX, y: targetY }];
+    const animation = data?.animation ?? 'none';
+    
+    // Shared overlay style for particles
+    const overlayBaseStyle: React.CSSProperties = { 
+        ...style, 
+        fill: 'none', 
+        stroke: 'rgba(255, 255, 255, 0.95)', 
+        strokeWidth: Math.max(3, (style?.strokeWidth || 6) * 0.5), 
+        pointerEvents: 'none',
+        strokeLinecap: 'round'
+    };
 
     return (
         <>
-            <BaseEdge path={edgePath} markerEnd={markerEnd} style={{ ...style, fill: 'none' }} interactionWidth={interactionWidth} />
+            {/* 1. Base solid edge (always rendered, keeps the arrow) */}
+            <BaseEdge
+                path={edgePath}
+                markerEnd={markerEnd}
+                style={{ ...style, fill: 'none' }}
+                interactionWidth={interactionWidth}
+            />
+
+            {/* 2. Animation Layers (Overlays) */}
+            {animation === 'forward' && (
+                <BaseEdge
+                    path={edgePath}
+                    style={{
+                        ...overlayBaseStyle,
+                        strokeDasharray: '10 90',
+                        animation: 'arch-flow-forward 1.5s linear infinite'
+                    }}
+                />
+            )}
+            {animation === 'bidirectional' && (
+                <>
+                    <BaseEdge
+                        path={edgePath}
+                        style={{
+                            ...overlayBaseStyle,
+                            strokeDasharray: '10 90',
+                            animation: 'arch-flow-forward 1.5s linear infinite'
+                        }}
+                    />
+                    <BaseEdge
+                        path={edgePath}
+                        style={{
+                            ...overlayBaseStyle,
+                            strokeDasharray: '10 90',
+                            strokeDashoffset: 50,
+                            animation: 'arch-flow-reverse 1.5s linear infinite'
+                        }}
+                    />
+                </>
+            )}
+
             {label && showLabel && (
                 <EdgeLabelRenderer>
                     <div

@@ -320,7 +320,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
     const [styleEditorNodeId, setStyleEditorNodeId] = React.useState<string | null>(null);
     const [contextMenu, setContextMenu] = React.useState<{ id: string, top: number, left: number, type: 'node' | 'edge' | 'pane', clientX?: number, clientY?: number, isContainer?: boolean } | null>(null);
-    const [activeSubMenu, setActiveSubMenu] = React.useState<'lineType' | 'connectionType' | 'swapNode' | 'order' | null>(null);
+    const [activeSubMenu, setActiveSubMenu] = React.useState<'lineType' | 'connectionType' | 'animation' | 'swapNode' | 'order' | null>(null);
     const [selectedId, setSelectedId] = React.useState<string | null>(null);
     const [localNodes, setLocalNodes] = React.useState<any[]>([]);
     const [localEdges, setLocalEdges] = React.useState<any[]>([]);
@@ -394,7 +394,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         handleWaypointsChange,
         onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd,
         onEdgesDelete, onEdgeContextMenu, onEdgeClick,
-        handleLineTypeChange, handleConnectionTypeChange,
+        handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange,
         handleGearClick, handlePaletteItemClick, handleResizeEnd, handleTextChange,
         onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop,
         onNodesDelete, onNodeContextMenu, onNodeClick,
@@ -535,6 +535,10 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
             .arch-node-gear:hover { transform: rotate(360deg); }
             .arch-node-gear:active { transform: translateX(-100%) rotate(-360deg); }
             .arch-node-svg-wrapper svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
+            /* Animation keyframes: distance must match (dash + gap) for seamless loops */
+            @keyframes arch-flow-forward { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+            @keyframes arch-flow-reverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 100; } }
+            
             /* Base handle is a transparent anchor — React Flow's translate(-50%,-50%) is never overwritten */
             .arch-node-handle { background: transparent !important; border-color: transparent !important; }
             /* ::after renders the visible dot and owns all visual transitions */
@@ -704,6 +708,18 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                                         <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('step')}><span>🔲 Stepped</span><span>{currentLineType === 'step' ? '✓' : ''}</span></div>
                                                         <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('straight')}><span>📏 Straight</span><span>{currentLineType === 'straight' ? '✓' : ''}</span></div>
                                                         <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('default')}><span>➰ Bezier</span><span>{currentLineType === 'default' ? '✓' : ''}</span></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('animation')}>
+                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'animation' ? 'var(--neutral-30)' : 'transparent' }}>
+                                                    <span>✨ Animation</span><span>▶</span>
+                                                </div>
+                                                {activeSubMenu === 'animation' && (
+                                                    <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px' }}>
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleAnimationChange('none')}><span>🚫 None</span><span>{(rawEdgesDict[contextMenu.id]?.animation || 'none') === 'none' ? '✓' : ''}</span></div>
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleAnimationChange('forward')}><span>➡️ Forward</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'forward' ? '✓' : ''}</span></div>
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleAnimationChange('bidirectional')}><span>↔️ Bidirectional</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'bidirectional' ? '✓' : ''}</span></div>
                                                     </div>
                                                 )}
                                             </div>
