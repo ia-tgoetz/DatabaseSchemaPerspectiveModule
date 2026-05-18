@@ -177,7 +177,13 @@ export const CustomEdge = ({
                     style={{
                         ...overlayBaseStyle,
                         strokeDasharray: '10 90',
-                        animation: 'arch-flow-forward 1.5s linear infinite'
+                        animation: 'arch-flow-forward 0.75s linear infinite',
+                            filter: `
+                            drop-shadow(1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(-1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px 1px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px -1px 0px rgba(0, 0, 0, 1))
+                            `
                     }}
                 />
             )}
@@ -188,7 +194,13 @@ export const CustomEdge = ({
                         style={{
                             ...overlayBaseStyle,
                             strokeDasharray: '10 90',
-                            animation: 'arch-flow-forward 1.5s linear infinite'
+                            animation: 'arch-flow-forward 0.75s linear infinite',
+                            filter: `
+                            drop-shadow(1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(-1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px 1px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px -1px 0px rgba(0, 0, 0, 1))
+                            `
                         }}
                     />
                     <BaseEdge
@@ -197,7 +209,13 @@ export const CustomEdge = ({
                             ...overlayBaseStyle,
                             strokeDasharray: '10 90',
                             strokeDashoffset: 50,
-                            animation: 'arch-flow-reverse 1.5s linear infinite'
+                            animation: 'arch-flow-reverse 0.75s linear infinite',
+                            filter: `
+                            drop-shadow(1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(-1px 0px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px 1px 0px rgba(0, 0, 0, 1)) 
+                            drop-shadow(0px -1px 0px rgba(0, 0, 0, 1))
+                            `
                         }}
                     />
                 </>
