@@ -12,9 +12,112 @@
           "basis": "600px"
         },
         "props": {
+          "edges": {
+            "Ibc89811d": {
+              "animation": "bidirectional",
+              "arrow": true,
+              "connectionType": "gateway-network",
+              "dashed": false,
+              "lineType": "smoothstep",
+              "showLabel": false,
+              "source": "Ied7e1bab",
+              "sourceHandle": "top-2",
+              "target": "Ie157ad77",
+              "targetHandle": "bottom-2",
+              "waypoints": [
+                {
+                  "x": 255,
+                  "y": 300
+                },
+                {
+                  "x": 90,
+                  "y": 300
+                }
+              ]
+            }
+          },
           "hierarchy": {
             "areas": [],
-            "nodes": []
+            "nodes": [
+              {
+                "id": "Ie157ad77",
+                "label": "Standard",
+                "typeId": "standard"
+              },
+              {
+                "id": "Ied7e1bab",
+                "label": "Edge IIOT Gateway",
+                "typeId": "edge-iiot"
+              }
+            ]
+          },
+          "nodes": {
+            "Ie157ad77": {
+              "configs": {},
+              "connections": [
+                "Ibc89811d"
+              ],
+              "hideHandles": false,
+              "hierarchy": [],
+              "inactive": false,
+              "label": "Standard",
+              "labelStyle": {
+                "classes": ""
+              },
+              "paletteId": "standard",
+              "style": {
+                "classes": ""
+              },
+              "supportedConnections": [
+                "gateway-network",
+                "device-driver",
+                "client",
+                "db",
+                "opc-ua",
+                "mqtt",
+                "rest",
+                "opc-com",
+                "mongodb",
+                "kafka",
+                "standard"
+              ],
+              "tooltip": "Edge IIOT Gateway",
+              "typeId": "standard",
+              "useOverrideImage": true,
+              "x": 15,
+              "y": 30
+            },
+            "Ied7e1bab": {
+              "configs": {},
+              "connections": [
+                "Ibc89811d"
+              ],
+              "hideHandles": false,
+              "hierarchy": [],
+              "inactive": false,
+              "label": "Edge IIOT Gateway",
+              "labelStyle": {
+                "classes": ""
+              },
+              "paletteId": "edge-iiot",
+              "style": {
+                "classes": ""
+              },
+              "supportedConnections": [
+                "gateway-network",
+                "device-driver",
+                "opc-ua",
+                "mqtt",
+                "rest",
+                "opc-com",
+                "standard"
+              ],
+              "tooltip": "Edge IIOT Gateway",
+              "typeId": "edge-iiot",
+              "useOverrideImage": false,
+              "x": 180,
+              "y": 420
+            }
           }
         },
         "type": "com.wargoetz.reactflow.architecturebuilder"
