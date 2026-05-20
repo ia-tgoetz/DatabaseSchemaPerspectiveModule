@@ -24,7 +24,7 @@ if (signPropsFile.exists()) {
 }
 
 allprojects {
-    version = "1.0.5" // Add Free Flag and Added Flow Animations
+    version = "1.0.6" // Fixed Edge Loss during area copy
     group = "com.wargoetz.reactflow" // <-- UPDATED
 }
 

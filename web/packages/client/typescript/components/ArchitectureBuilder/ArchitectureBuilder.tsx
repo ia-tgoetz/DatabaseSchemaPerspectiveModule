@@ -11,6 +11,7 @@ import { edgeTypes } from './CustomEdge';
 import { mapIgnitionToReactFlowEdges } from './EdgeUtils';
 import { useArchitectureFlowHandlers } from './useArchitectureFlowHandlers';
 import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
+import { CanvasErrorBoundary } from './CanvasErrorBoundary';
 
 const SwapIcon = ({ image }: { image: string }) => {
     const scopeId = React.useMemo(() => nextSvgScopeId(), []);
@@ -326,6 +327,32 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     const [localEdges, setLocalEdges] = React.useState<any[]>([]);
     const [hoveredEdgeId, setHoveredEdgeId] = React.useState<string | null>(null);
 
+    // Suppress ResizeObserver loop limit exceeded error which can cause white-screen in Ignition Designer
+    React.useEffect(() => {
+        const suppressResizeObserverError = (e: ErrorEvent) => {
+            if (e.message && (e.message.includes('ResizeObserver loop') || e.message.includes('ResizeObserver loop limit exceeded'))) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+            }
+        };
+
+        const handleOnError = (msg: any) => {
+            if (typeof msg === 'string' && (msg.includes('ResizeObserver loop') || msg.includes('ResizeObserver loop limit exceeded'))) {
+                return true; // Tells the browser/Ignition to ignore the error
+            }
+            return false;
+        };
+
+        window.addEventListener('error', suppressResizeObserverError, true);
+        const oldOnError = window.onerror;
+        window.onerror = handleOnError;
+
+        return () => {
+            window.removeEventListener('error', suppressResizeObserverError, true);
+            window.onerror = oldOnError;
+        };
+    }, []);
+
     // ─── Prop extraction ───────────────────────────────────────────────────
 
     const rawNodesJson = JSON.stringify(extractDeep(props.props.nodes) || {});
@@ -521,241 +548,243 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     // ─── Render ────────────────────────────────────────────────────────────
 
     return (
-        <div {...props.emit({ classes })} style={containerStyle} tabIndex={0}>
-            <style>{`
-            .arch-theme-wrapper {
-                display: flex; flex-direction: row; flex: 1; width: 100%; height: 100%;
-                --edge: #78D175; --panel: #78D175; --cloud: #25A4E9; --standard: #FF8C00;
-                --cirrusLink: #156D97; --sepasoft: #2DA449; --ia-darkgray: #39464B;
-                --ia-green: #8DC63E; --ia-gray: #445C6D; --ignition-orange: #F7901E;
-                --ignition-blue: #003E69; --ignition-darkblue: #002143;
-                --edge-green: #78D175; --edge-gray: #283439; --edge-dark-gray: #1E2528; --edge-light-gray: #4E5558;
-            }
-            .arch-node-gear { transform-origin: 50% 50%; transition: transform 0.75s ease-in-out; }
-            .arch-node-gear:hover { transform: rotate(360deg); }
-            .arch-node-gear:active { transform: translateX(-100%) rotate(-360deg); }
-            .arch-node-svg-wrapper svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
-            /* Animation keyframes: distance must match (dash + gap) for seamless loops */
-            @keyframes arch-flow-forward { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
-            @keyframes arch-flow-reverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 100; } }
-            
-            /* Base handle is a transparent anchor — React Flow's translate(-50%,-50%) is never overwritten */
-            .arch-node-handle { background: transparent !important; border-color: transparent !important; }
-            /* ::after renders the visible dot and owns all visual transitions */
-            .arch-node-handle::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; border-radius: 50%; background: var(--neutral-90); border: 1px solid var(--neutral-90); pointer-events: none; transition: transform 0.15s ease-in-out, background 0.15s ease-in-out, border-color 0.15s ease-in-out; }
-            /* Hover: scale ::after from its own center — base anchor is untouched */
-            .arch-node-handle:hover::after { background: var(--callToAction) !important; border-color: var(--callToAction) !important; transform: translate(-50%, -50%) scale(1.5); }
-            /* Connected handle: shown when the selected edge touches this handle */
-            .arch-node-handle--connected::after { background: var(--callToAction) !important; border-color: var(--callToAction) !important; width: 12px !important; height: 12px !important; box-shadow: 0 0 5px var(--callToAction); }
-            /* React Flow connection states: base stays transparent, ::after carries the color */
-            .react-flow__handle.connecting { background: transparent !important; border-color: transparent !important; }
-            .react-flow__handle.connecting::after { background: #3b82f6 !important; border-color: #2563eb !important; width: 14px !important; height: 14px !important; }
-            .react-flow__handle.valid { background: transparent !important; border-color: transparent !important; cursor: crosshair !important; }
-            .react-flow__handle.valid::after { background: #22c55e !important; border-color: #16a34a !important; width: 14px !important; height: 14px !important; }
-            /* Cursors live on the base handle (the pointer-events target) */
-            .arch-creating-edge .arch-node-handle { cursor: crosshair !important; }
-            .arch-moving-edge .arch-node-handle { cursor: grab !important; }
-            .arch-creating-edge .arch-node-handle.connecting:not(.valid):hover,
-            .arch-moving-edge   .arch-node-handle.connecting:not(.valid):hover { cursor: not-allowed !important; }
-            .arch-creating-edge .arch-node-handle.connecting:not(.valid):hover::after,
-            .arch-moving-edge   .arch-node-handle.connecting:not(.valid):hover::after { background: #ef4444 !important; border-color: #dc2626 !important; }
-            `}</style>
+        <CanvasErrorBoundary componentEvents={props.componentEvents}>
+            <div {...props.emit({ classes })} style={containerStyle} tabIndex={0}>
+                <style>{`
+                .arch-theme-wrapper {
+                    display: flex; flex-direction: row; flex: 1; width: 100%; height: 100%;
+                    --edge: #78D175; --panel: #78D175; --cloud: #25A4E9; --standard: #FF8C00;
+                    --cirrusLink: #156D97; --sepasoft: #2DA449; --ia-darkgray: #39464B;
+                    --ia-green: #8DC63E; --ia-gray: #445C6D; --ignition-orange: #F7901E;
+                    --ignition-blue: #003E69; --ignition-darkblue: #002143;
+                    --edge-green: #78D175; --edge-gray: #283439; --edge-dark-gray: #1E2528; --edge-light-gray: #4E5558;
+                }
+                .arch-node-gear { transform-origin: 50% 50%; transition: transform 0.75s ease-in-out; }
+                .arch-node-gear:hover { transform: rotate(360deg); }
+                .arch-node-gear:active { transform: translateX(-100%) rotate(-360deg); }
+                .arch-node-svg-wrapper svg { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
+                /* Animation keyframes: distance must match (dash + gap) for seamless loops */
+                @keyframes arch-flow-forward { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+                @keyframes arch-flow-reverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 100; } }
+                
+                /* Base handle is a transparent anchor — React Flow's translate(-50%,-50%) is never overwritten */
+                .arch-node-handle { background: transparent !important; border-color: transparent !important; }
+                /* ::after renders the visible dot and owns all visual transitions */
+                .arch-node-handle::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; border-radius: 50%; background: var(--neutral-90); border: 1px solid var(--neutral-90); pointer-events: none; transition: transform 0.15s ease-in-out, background 0.15s ease-in-out, border-color 0.15s ease-in-out; }
+                /* Hover: scale ::after from its own center — base anchor is untouched */
+                .arch-node-handle:hover::after { background: var(--callToAction) !important; border-color: var(--callToAction) !important; transform: translate(-50%, -50%) scale(1.5); }
+                /* Connected handle: shown when the selected edge touches this handle */
+                .arch-node-handle--connected::after { background: var(--callToAction) !important; border-color: var(--callToAction) !important; width: 12px !important; height: 12px !important; box-shadow: 0 0 5px var(--callToAction); }
+                /* React Flow connection states: base stays transparent, ::after carries the color */
+                .react-flow__handle.connecting { background: transparent !important; border-color: transparent !important; }
+                .react-flow__handle.connecting::after { background: #3b82f6 !important; border-color: #2563eb !important; width: 14px !important; height: 14px !important; }
+                .react-flow__handle.valid { background: transparent !important; border-color: transparent !important; cursor: crosshair !important; }
+                .react-flow__handle.valid::after { background: #22c55e !important; border-color: #16a34a !important; width: 14px !important; height: 14px !important; }
+                /* Cursors live on the base handle (the pointer-events target) */
+                .arch-creating-edge .arch-node-handle { cursor: crosshair !important; }
+                .arch-moving-edge .arch-node-handle { cursor: grab !important; }
+                .arch-creating-edge .arch-node-handle.connecting:not(.valid):hover,
+                .arch-moving-edge   .arch-node-handle.connecting:not(.valid):hover { cursor: not-allowed !important; }
+                .arch-creating-edge .arch-node-handle.connecting:not(.valid):hover::after,
+                .arch-moving-edge   .arch-node-handle.connecting:not(.valid):hover::after { background: #ef4444 !important; border-color: #dc2626 !important; }
+                `}</style>
 
-            <div className="arch-theme-wrapper">
-                {isEnabled && <Sidebar paletteItems={paletteItems} isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onDragStartItem={(item) => { draggedItemRef.current = item; }} onItemClick={handlePaletteItemClick} />}
+                <div className="arch-theme-wrapper">
+                    {isEnabled && <Sidebar paletteItems={paletteItems} isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onDragStartItem={(item) => { draggedItemRef.current = item; }} onItemClick={handlePaletteItemClick} />}
 
-                <div style={{ flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }} ref={reactFlowWrapper} className={isConnecting ? 'arch-creating-edge' : isUpdatingEdge ? 'arch-moving-edge' : ''}>
-                    <ReactFlowProvider>
-                        <ReactFlow
-                            nodes={localNodes} edges={displayEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
-                            isValidConnection={isValidConnection} onInit={setReactFlowInstance}
-                            onDrop={isEnabled ? onDrop : undefined} onDragOver={isEnabled ? onDragOver : undefined}
-                            onConnect={isEnabled ? onConnect : undefined} onEdgeUpdate={isEnabled ? onEdgeUpdate : undefined}
-                            onEdgeUpdateStart={isEnabled ? onEdgeUpdateStart : undefined}
-                            onEdgeUpdateEnd={isEnabled ? onEdgeUpdateEnd : undefined}
-                            onConnectStart={isEnabled ? onConnectStart : undefined}
-                            onConnectEnd={isEnabled ? onConnectEnd : undefined}
-                            onNodeDragStart={isEnabled ? onNodeDragStart : undefined} onNodeDrag={isEnabled ? onNodeDrag : undefined} onNodeDragStop={isEnabled ? onNodeDragStop : undefined}
-                            onNodesChange={onNodesChange}
-                            onNodeClick={enableOnClickEvents ? onNodeClick : undefined} onEdgeClick={enableOnClickEvents ? onEdgeClick : undefined}
-                            onNodesDelete={isEnabled ? onNodesDelete : undefined} onEdgesDelete={isEnabled ? onEdgesDelete : undefined}
-                            onNodeContextMenu={isEnabled ? onNodeContextMenu : undefined} onEdgeContextMenu={isEnabled ? onEdgeContextMenu : undefined}
-                            onEdgeMouseEnter={(_evt, edge) => setHoveredEdgeId(edge.id)}
-                            onEdgeMouseLeave={() => setHoveredEdgeId(null)}
-                            onPaneClick={enableOnClickEvents ? onPaneClick : undefined} onPaneContextMenu={isEnabled ? onPaneContextMenu : undefined}
-                            nodesDraggable={isEnabled} nodesConnectable={isEnabled} elementsSelectable={isEnabled}
-                            connectionMode={ConnectionMode.Loose} snapToGrid={snapEnabled} snapGrid={snapGrid}
-                            connectionLineStyle={{ stroke: '#cccccc', strokeWidth: 6 }}
-                            elevateNodesOnSelect={false}
-                            minZoom={0.05}
-                        >
-                            <Background gap={snapPixels} />
-                            <Controls showInteractive={false} />
-                        </ReactFlow>
-                    </ReactFlowProvider>
+                    <div style={{ flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }} ref={reactFlowWrapper} className={isConnecting ? 'arch-creating-edge' : isUpdatingEdge ? 'arch-moving-edge' : ''}>
+                        <ReactFlowProvider>
+                            <ReactFlow
+                                nodes={localNodes} edges={displayEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
+                                isValidConnection={isValidConnection} onInit={setReactFlowInstance}
+                                onDrop={isEnabled ? onDrop : undefined} onDragOver={isEnabled ? onDragOver : undefined}
+                                onConnect={isEnabled ? onConnect : undefined} onEdgeUpdate={isEnabled ? onEdgeUpdate : undefined}
+                                onEdgeUpdateStart={isEnabled ? onEdgeUpdateStart : undefined}
+                                onEdgeUpdateEnd={isEnabled ? onEdgeUpdateEnd : undefined}
+                                onConnectStart={isEnabled ? onConnectStart : undefined}
+                                onConnectEnd={isEnabled ? onConnectEnd : undefined}
+                                onNodeDragStart={isEnabled ? onNodeDragStart : undefined} onNodeDrag={isEnabled ? onNodeDrag : undefined} onNodeDragStop={isEnabled ? onNodeDragStop : undefined}
+                                onNodesChange={onNodesChange}
+                                onNodeClick={enableOnClickEvents ? onNodeClick : undefined} onEdgeClick={enableOnClickEvents ? onEdgeClick : undefined}
+                                onNodesDelete={isEnabled ? onNodesDelete : undefined} onEdgesDelete={isEnabled ? onEdgesDelete : undefined}
+                                onNodeContextMenu={isEnabled ? onNodeContextMenu : undefined} onEdgeContextMenu={isEnabled ? onEdgeContextMenu : undefined}
+                                onEdgeMouseEnter={(_evt, edge) => setHoveredEdgeId(edge.id)}
+                                onEdgeMouseLeave={() => setHoveredEdgeId(null)}
+                                onPaneClick={enableOnClickEvents ? onPaneClick : undefined} onPaneContextMenu={isEnabled ? onPaneContextMenu : undefined}
+                                nodesDraggable={isEnabled} nodesConnectable={isEnabled} elementsSelectable={isEnabled}
+                                connectionMode={ConnectionMode.Loose} snapToGrid={snapEnabled} snapGrid={snapGrid}
+                                connectionLineStyle={{ stroke: '#cccccc', strokeWidth: 6 }}
+                                elevateNodesOnSelect={false}
+                                minZoom={0.05}
+                            >
+                                <Background gap={snapPixels} />
+                                <Controls showInteractive={false} />
+                            </ReactFlow>
+                        </ReactFlowProvider>
 
-                    {styleEditorNodeId && rawNodesDict[styleEditorNodeId] && (
-                        <StyleEditorModal
-                            node={rawNodesDict[styleEditorNodeId]}
-                            onSave={(newStyle, newLabelStyle, newTextStyle) => {
-                                if (props.store?.props) {
-                                    const nextNodes = { ...rawNodesDict };
-                                    nextNodes[styleEditorNodeId].style = newStyle;
-                                    nextNodes[styleEditorNodeId].labelStyle = newLabelStyle;
-                                    nextNodes[styleEditorNodeId].textStyle = newTextStyle;
-                                    props.store.props.write('nodes', nextNodes);
-                                }
-                                setStyleEditorNodeId(null);
-                            }}
-                            onCancel={() => setStyleEditorNodeId(null)}
-                        />
-                    )}
+                        {styleEditorNodeId && rawNodesDict[styleEditorNodeId] && (
+                            <StyleEditorModal
+                                node={rawNodesDict[styleEditorNodeId]}
+                                onSave={(newStyle, newLabelStyle, newTextStyle) => {
+                                    if (props.store?.props) {
+                                        const nextNodes = { ...rawNodesDict };
+                                        nextNodes[styleEditorNodeId].style = newStyle;
+                                        nextNodes[styleEditorNodeId].labelStyle = newLabelStyle;
+                                        nextNodes[styleEditorNodeId].textStyle = newTextStyle;
+                                        props.store.props.write('nodes', nextNodes);
+                                    }
+                                    setStyleEditorNodeId(null);
+                                }}
+                                onCancel={() => setStyleEditorNodeId(null)}
+                            />
+                        )}
 
-                    {contextMenu && (
-                        <div style={{ position: 'absolute', top: contextMenu.top, left: contextMenu.left, zIndex: 10, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px', fontSize: '12px' }}>
+                        {contextMenu && (
+                            <div style={{ position: 'absolute', top: contextMenu.top, left: contextMenu.left, zIndex: 10, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px', fontSize: '12px' }}>
 
-                            {contextMenu.type === 'pane' && (
-                                <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>
-                                    📋 Paste
-                                </div>
-                            )}
+                                {contextMenu.type === 'pane' && (
+                                    <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>
+                                        📋 Paste
+                                    </div>
+                                )}
 
-                            {contextMenu.type !== 'pane' && (
-                                <>
-                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('config')}>⚙️ Config</div>
+                                {contextMenu.type !== 'pane' && (
+                                    <>
+                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('config')}>⚙️ Config</div>
 
-                                    {contextMenu.type === 'node' && (
-                                        <>
-                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--callToAction)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('editStyle')}>🎨 Edit Style</div>
-                                            {!contextMenu.isContainer && (
-                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleGrayscale')}>
-                                                    <span>⬜ Toggle Inactive</span><span>{rawNodesDict[contextMenu.id]?.inactive ? '✓' : ''}</span>
-                                                </div>
-                                            )}
-                                            <div style={{ borderTop: '1px solid var(--neutral-40)', margin: '4px 0' }} />
-                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('copy')}>📋 Copy</div>
-                                            {contextMenu.isContainer && (
-                                                <>
-                                                    <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>📋 Paste</div>
-                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', borderTop: '1px solid var(--neutral-40)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLink')}>
-                                                        {rawNodesDict[contextMenu.id]?.configs?.unlinked ? '🔗 Link Contents' : '🔓 Unlink Contents'}
+                                        {contextMenu.type === 'node' && (
+                                            <>
+                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--callToAction)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('editStyle')}>🎨 Edit Style</div>
+                                                {!contextMenu.isContainer && (
+                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleGrayscale')}>
+                                                        <span>⬜ Toggle Inactive</span><span>{rawNodesDict[contextMenu.id]?.inactive ? '✓' : ''}</span>
                                                     </div>
-                                                    <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('order')}>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'order' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                            <span>📑 Order</span><span>▶</span>
+                                                )}
+                                                <div style={{ borderTop: '1px solid var(--neutral-40)', margin: '4px 0' }} />
+                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('copy')}>📋 Copy</div>
+                                                {contextMenu.isContainer && (
+                                                    <>
+                                                        <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>📋 Paste</div>
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', borderTop: '1px solid var(--neutral-40)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLink')}>
+                                                            {rawNodesDict[contextMenu.id]?.configs?.unlinked ? '🔗 Link Contents' : '🔓 Unlink Contents'}
                                                         </div>
-                                                        {activeSubMenu === 'order' && (
+                                                        <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('order')}>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'order' ? 'var(--neutral-30)' : 'transparent' }}>
+                                                                <span>📑 Order</span><span>▶</span>
+                                                            </div>
+                                                            {activeSubMenu === 'order' && (
+                                                                <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '150px' }}>
+                                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('bringToFront')}>⏫ Bring to Front</div>
+                                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('bringForward')}>🔼 Bring Forward</div>
+                                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('sendBackward')}>🔽 Send Backward</div>
+                                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('sendToBack')}>⏬ Send to Back</div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                )}
+                                                {validSwapItems.length > 0 && (
+                                                    <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('swapNode')}>
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'swapNode' ? 'var(--neutral-30)' : 'transparent' }}>
+                                                            <span>🔄 Swap Node</span><span>▶</span>
+                                                        </div>
+                                                        {activeSubMenu === 'swapNode' && (
                                                             <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '150px' }}>
-                                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('bringToFront')}>⏫ Bring to Front</div>
-                                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('bringForward')}>🔼 Bring Forward</div>
-                                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('sendBackward')}>🔽 Send Backward</div>
-                                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('sendToBack')}>⏬ Send to Back</div>
+                                                                {validSwapItems.map(targetItem => (
+                                                                    <div key={targetItem.id} style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center' }} onClick={() => handleNodeSwap(targetItem.id)}>
+                                                                        <div style={{ width: '16px', height: '16px', marginRight: '6px', display: 'flex', alignItems: 'center' }}>{targetItem.image && <SwapIcon image={targetItem.image} />}</div>
+                                                                        <span>{targetItem.label}</span>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                         )}
                                                     </div>
-                                                </>
-                                            )}
-                                            {validSwapItems.length > 0 && (
-                                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('swapNode')}>
-                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'swapNode' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                        <span>🔄 Swap Node</span><span>▶</span>
+                                                )}
+                                            </>
+                                        )}
+
+                                        {contextMenu.type === 'edge' && (
+                                            <>
+                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('reverseEdge')}>🔄 Reverse Direction</div>
+                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleArrow')}>
+                                                    {rawEdgesDict[contextMenu.id]?.arrow !== false ? '❌ Remove Arrow' : '➡️ Add Arrow'}
+                                                </div>
+                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLabel')}>
+                                                    {rawEdgesDict[contextMenu.id]?.showLabel === true ? '👁️ Hide Label' : '👁️ Show Label'}
+                                                </div>
+                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleDashed')}>
+                                                    {rawEdgesDict[contextMenu.id]?.dashed ? '─── Solid Line' : '- - - Dashed Line'}
+                                                </div>
+                                                {(() => {
+                                                    const e = rawEdgesDict[contextMenu.id];
+                                                    const lt = e?.lineType;
+                                                    const canClear = (!lt || lt === 'smoothstep' || lt === 'step') && e?.waypoints?.length > 0;
+                                                    return canClear ? (
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('clearWaypoints')}>
+                                                            ⊙ Clear Path ({e.waypoints.length} pt{e.waypoints.length !== 1 ? 's' : ''})
+                                                        </div>
+                                                    ) : null;
+                                                })()}
+                                                <div style={{ borderTop: '1px solid var(--neutral-40)', margin: '4px 0' }} />
+                                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('lineType')}>
+                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'lineType' ? 'var(--neutral-30)' : 'transparent' }}>
+                                                        <span>〰️ Line Type</span><span>▶</span>
                                                     </div>
-                                                    {activeSubMenu === 'swapNode' && (
-                                                        <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '150px' }}>
-                                                            {validSwapItems.map(targetItem => (
-                                                                <div key={targetItem.id} style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center' }} onClick={() => handleNodeSwap(targetItem.id)}>
-                                                                    <div style={{ width: '16px', height: '16px', marginRight: '6px', display: 'flex', alignItems: 'center' }}>{targetItem.image && <SwapIcon image={targetItem.image} />}</div>
-                                                                    <span>{targetItem.label}</span>
-                                                                </div>
-                                                            ))}
+                                                    {activeSubMenu === 'lineType' && (
+                                                        <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '120px' }}>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('smoothstep')}><span>〰️ Smooth</span><span>{currentLineType === 'smoothstep' ? '✓' : ''}</span></div>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('step')}><span>🔲 Stepped</span><span>{currentLineType === 'step' ? '✓' : ''}</span></div>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('straight')}><span>📏 Straight</span><span>{currentLineType === 'straight' ? '✓' : ''}</span></div>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('default')}><span>➰ Bezier</span><span>{currentLineType === 'default' ? '✓' : ''}</span></div>
                                                         </div>
                                                     )}
                                                 </div>
-                                            )}
-                                        </>
-                                    )}
+                                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('animation')}>
+                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'animation' ? 'var(--neutral-30)' : 'transparent' }}>
+                                                        <span>✨ Animation</span><span>▶</span>
+                                                    </div>
+                                                    {activeSubMenu === 'animation' && (
+                                                        <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px' }}>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleAnimationChange('none')}><span>🚫 None</span><span>{(rawEdgesDict[contextMenu.id]?.animation || 'none') === 'none' ? '✓' : ''}</span></div>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleAnimationChange('forward')}><span>➡️ Forward</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'forward' ? '✓' : ''}</span></div>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleAnimationChange('bidirectional')}><span>↔️ Bidirectional</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'bidirectional' ? '✓' : ''}</span></div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('connectionType')}>
+                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'connectionType' ? 'var(--neutral-30)' : 'transparent' }}>
+                                                        <span>🔗 Connection</span><span>▶</span>
+                                                    </div>
+                                                    {activeSubMenu === 'connectionType' && (
+                                                        <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px' }}>
+                                                            {availableConnections.length === 0
+                                                                ? <div style={{ padding: '5px 8px', color: 'var(--neutral-60)' }}>No valid connections</div>
+                                                                : availableConnections.map(c => (
+                                                                    <div key={c} style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleConnectionTypeChange(c)}>
+                                                                        <span><span style={{ color: connectionTypes[c]?.color || 'var(--neutral-90)', marginRight: '4px' }}>●</span>{connectionTypes[c]?.label || c}</span>
+                                                                        <span>{currentConnectionType === c ? '✓' : ''}</span>
+                                                                    </div>
+                                                                ))
+                                                            }
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
 
-                                    {contextMenu.type === 'edge' && (
-                                        <>
-                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('reverseEdge')}>🔄 Reverse Direction</div>
-                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleArrow')}>
-                                                {rawEdgesDict[contextMenu.id]?.arrow !== false ? '❌ Remove Arrow' : '➡️ Add Arrow'}
-                                            </div>
-                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLabel')}>
-                                                {rawEdgesDict[contextMenu.id]?.showLabel === true ? '👁️ Hide Label' : '👁️ Show Label'}
-                                            </div>
-                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleDashed')}>
-                                                {rawEdgesDict[contextMenu.id]?.dashed ? '─── Solid Line' : '- - - Dashed Line'}
-                                            </div>
-                                            {(() => {
-                                                const e = rawEdgesDict[contextMenu.id];
-                                                const lt = e?.lineType;
-                                                const canClear = (!lt || lt === 'smoothstep' || lt === 'step') && e?.waypoints?.length > 0;
-                                                return canClear ? (
-                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('clearWaypoints')}>
-                                                        ⊙ Clear Path ({e.waypoints.length} pt{e.waypoints.length !== 1 ? 's' : ''})
-                                                    </div>
-                                                ) : null;
-                                            })()}
-                                            <div style={{ borderTop: '1px solid var(--neutral-40)', margin: '4px 0' }} />
-                                            <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('lineType')}>
-                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'lineType' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                    <span>〰️ Line Type</span><span>▶</span>
-                                                </div>
-                                                {activeSubMenu === 'lineType' && (
-                                                    <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '120px' }}>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('smoothstep')}><span>〰️ Smooth</span><span>{currentLineType === 'smoothstep' ? '✓' : ''}</span></div>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('step')}><span>🔲 Stepped</span><span>{currentLineType === 'step' ? '✓' : ''}</span></div>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('straight')}><span>📏 Straight</span><span>{currentLineType === 'straight' ? '✓' : ''}</span></div>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleLineTypeChange('default')}><span>➰ Bezier</span><span>{currentLineType === 'default' ? '✓' : ''}</span></div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('animation')}>
-                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'animation' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                    <span>✨ Animation</span><span>▶</span>
-                                                </div>
-                                                {activeSubMenu === 'animation' && (
-                                                    <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px' }}>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleAnimationChange('none')}><span>🚫 None</span><span>{(rawEdgesDict[contextMenu.id]?.animation || 'none') === 'none' ? '✓' : ''}</span></div>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleAnimationChange('forward')}><span>➡️ Forward</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'forward' ? '✓' : ''}</span></div>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleAnimationChange('bidirectional')}><span>↔️ Bidirectional</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'bidirectional' ? '✓' : ''}</span></div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('connectionType')}>
-                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'connectionType' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                    <span>🔗 Connection</span><span>▶</span>
-                                                </div>
-                                                {activeSubMenu === 'connectionType' && (
-                                                    <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px' }}>
-                                                        {availableConnections.length === 0
-                                                            ? <div style={{ padding: '5px 8px', color: 'var(--neutral-60)' }}>No valid connections</div>
-                                                            : availableConnections.map(c => (
-                                                                <div key={c} style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleConnectionTypeChange(c)}>
-                                                                    <span><span style={{ color: connectionTypes[c]?.color || 'var(--neutral-90)', marginRight: '4px' }}>●</span>{connectionTypes[c]?.label || c}</span>
-                                                                    <span>{currentConnectionType === c ? '✓' : ''}</span>
-                                                                </div>
-                                                            ))
-                                                        }
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
-
-                                    {contextMenu.isContainer && (
-                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: '1px solid var(--neutral-40)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('deleteWithContents')}>🗑️ Delete Area & Contents</div>
-                                    )}
-                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: contextMenu.isContainer ? 'none' : '1px solid var(--neutral-40)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('delete')}>
-                                        {contextMenu.isContainer ? '🗑️ Delete Area Only' : '🗑️ Delete'}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    )}
+                                        {contextMenu.isContainer && (
+                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: '1px solid var(--neutral-40)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('deleteWithContents')}>🗑️ Delete Area & Contents</div>
+                                        )}
+                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: contextMenu.isContainer ? 'none' : '1px solid var(--neutral-40)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('delete')}>
+                                            {contextMenu.isContainer ? '🗑️ Delete Area Only' : '🗑️ Delete'}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </CanvasErrorBoundary>
     );
 });

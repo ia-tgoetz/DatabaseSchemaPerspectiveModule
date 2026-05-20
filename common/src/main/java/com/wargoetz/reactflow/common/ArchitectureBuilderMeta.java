@@ -44,7 +44,8 @@ public class ArchitectureBuilderMeta {
                 new ComponentEventDescriptor("onEdgeClick", "Fired when an edge is clicked.", null),
                 new ComponentEventDescriptor("onGearClick", "Fired when the gear icon is clicked.", null),
                 new ComponentEventDescriptor("onContextMenuAction", "Fired when a context menu option is selected.", null),
-                new ComponentEventDescriptor("onPaletteItemClick", "Fired when a palette item is clicked in the sidebar.", null)
+                new ComponentEventDescriptor("onPaletteItemClick", "Fired when a palette item is clicked in the sidebar.", null),
+                new ComponentEventDescriptor("onCanvasError", "Fired when a canvas rendering or interaction error occurs.", null)
             ))                                                              // <-- ADD THIS
         .setSchema(JsonSchema.parse(ArchitectureBuilderMeta.class.getResourceAsStream("/architecturebuilder.props.json")))
         .build();
