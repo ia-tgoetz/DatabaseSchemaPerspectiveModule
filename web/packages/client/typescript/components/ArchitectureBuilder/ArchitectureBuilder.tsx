@@ -11,7 +11,7 @@ import { edgeTypes } from './CustomEdge';
 import { mapIgnitionToReactFlowEdges } from './EdgeUtils';
 import { useArchitectureFlowHandlers } from './useArchitectureFlowHandlers';
 import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
-import { CanvasErrorBoundary } from './CanvasErrorBoundary';
+import { ComponentErrorBoundary } from '../common/ComponentErrorBoundary';
 
 const SwapIcon = ({ image }: { image: string }) => {
     const scopeId = React.useMemo(() => nextSvgScopeId(), []);
@@ -548,7 +548,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     // ─── Render ────────────────────────────────────────────────────────────
 
     return (
-        <CanvasErrorBoundary componentEvents={props.componentEvents}>
+        <ComponentErrorBoundary componentEvents={props.componentEvents}>
             <div {...props.emit({ classes })} style={containerStyle} tabIndex={0}>
                 <style>{`
                 .arch-theme-wrapper {
@@ -785,6 +785,6 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                     </div>
                 </div>
             </div>
-        </CanvasErrorBoundary>
+        </ComponentErrorBoundary>
     );
 });

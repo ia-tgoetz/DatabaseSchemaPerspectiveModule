@@ -375,6 +375,8 @@ Shortcuts are disabled when focus is inside an `<input>` or `<textarea>`, and wh
 | `onGearClick` | `{ id, paletteId, typeId, type: "node", action: "config" }` |
 | `onPaletteItemClick` | Full palette item fields. |
 | `onContextMenuAction` | `{ id, paletteId, type, action }` where `action` is the menu action string (e.g. `"delete"`, `"lineType:step"`, `"swapNode:EdgeGateway"`). |
+| `onPaneClick` | `{ type: "pane" }` fired when clicking the canvas background. |
+| `onCanvasError` | `{ source, message, stack }` fired when a rendering or interaction error occurs. |
 
 ---
 

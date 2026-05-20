@@ -7,6 +7,8 @@ import ReactFlow, { Background, Controls, Handle, Position, useNodesState, useEd
 import 'reactflow/dist/style.css'; 
 import './HierarchyChart.css'; 
 
+import { ComponentErrorBoundary } from '../common/ComponentErrorBoundary';
+
 const extractDeep = (obj: any): any => {
     if (obj === null || obj === undefined) return undefined;
     if (typeof obj !== 'object') return obj;
@@ -87,114 +89,149 @@ export const HierarchyChart = observer((props: ComponentProps<HierarchyChartProp
     const activeConnectionLineType = React.useMemo(() => mapConnectionLineType(lineType), [lineType]);
 
     React.useEffect(() => {
-        const safeNodes = extractDeep(propNodes) || [];
-        const mappedEdges: any[] = [];
+        try {
+            const safeNodes = extractDeep(propNodes) || [];
+            const mappedEdges: any[] = [];
 
-        safeNodes.forEach((node: any) => {
-            if (Array.isArray(node.parents)) {
-                node.parents.forEach((parentObj: any) => {
-                    const sourceNode = safeNodes.find((n: any) => n.id === parentObj.id);
-                    if (!sourceNode) return; 
+            safeNodes.forEach((node: any) => {
+                if (Array.isArray(node.parents)) {
+                    node.parents.forEach((parentObj: any) => {
+                        const sourceNode = safeNodes.find((n: any) => n.id === parentObj.id);
+                        if (!sourceNode) return; 
 
-                    let sourceHandle = layoutDirection === 'TB' ? 'bottom-source' : 'right-source';
-                    if (parentObj.sourceHandle && parentObj.sourceHandle !== 'auto') {
-                        sourceHandle = parentObj.sourceHandle.includes('-') ? parentObj.sourceHandle : `${parentObj.sourceHandle}-source`;
-                    }
+                        let sourceHandle = layoutDirection === 'TB' ? 'bottom-source' : 'right-source';
+                        if (parentObj.sourceHandle && parentObj.sourceHandle !== 'auto') {
+                            sourceHandle = parentObj.sourceHandle.includes('-') ? parentObj.sourceHandle : `${parentObj.sourceHandle}-source`;
+                        }
 
-                    let targetHandle = layoutDirection === 'TB' ? 'top-target' : 'left-target';
-                    if (parentObj.targetHandle && parentObj.targetHandle !== 'auto') {
-                        targetHandle = parentObj.targetHandle.includes('-') ? parentObj.targetHandle : `${parentObj.targetHandle}-target`;
-                    }
+                        let targetHandle = layoutDirection === 'TB' ? 'top-target' : 'left-target';
+                        if (parentObj.targetHandle && parentObj.targetHandle !== 'auto') {
+                            targetHandle = parentObj.targetHandle.includes('-') ? parentObj.targetHandle : `${parentObj.targetHandle}-target`;
+                        }
 
-                    mappedEdges.push({
-                        id: `e-${parentObj.id}(${sourceHandle})-${node.id}(${targetHandle})`,
-                        source: parentObj.id,
-                        target: node.id,
-                        sourceHandle: sourceHandle,
-                        targetHandle: targetHandle,
-                        type: lineType === 'bezier' ? 'default' : lineType,
-                        animated: node.variant === 'in_progress'
+                        mappedEdges.push({
+                            id: `e-${parentObj.id}(${sourceHandle})-${node.id}(${targetHandle})`,
+                            source: parentObj.id,
+                            target: node.id,
+                            sourceHandle: sourceHandle,
+                            targetHandle: targetHandle,
+                            type: lineType === 'bezier' ? 'default' : lineType,
+                            animated: node.variant === 'in_progress'
+                        });
                     });
-                });
-            }
-        });
-
-        const dagreGraph = new dagre.graphlib.Graph();
-        dagreGraph.setDefaultEdgeLabel(() => ({}));
-        dagreGraph.setGraph({ rankdir: layoutDirection });
-
-        safeNodes.forEach((node: any) => dagreGraph.setNode(node.id, { width: 200, height: 80 }));
-        mappedEdges.forEach((edge: any) => dagreGraph.setEdge(edge.source, edge.target));
-        dagre.layout(dagreGraph);
-
-        const mappedNodes = safeNodes.map((node: any) => {
-            const autoPos = dagreGraph.node(node.id);
-            const hasManualPosition = node.position && typeof node.position.x === 'number';
-            return {
-                id: node.id,
-                type: 'hierarchyNode',
-                data: { label: node.name, variant: node.variant, style: node.style },
-                position: hasManualPosition ? node.position : { x: autoPos.x - 100, y: autoPos.y - 40 } 
-            };
-        });
-
-        setNodes(mappedNodes);
-        setEdges((currentEdges: any[]) => {
-            return mappedEdges.map(newEdge => {
-                const existing = currentEdges.find(e => e.id === newEdge.id);
-                return existing ? { ...newEdge, selected: existing.selected } : newEdge;
+                }
             });
-        });
-    }, [propNodes, layoutDirection, lineType, setNodes, setEdges]);
+
+            const dagreGraph = new dagre.graphlib.Graph();
+            dagreGraph.setDefaultEdgeLabel(() => ({}));
+            dagreGraph.setGraph({ rankdir: layoutDirection });
+
+            safeNodes.forEach((node: any) => dagreGraph.setNode(node.id, { width: 200, height: 80 }));
+            mappedEdges.forEach((edge: any) => dagreGraph.setEdge(edge.source, edge.target));
+            dagre.layout(dagreGraph);
+
+            const mappedNodes = safeNodes.map((node: any) => {
+                const autoPos = dagreGraph.node(node.id);
+                const hasManualPosition = node.position && typeof node.position.x === 'number';
+                return {
+                    id: node.id,
+                    type: 'hierarchyNode',
+                    data: { label: node.name, variant: node.variant, style: node.style },
+                    position: hasManualPosition ? node.position : { x: autoPos.x - 100, y: autoPos.y - 40 } 
+                };
+            });
+
+            setNodes(mappedNodes);
+            setEdges((currentEdges: any[]) => {
+                return mappedEdges.map(newEdge => {
+                    const existing = currentEdges.find(e => e.id === newEdge.id);
+                    return existing ? { ...newEdge, selected: existing.selected } : newEdge;
+                });
+            });
+        } catch (error: any) {
+            console.error("Error in HierarchyChart effect:", error);
+            if (props.componentEvents) {
+                props.componentEvents.fireComponentEvent('onCanvasError', { source: 'HierarchyChartEffect', message: error.message, stack: error.stack });
+            }
+        }
+    }, [propNodes, layoutDirection, lineType, setNodes, setEdges, props.componentEvents]);
 
     const onNodeDragStop = React.useCallback((event: React.MouseEvent, node: Node) => {
-        const safeNodes = extractDeep(props.props.nodes) || [];
-        const nodeIndex = safeNodes.findIndex((n: any) => String(n.id) === node.id);
-        if (nodeIndex !== -1 && props.store?.props) {
-            props.store.props.write(`nodes[${nodeIndex}].position`, { x: Math.round(node.position.x), y: Math.round(node.position.y) });
+        try {
+            const safeNodes = extractDeep(props.props.nodes) || [];
+            const nodeIndex = safeNodes.findIndex((n: any) => String(n.id) === node.id);
+            if (nodeIndex !== -1 && props.store?.props) {
+                props.store.props.write(`nodes[${nodeIndex}].position`, { x: Math.round(node.position.x), y: Math.round(node.position.y) });
+            }
+        } catch (error: any) {
+            console.error("Error in onNodeDragStop:", error);
+            if (props.componentEvents) {
+                props.componentEvents.fireComponentEvent('onCanvasError', { source: 'onNodeDragStop', message: error.message, stack: error.stack });
+            }
         }
-    }, [props.props.nodes, props.store]);
+    }, [props.props.nodes, props.store, props.componentEvents]);
 
     const onConnect = React.useCallback((params: Connection) => {
-        if (params.source === params.target) return; 
-        const safeNodes = extractDeep(props.props.nodes) || [];
-        const nextNodes = safeNodes.map((node: any) => {
-            if (String(node.id) === params.target) {
-                const currentParents = Array.isArray(node.parents) ? [...node.parents] : [];
-                return { ...node, parents: [...currentParents, { id: params.source, sourceHandle: params.sourceHandle || 'auto', targetHandle: params.targetHandle || 'auto' }] };
+        try {
+            if (params.source === params.target) return; 
+            const safeNodes = extractDeep(props.props.nodes) || [];
+            const nextNodes = safeNodes.map((node: any) => {
+                if (String(node.id) === params.target) {
+                    const currentParents = Array.isArray(node.parents) ? [...node.parents] : [];
+                    return { ...node, parents: [...currentParents, { id: params.source, sourceHandle: params.sourceHandle || 'auto', targetHandle: params.targetHandle || 'auto' }] };
+                }
+                return node;
+            });
+            if (props.store?.props) props.store.props.write('nodes', nextNodes);
+        } catch (error: any) {
+            console.error("Error in onConnect:", error);
+            if (props.componentEvents) {
+                props.componentEvents.fireComponentEvent('onCanvasError', { source: 'onConnect', message: error.message, stack: error.stack });
             }
-            return node;
-        });
-        if (props.store?.props) props.store.props.write('nodes', nextNodes); 
-    }, [props.props.nodes, props.store]);
+        }
+    }, [props.props.nodes, props.store, props.componentEvents]);
 
     const onEdgeUpdate = React.useCallback((oldEdge: Edge, newConnection: Connection) => {
-        if (newConnection.source === newConnection.target) return;
-        const safeNodes = extractDeep(props.props.nodes) || [];
-        const nextNodes = safeNodes.map((node: any) => {
-            let nextParents = Array.isArray(node.parents) ? [...node.parents] : [];
-            let changed = false;
-            if (String(node.id) === oldEdge.target) { nextParents = nextParents.filter((p: any) => p.id !== oldEdge.source); changed = true; }
-            if (String(node.id) === newConnection.target) { nextParents.push({ id: newConnection.source, sourceHandle: newConnection.sourceHandle || 'auto', targetHandle: newConnection.targetHandle || 'auto' }); changed = true; }
-            return changed ? { ...node, parents: nextParents } : node;
-        });
-        if (props.store?.props) props.store.props.write('nodes', nextNodes); 
-    }, [props.props.nodes, props.store]);
+        try {
+            if (newConnection.source === newConnection.target) return;
+            const safeNodes = extractDeep(props.props.nodes) || [];
+            const nextNodes = safeNodes.map((node: any) => {
+                let nextParents = Array.isArray(node.parents) ? [...node.parents] : [];
+                let changed = false;
+                if (String(node.id) === oldEdge.target) { nextParents = nextParents.filter((p: any) => p.id !== oldEdge.source); changed = true; }
+                if (String(node.id) === newConnection.target) { nextParents.push({ id: newConnection.source, sourceHandle: newConnection.sourceHandle || 'auto', targetHandle: newConnection.targetHandle || 'auto' }); changed = true; }
+                return changed ? { ...node, parents: nextParents } : node;
+            });
+            if (props.store?.props) props.store.props.write('nodes', nextNodes);
+        } catch (error: any) {
+            console.error("Error in onEdgeUpdate:", error);
+            if (props.componentEvents) {
+                props.componentEvents.fireComponentEvent('onCanvasError', { source: 'onEdgeUpdate', message: error.message, stack: error.stack });
+            }
+        }
+    }, [props.props.nodes, props.store, props.componentEvents]);
 
     const onEdgesDelete = React.useCallback((edgesToDelete: Edge[]) => {
-        const safeNodes = extractDeep(props.props.nodes) || [];
-        let hasChanges = false;
-        const nextNodes = safeNodes.map((node: any) => {
-            const edgesTargetingThisNode = edgesToDelete.filter(e => e.target === String(node.id));
-            if (edgesTargetingThisNode.length > 0 && Array.isArray(node.parents)) {
-                hasChanges = true;
-                const sourcesToRemove = edgesTargetingThisNode.map(e => e.source);
-                return { ...node, parents: node.parents.filter((p: any) => !sourcesToRemove.includes(p.id)) };
+        try {
+            const safeNodes = extractDeep(props.props.nodes) || [];
+            let hasChanges = false;
+            const nextNodes = safeNodes.map((node: any) => {
+                const edgesTargetingThisNode = edgesToDelete.filter(e => e.target === String(node.id));
+                if (edgesTargetingThisNode.length > 0 && Array.isArray(node.parents)) {
+                    hasChanges = true;
+                    const sourcesToRemove = edgesTargetingThisNode.map(e => e.source);
+                    return { ...node, parents: node.parents.filter((p: any) => !sourcesToRemove.includes(p.id)) };
+                }
+                return node;
+            });
+            if (hasChanges && props.store?.props) props.store.props.write('nodes', nextNodes);
+        } catch (error: any) {
+            console.error("Error in onEdgesDelete:", error);
+            if (props.componentEvents) {
+                props.componentEvents.fireComponentEvent('onCanvasError', { source: 'onEdgesDelete', message: error.message, stack: error.stack });
             }
-            return node;
-        });
-        if (hasChanges && props.store?.props) props.store.props.write('nodes', nextNodes); 
-    }, [props.props.nodes, props.store]);
+        }
+    }, [props.props.nodes, props.store, props.componentEvents]);
 
     const displayEdges = edges.map((edge: any) => ({
         ...edge,
@@ -203,11 +240,13 @@ export const HierarchyChart = observer((props: ComponentProps<HierarchyChartProp
     }));
 
     return (
-        <div {...props.emit()} style={{ width: '100%', height: '100%' }}>
-            <ReactFlow nodes={nodes} edges={displayEdges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onNodeDragStop={onNodeDragStop} onConnect={onConnect} onEdgeUpdate={onEdgeUpdate} onEdgesDelete={onEdgesDelete} connectionLineType={activeConnectionLineType} fitView nodesDraggable={true} nodesConnectable={true} >
-                <Background color="var(--neutral-40)" gap={16} />
-                <Controls />
-            </ReactFlow>
-        </div>
+        <ComponentErrorBoundary componentEvents={props.componentEvents}>
+            <div {...props.emit()} style={{ width: '100%', height: '100%' }}>
+                <ReactFlow nodes={nodes} edges={displayEdges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onNodeDragStop={onNodeDragStop} onConnect={onConnect} onEdgeUpdate={onEdgeUpdate} onEdgesDelete={onEdgesDelete} connectionLineType={activeConnectionLineType} fitView nodesDraggable={true} nodesConnectable={true} >
+                    <Background color="var(--neutral-40)" gap={16} />
+                    <Controls />
+                </ReactFlow>
+            </div>
+        </ComponentErrorBoundary>
     );
 });

@@ -9,7 +9,7 @@ interface State {
     hasError: boolean;
 }
 
-export class CanvasErrorBoundary extends React.Component<Props, State> {
+export class ComponentErrorBoundary extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = { hasError: false };
@@ -20,7 +20,7 @@ export class CanvasErrorBoundary extends React.Component<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        console.error("Canvas Error Boundary caught an error", error, errorInfo);
+        console.error("Component Error Boundary caught an error", error, errorInfo);
         if (this.props.componentEvents?.fireComponentEvent) {
             this.props.componentEvents.fireComponentEvent('onCanvasError', {
                 source: 'ErrorBoundary',
@@ -45,7 +45,7 @@ export class CanvasErrorBoundary extends React.Component<Props, State> {
                     padding: '20px',
                     textAlign: 'center'
                 }}>
-                    <h3>Canvas crashed. Please refresh.</h3>
+                    <h3>Component crashed. Please refresh.</h3>
                     <button 
                         onClick={() => this.setState({ hasError: false })}
                         style={{

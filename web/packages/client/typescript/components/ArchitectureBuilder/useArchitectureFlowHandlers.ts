@@ -116,13 +116,20 @@ export const useArchitectureFlowHandlers = ({
     // ─── Edge handlers ───────────────────────────────────────────────────────
 
     const handleWaypointsChange = React.useCallback((edgeId: string, waypoints: { x: number; y: number }[]) => {
-        if (!store?.props) return;
-        const nextEdges = { ...rawEdgesDict };
-        if (nextEdges[edgeId]) {
-            nextEdges[edgeId] = { ...nextEdges[edgeId], waypoints };
-            store.props.write('edges', nextEdges);
+        try {
+            if (!store?.props) return;
+            const nextEdges = { ...rawEdgesDict };
+            if (nextEdges[edgeId]) {
+                nextEdges[edgeId] = { ...nextEdges[edgeId], waypoints };
+                store.props.write('edges', nextEdges);
+            }
+        } catch (error: any) {
+            console.error("Error in handleWaypointsChange:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleWaypointsChange', message: error.message, stack: error.stack });
+            }
         }
-    }, [store, rawEdgesDict]);
+    }, [store, rawEdgesDict, componentEvents]);
 
     const onConnect = React.useCallback((connectionParams: any) => {
         try {
@@ -146,20 +153,27 @@ export const useArchitectureFlowHandlers = ({
     }, [store, rawEdgesDict, rawNodesDict, globalHandleCount, getValidIntersection, connectionTypes, globalDefaultConnectionType, componentEvents]);
 
     const onEdgeUpdate = React.useCallback((oldEdge: Edge, newConnection: Connection) => {
-        if (!newConnection.source || !newConnection.target) return;
-        const validTypes = getValidIntersection(newConnection.source, newConnection.target, oldEdge.id);
-        if (validTypes.length === 0) return;
-        if (store?.props) {
-            const nextEdges = { ...rawEdgesDict };
-            const oldData = nextEdges[oldEdge.id];
-            if (!validTypes.includes(oldData.connectionType)) return;
-            const src = getHandlePixelPos(newConnection.source, newConnection.sourceHandle || '', rawNodesDict, globalHandleCount);
-            const tgt = getHandlePixelPos(newConnection.target, newConnection.targetHandle || '', rawNodesDict, globalHandleCount);
-            const waypoints = src && tgt ? computeAutoWaypoints(src.x, src.y, src.position, tgt.x, tgt.y, tgt.position) : [];
-            nextEdges[oldEdge.id] = { ...oldData, source: newConnection.source, target: newConnection.target, sourceHandle: newConnection.sourceHandle, targetHandle: newConnection.targetHandle, waypoints };
-            store.props.write('edges', nextEdges);
+        try {
+            if (!newConnection.source || !newConnection.target) return;
+            const validTypes = getValidIntersection(newConnection.source, newConnection.target, oldEdge.id);
+            if (validTypes.length === 0) return;
+            if (store?.props) {
+                const nextEdges = { ...rawEdgesDict };
+                const oldData = nextEdges[oldEdge.id];
+                if (!validTypes.includes(oldData.connectionType)) return;
+                const src = getHandlePixelPos(newConnection.source, newConnection.sourceHandle || '', rawNodesDict, globalHandleCount);
+                const tgt = getHandlePixelPos(newConnection.target, newConnection.targetHandle || '', rawNodesDict, globalHandleCount);
+                const waypoints = src && tgt ? computeAutoWaypoints(src.x, src.y, src.position, tgt.x, tgt.y, tgt.position) : [];
+                nextEdges[oldEdge.id] = { ...oldData, source: newConnection.source, target: newConnection.target, sourceHandle: newConnection.sourceHandle, targetHandle: newConnection.targetHandle, waypoints };
+                store.props.write('edges', nextEdges);
+            }
+        } catch (error: any) {
+            console.error("Error in onEdgeUpdate:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'onEdgeUpdate', message: error.message, stack: error.stack });
+            }
         }
-    }, [store, rawEdgesDict, rawNodesDict, globalHandleCount, getValidIntersection]);
+    }, [store, rawEdgesDict, rawNodesDict, globalHandleCount, getValidIntersection, componentEvents]);
 
     const onEdgeUpdateStart = React.useCallback((event: any, edge: any) => {
         updatingEdgeRef.current = edge?.id || null;
@@ -175,11 +189,18 @@ export const useArchitectureFlowHandlers = ({
     const onConnectEnd = React.useCallback(() => setIsConnecting(false), []);
 
     const onEdgesDelete = React.useCallback((deleted: Edge[]) => {
-        if (!store?.props) return;
-        const nextEdges = { ...rawEdgesDict };
-        deleted.forEach(e => { delete nextEdges[e.id]; if (e.id === selectedId) setSelectedId(null); });
-        store.props.write('edges', nextEdges);
-    }, [store, rawEdgesDict, selectedId, setSelectedId]);
+        try {
+            if (!store?.props) return;
+            const nextEdges = { ...rawEdgesDict };
+            deleted.forEach(e => { delete nextEdges[e.id]; if (e.id === selectedId) setSelectedId(null); });
+            store.props.write('edges', nextEdges);
+        } catch (error: any) {
+            console.error("Error in onEdgesDelete:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'onEdgesDelete', message: error.message, stack: error.stack });
+            }
+        }
+    }, [store, rawEdgesDict, selectedId, setSelectedId, componentEvents]);
 
     const onEdgeContextMenu = React.useCallback((event: any, edge: any) => {
         event.preventDefault();
@@ -198,41 +219,62 @@ export const useArchitectureFlowHandlers = ({
     }, [componentEvents, rawEdgesDict, setSelectedId]);
 
     const handleLineTypeChange = React.useCallback((newLineType: string) => {
-        if (!contextMenu || contextMenu.type !== 'edge') return;
-        if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `lineType:${newLineType}` });
-        if (store?.props) {
-            const nextEdges = { ...rawEdgesDict };
-            if (nextEdges[contextMenu.id]) { nextEdges[contextMenu.id].lineType = newLineType; store.props.write('edges', nextEdges); }
+        try {
+            if (!contextMenu || contextMenu.type !== 'edge') return;
+            if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `lineType:${newLineType}` });
+            if (store?.props) {
+                const nextEdges = { ...rawEdgesDict };
+                if (nextEdges[contextMenu.id]) { nextEdges[contextMenu.id].lineType = newLineType; store.props.write('edges', nextEdges); }
+            }
+            closeContextMenu();
+        } catch (error: any) {
+            console.error("Error in handleLineTypeChange:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleLineTypeChange', message: error.message, stack: error.stack });
+            }
         }
-        closeContextMenu();
     }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
 
     const handleConnectionTypeChange = React.useCallback((newConnectionType: string) => {
-        if (!contextMenu || contextMenu.type !== 'edge') return;
-        if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `connectionType:${newConnectionType}` });
-        if (store?.props) {
-            const nextEdges = { ...rawEdgesDict };
-            if (nextEdges[contextMenu.id]) {
-                const typeDef = connectionTypes[newConnectionType] || {};
-                nextEdges[contextMenu.id].connectionType = newConnectionType;
-                nextEdges[contextMenu.id].arrow = typeDef.arrow !== false;
-                store.props.write('edges', nextEdges);
+        try {
+            if (!contextMenu || contextMenu.type !== 'edge') return;
+            if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `connectionType:${newConnectionType}` });
+            if (store?.props) {
+                const nextEdges = { ...rawEdgesDict };
+                if (nextEdges[contextMenu.id]) {
+                    const typeDef = connectionTypes[newConnectionType] || {};
+                    nextEdges[contextMenu.id].connectionType = newConnectionType;
+                    nextEdges[contextMenu.id].arrow = typeDef.arrow !== false;
+                    store.props.write('edges', nextEdges);
+                }
+            }
+            closeContextMenu();
+        } catch (error: any) {
+            console.error("Error in handleConnectionTypeChange:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleConnectionTypeChange', message: error.message, stack: error.stack });
             }
         }
-        closeContextMenu();
     }, [contextMenu, componentEvents, rawEdgesDict, connectionTypes, store, closeContextMenu]);
 
     const handleAnimationChange = React.useCallback((newAnimation: string) => {
-        if (!contextMenu || contextMenu.type !== 'edge') return;
-        if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `animation:${newAnimation}` });
-        if (store?.props) {
-            const nextEdges = { ...rawEdgesDict };
-            if (nextEdges[contextMenu.id]) {
-                nextEdges[contextMenu.id].animation = newAnimation;
-                store.props.write('edges', nextEdges);
+        try {
+            if (!contextMenu || contextMenu.type !== 'edge') return;
+            if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `animation:${newAnimation}` });
+            if (store?.props) {
+                const nextEdges = { ...rawEdgesDict };
+                if (nextEdges[contextMenu.id]) {
+                    nextEdges[contextMenu.id].animation = newAnimation;
+                    store.props.write('edges', nextEdges);
+                }
+            }
+            closeContextMenu();
+        } catch (error: any) {
+            console.error("Error in handleAnimationChange:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleAnimationChange', message: error.message, stack: error.stack });
             }
         }
-        closeContextMenu();
     }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
 
     // ─── Node handlers ───────────────────────────────────────────────────────
@@ -252,27 +294,41 @@ export const useArchitectureFlowHandlers = ({
     }, [componentEvents]);
 
     const handleResizeEnd = React.useCallback((id: string, x: number, y: number, width: number, height: number) => {
-        if (store?.props) {
-            const nextNodes = { ...rawNodesDict };
-            if (nextNodes[id]) {
-                nextNodes[id].x = Math.round(x);
-                nextNodes[id].y = Math.round(y);
-                nextNodes[id].width = Math.round(width);
-                nextNodes[id].height = Math.round(height);
-                store.props.write('nodes', nextNodes);
+        try {
+            if (store?.props) {
+                const nextNodes = { ...rawNodesDict };
+                if (nextNodes[id]) {
+                    nextNodes[id].x = Math.round(x);
+                    nextNodes[id].y = Math.round(y);
+                    nextNodes[id].width = Math.round(width);
+                    nextNodes[id].height = Math.round(height);
+                    store.props.write('nodes', nextNodes);
+                }
+            }
+        } catch (error: any) {
+            console.error("Error in handleResizeEnd:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleResizeEnd', message: error.message, stack: error.stack });
             }
         }
-    }, [store, rawNodesDict]);
+    }, [store, rawNodesDict, componentEvents]);
 
     const handleTextChange = React.useCallback((id: string, text: string) => {
-        if (store?.props) {
-            const nextNodes = { ...rawNodesDict };
-            if (nextNodes[id]) {
-                nextNodes[id] = { ...nextNodes[id], text };
-                store.props.write('nodes', nextNodes);
+        try {
+            if (store?.props) {
+                const nextNodes = { ...rawNodesDict };
+                if (nextNodes[id]) {
+                    nextNodes[id] = { ...nextNodes[id], text };
+                    store.props.write('nodes', nextNodes);
+                }
+            }
+        } catch (error: any) {
+            console.error("Error in handleTextChange:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleTextChange', message: error.message, stack: error.stack });
             }
         }
-    }, [store, rawNodesDict]);
+    }, [store, rawNodesDict, componentEvents]);
 
     const onNodesChange = React.useCallback((changes: NodeChange[]) => {
         setLocalNodes((nds) => applyNodeChanges(changes, nds));
@@ -376,20 +432,27 @@ export const useArchitectureFlowHandlers = ({
     }, [store, rawNodesDict, rawEdgesDict, componentEvents]);
 
     const onNodesDelete = React.useCallback((deleted: any[]) => {
-        if (!store?.props) return;
-        const nextNodes = { ...rawNodesDict };
-        const nextEdges = { ...rawEdgesDict };
-        let edgesChanged = false;
-        deleted.forEach(n => {
-            delete nextNodes[n.id];
-            if (n.id === selectedId) setSelectedId(null);
-            Object.keys(nextEdges).forEach(edgeId => {
-                if (nextEdges[edgeId].source === n.id || nextEdges[edgeId].target === n.id) { delete nextEdges[edgeId]; edgesChanged = true; }
+        try {
+            if (!store?.props) return;
+            const nextNodes = { ...rawNodesDict };
+            const nextEdges = { ...rawEdgesDict };
+            let edgesChanged = false;
+            deleted.forEach(n => {
+                delete nextNodes[n.id];
+                if (n.id === selectedId) setSelectedId(null);
+                Object.keys(nextEdges).forEach(edgeId => {
+                    if (nextEdges[edgeId].source === n.id || nextEdges[edgeId].target === n.id) { delete nextEdges[edgeId]; edgesChanged = true; }
+                });
             });
-        });
-        store.props.write('nodes', nextNodes);
-        if (edgesChanged) store.props.write('edges', nextEdges);
-    }, [store, rawNodesDict, rawEdgesDict, selectedId, setSelectedId]);
+            store.props.write('nodes', nextNodes);
+            if (edgesChanged) store.props.write('edges', nextEdges);
+        } catch (error: any) {
+            console.error("Error in onNodesDelete:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'onNodesDelete', message: error.message, stack: error.stack });
+            }
+        }
+    }, [store, rawNodesDict, rawEdgesDict, selectedId, setSelectedId, componentEvents]);
 
     const onNodeContextMenu = React.useCallback((event: any, node: any) => {
         event.preventDefault();
@@ -530,7 +593,10 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
     const onPaneClick = React.useCallback(() => {
         setSelectedId(null);
         closeContextMenu();
-    }, [setSelectedId, closeContextMenu]);
+        if (componentEvents) {
+            componentEvents.fireComponentEvent('onPaneClick', { type: 'pane' });
+        }
+    }, [setSelectedId, closeContextMenu, componentEvents]);
 
     const onPaneContextMenu = React.useCallback((event: any) => {
         event.preventDefault();
@@ -544,33 +610,40 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
     // ─── Context menu actions ─────────────────────────────────────────────────
 
     const handleNodeSwap = React.useCallback((newId: string) => {
-        if (!contextMenu || contextMenu.type !== 'node') return;
-        const newItem = paletteItems.find((p: any) => p.id === newId);
-        if (!newItem) return;
-        if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawNodesDict[contextMenu.id]?.paletteId, type: contextMenu.type, action: `swapNode:${newId}` });
-        if (store?.props) {
-            const nextNodes = { ...rawNodesDict };
-            const existingNode = nextNodes[contextMenu.id];
-            const { image: _img, ...existingNodeWithoutImage } = existingNode;
-            nextNodes[contextMenu.id] = { ...existingNodeWithoutImage, paletteId: newItem.id, typeId: newItem.typeId, label: newItem.label, tooltip: newItem.tooltip, supportedConnections: newItem.supportedConnections || [] };
-            const nextEdges = { ...rawEdgesDict };
-            let edgesChanged = false;
-            Object.keys(nextEdges).forEach(edgeId => {
-                const e = nextEdges[edgeId];
-                if (e.source === contextMenu.id || e.target === contextMenu.id) {
-                    const otherNodeId = e.source === contextMenu.id ? e.target : e.source;
-                    const otherNode = nextNodes[otherNodeId];
-                    if (otherNode) {
-                        const newSupported = newItem.supportedConnections || [];
-                        const otherSupported = otherNode.supportedConnections || [];
-                        if (!newSupported.includes(e.connectionType) || !otherSupported.includes(e.connectionType)) { delete nextEdges[edgeId]; edgesChanged = true; }
+        try {
+            if (!contextMenu || contextMenu.type !== 'node') return;
+            const newItem = paletteItems.find((p: any) => p.id === newId);
+            if (!newItem) return;
+            if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawNodesDict[contextMenu.id]?.paletteId, type: contextMenu.type, action: `swapNode:${newId}` });
+            if (store?.props) {
+                const nextNodes = { ...rawNodesDict };
+                const existingNode = nextNodes[contextMenu.id];
+                const { image: _img, ...existingNodeWithoutImage } = existingNode;
+                nextNodes[contextMenu.id] = { ...existingNodeWithoutImage, paletteId: newItem.id, typeId: newItem.typeId, label: newItem.label, tooltip: newItem.tooltip, supportedConnections: newItem.supportedConnections || [] };
+                const nextEdges = { ...rawEdgesDict };
+                let edgesChanged = false;
+                Object.keys(nextEdges).forEach(edgeId => {
+                    const e = nextEdges[edgeId];
+                    if (e.source === contextMenu.id || e.target === contextMenu.id) {
+                        const otherNodeId = e.source === contextMenu.id ? e.target : e.source;
+                        const otherNode = nextNodes[otherNodeId];
+                        if (otherNode) {
+                            const newSupported = newItem.supportedConnections || [];
+                            const otherSupported = otherNode.supportedConnections || [];
+                            if (!newSupported.includes(e.connectionType) || !otherSupported.includes(e.connectionType)) { delete nextEdges[edgeId]; edgesChanged = true; }
+                        }
                     }
-                }
-            });
-            store.props.write('nodes', nextNodes);
-            if (edgesChanged) store.props.write('edges', nextEdges);
+                });
+                store.props.write('nodes', nextNodes);
+                if (edgesChanged) store.props.write('edges', nextEdges);
+            }
+            closeContextMenu();
+        } catch (error: any) {
+            console.error("Error in handleNodeSwap:", error);
+            if (componentEvents) {
+                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleNodeSwap', message: error.message, stack: error.stack });
+            }
         }
-        closeContextMenu();
     }, [contextMenu, paletteItems, componentEvents, rawNodesDict, rawEdgesDict, store, closeContextMenu]);
 
     const handleContextMenuAction = React.useCallback((action: string) => {

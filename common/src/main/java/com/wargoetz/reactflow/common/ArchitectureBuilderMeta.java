@@ -6,6 +6,8 @@ import com.inductiveautomation.perspective.common.api.ComponentDescriptor;
 import com.inductiveautomation.perspective.common.api.ComponentDescriptorImpl;
 import com.inductiveautomation.perspective.common.api.ComponentEventDescriptor;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 public class ArchitectureBuilderMeta {
@@ -31,6 +33,14 @@ public class ArchitectureBuilderMeta {
         BrowserResource.ResourceType.CSS
     );
 
+    public static final JsonSchema NODE_EVENT_SCHEMA = JsonSchema.parse(new ByteArrayInputStream("{ \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"string\" }, \"paletteId\": { \"type\": \"string\" }, \"typeId\": { \"type\": \"string\" }, \"type\": { \"type\": \"string\" } } }".getBytes(StandardCharsets.UTF_8)));
+    public static final JsonSchema EDGE_EVENT_SCHEMA = JsonSchema.parse(new ByteArrayInputStream("{ \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"string\" }, \"paletteId\": { \"type\": \"string\" }, \"type\": { \"type\": \"string\" } } }".getBytes(StandardCharsets.UTF_8)));
+    public static final JsonSchema GEAR_EVENT_SCHEMA = JsonSchema.parse(new ByteArrayInputStream("{ \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"string\" }, \"paletteId\": { \"type\": \"string\" }, \"typeId\": { \"type\": \"string\" }, \"type\": { \"type\": \"string\" }, \"action\": { \"type\": \"string\" } } }".getBytes(StandardCharsets.UTF_8)));
+    public static final JsonSchema CONTEXT_MENU_EVENT_SCHEMA = JsonSchema.parse(new ByteArrayInputStream("{ \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"string\" }, \"paletteId\": { \"type\": \"string\" }, \"type\": { \"type\": \"string\" }, \"action\": { \"type\": \"string\" } } }".getBytes(StandardCharsets.UTF_8)));
+    public static final JsonSchema ERROR_EVENT_SCHEMA = JsonSchema.parse(new ByteArrayInputStream("{ \"type\": \"object\", \"properties\": { \"source\": { \"type\": \"string\" }, \"message\": { \"type\": \"string\" }, \"stack\": { \"type\": \"string\" } } }".getBytes(StandardCharsets.UTF_8)));
+    public static final JsonSchema PANE_EVENT_SCHEMA = JsonSchema.parse(new ByteArrayInputStream("{ \"type\": \"object\", \"properties\": { \"type\": { \"type\": \"string\" } } }".getBytes(StandardCharsets.UTF_8)));
+    public static final JsonSchema PALETTE_ITEM_EVENT_SCHEMA = JsonSchema.parse(new ByteArrayInputStream("{ \"type\": \"object\", \"properties\": { \"id\": { \"type\": \"string\" }, \"typeId\": { \"type\": \"string\" }, \"label\": { \"type\": \"string\" }, \"category\": { \"type\": \"string\" }, \"tooltip\": { \"type\": \"string\" } } }".getBytes(StandardCharsets.UTF_8)));
+
     public static final ComponentDescriptor DESCRIPTOR = ComponentDescriptorImpl.ComponentBuilder.newBuilder()
         .setId(COMPONENT_ID)
         .setModuleId(MODULE_ID)
@@ -40,13 +50,14 @@ public class ArchitectureBuilderMeta {
         .setDefaultMetaName("ArchitectureBuilder")
         .setResources(Set.of(JS_RESOURCE, DESIGNER_JS_RESOURCE, CSS_RESOURCE)) 
         .setEvents(Set.of(
-                new ComponentEventDescriptor("onNodeClick", "Fired when a node is clicked.", null),
-                new ComponentEventDescriptor("onEdgeClick", "Fired when an edge is clicked.", null),
-                new ComponentEventDescriptor("onGearClick", "Fired when the gear icon is clicked.", null),
-                new ComponentEventDescriptor("onContextMenuAction", "Fired when a context menu option is selected.", null),
-                new ComponentEventDescriptor("onPaletteItemClick", "Fired when a palette item is clicked in the sidebar.", null),
-                new ComponentEventDescriptor("onCanvasError", "Fired when a canvas rendering or interaction error occurs.", null)
-            ))                                                              // <-- ADD THIS
+                new ComponentEventDescriptor("onNodeClick", "Fired when a node is clicked.", NODE_EVENT_SCHEMA),
+                new ComponentEventDescriptor("onEdgeClick", "Fired when an edge is clicked.", EDGE_EVENT_SCHEMA),
+                new ComponentEventDescriptor("onGearClick", "Fired when the gear icon is clicked.", GEAR_EVENT_SCHEMA),
+                new ComponentEventDescriptor("onContextMenuAction", "Fired when a context menu option is selected.", CONTEXT_MENU_EVENT_SCHEMA),
+                new ComponentEventDescriptor("onPaletteItemClick", "Fired when a palette item is clicked in the sidebar.", PALETTE_ITEM_EVENT_SCHEMA),
+                new ComponentEventDescriptor("onCanvasError", "Fired when a canvas rendering or interaction error occurs.", ERROR_EVENT_SCHEMA),
+                new ComponentEventDescriptor("onPaneClick", "Fired when the canvas background is clicked.", PANE_EVENT_SCHEMA)
+            ))
         .setSchema(JsonSchema.parse(ArchitectureBuilderMeta.class.getResourceAsStream("/architecturebuilder.props.json")))
         .build();
 }
