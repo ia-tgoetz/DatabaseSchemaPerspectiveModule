@@ -26,6 +26,15 @@ export const CustomEdge = ({
     const storedWaypoints: Waypoint[] = data?.waypoints ?? [];
     const showLabel = data?.showLabel === true;
     const { getZoom } = useReactFlow();
+    const zoom = getZoom();
+
+    // Calculate dynamic interaction width (selection/drag zone)
+    const dynamicInteractionWidth = Math.max(20, Math.round(24 / zoom));
+
+    // Calculate dynamic segment handle dimensions (colored pills)
+    // Base: 36x14 physical pixels.
+    const hWidth = Math.max(24, Math.round(36 / zoom));
+    const hHeight = Math.max(10, Math.round(14 / zoom));
 
     // null = at rest (derive from props); non-null = user is actively dragging.
     // No useEffect or useMemo sync — the component reads from storedWaypoints (props) directly.
@@ -167,7 +176,7 @@ export const CustomEdge = ({
                 path={edgePath}
                 markerEnd={markerEnd}
                 style={{ ...style, fill: 'none' }}
-                interactionWidth={interactionWidth}
+                interactionWidth={dynamicInteractionWidth}
             />
 
             {/* 2. Animation Layers (Overlays) */}
@@ -260,9 +269,9 @@ export const CustomEdge = ({
                                 style={{
                                     position: 'absolute',
                                     transform: `translate(-50%, -50%) translate(${mx}px, ${my}px)`,
-                                    width: isH ? '36px' : '14px',
-                                    height: isH ? '14px' : '36px',
-                                    borderRadius: '7px',
+                                    width: isH ? `${hWidth}px` : `${hHeight}px`,
+                                    height: isH ? `${hHeight}px` : `${hWidth}px`,
+                                    borderRadius: `${hHeight / 2}px`,
                                     backgroundColor: 'var(--callToAction)',
                                     opacity: 0.85,
                                     cursor: isH ? 'ns-resize' : 'ew-resize',

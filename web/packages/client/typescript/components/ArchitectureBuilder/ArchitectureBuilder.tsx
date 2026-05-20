@@ -567,8 +567,8 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                 @keyframes arch-flow-forward { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
                 @keyframes arch-flow-reverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 100; } }
                 
-                /* Base handle is a transparent anchor — React Flow's translate(-50%,-50%) is never overwritten */
-                .arch-node-handle { background: transparent !important; border-color: transparent !important; }
+                /* Base handle is a transparent anchor — React Flow's translate(-50%,-50%) is forced via !important */
+                .arch-node-handle { background: transparent !important; border-color: transparent !important; transform: translate(-50%, -50%) !important; }
                 /* ::after renders the visible dot and owns all visual transitions */
                 .arch-node-handle::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; border-radius: 50%; background: var(--neutral-90); border: 1px solid var(--neutral-90); pointer-events: none; transition: transform 0.15s ease-in-out, background 0.15s ease-in-out, border-color 0.15s ease-in-out; }
                 /* Hover: scale ::after from its own center — base anchor is untouched */

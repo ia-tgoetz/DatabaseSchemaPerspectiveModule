@@ -1,6 +1,6 @@
 import React from 'react';
 // @ts-ignore
-import { NodeProps, NodeResizer } from 'reactflow';
+import { NodeProps, NodeResizer, useViewport } from 'reactflow';
 
 export interface ContainerNodeData {
     label: string;
@@ -12,7 +12,7 @@ export interface ContainerNodeData {
 }
 
 export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeData>) => {
-    
+    const { zoom } = useViewport();
     const finalLabelBg = data.labelStyle?.backgroundColor || 'var(--neutral-30)';
     const finalLabelColor = data.labelStyle?.color || 'var(--neutral-90)';
     const finalGearColor = data.labelStyle?.fill || finalLabelColor; 
@@ -30,15 +30,18 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
         outlineOffset: '2px'
     };
 
+    // Calculate dynamic resizer handle size based on zoom.
+    // Base size is 16px (physical). Caps at 10px min.
+    const resizerSize = Math.max(10, Math.round(16 / zoom));
+
     return (
         <>
-<NodeResizer 
+            <NodeResizer 
                 color="var(--callToAction)" 
                 isVisible={selected && data.isEditable !== false}
                 minWidth={150} 
                 minHeight={150}
-                // <-- FIXED: Enlarge Area grab-boxes to 16px! -->
-                handleStyle={{ width: '16px', height: '16px', borderRadius: '4px' }} 
+                handleStyle={{ width: `${resizerSize}px`, height: `${resizerSize}px`, borderRadius: '4px' }} 
                 onResizeEnd={(e, params) => {
                     if (data.onResizeEnd) data.onResizeEnd(id, params.x, params.y, params.width, params.height);
                 }}
