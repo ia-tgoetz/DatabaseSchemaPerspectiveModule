@@ -2,7 +2,7 @@
   "pages": {
     "/": {
       "title": "",
-      "viewPath": "ArchBuilder/Main"
+      "viewPath": "Main"
     },
     "/arc": {
       "title": "",

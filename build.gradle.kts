@@ -24,7 +24,7 @@ if (signPropsFile.exists()) {
 }
 
 allprojects {
-    version = "1.0.6" // Fixed Edge Loss during area copy
+    version = "1.0.7" // Fixed Edge Loss during area copy
     group = "com.wargoetz.reactflow" // <-- UPDATED
 }
 

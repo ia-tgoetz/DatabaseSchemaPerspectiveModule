@@ -22,10 +22,21 @@ export class ComponentErrorBoundary extends React.Component<Props, State> {
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
         console.error("Component Error Boundary caught an error", error, errorInfo);
         if (this.props.componentEvents?.fireComponentEvent) {
+            let message = 'Unknown error';
+            let stack = '';
+            if (error instanceof Error) {
+                message = error.message;
+                stack = error.stack || '';
+            } else if (typeof error === 'string') {
+                message = error;
+            } else {
+                message = JSON.stringify(error) || 'Unknown error';
+            }
+
             this.props.componentEvents.fireComponentEvent('onCanvasError', {
                 source: 'ErrorBoundary',
-                message: error.message,
-                stack: error.stack
+                message,
+                stack
             });
         }
     }

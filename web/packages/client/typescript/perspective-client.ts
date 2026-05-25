@@ -96,7 +96,7 @@ export class ArchitectureBuilderMeta implements ComponentMeta {
             edgeWidth: tree.read('edgeWidth', 6),
             hideHandles: tree.read('hideHandles', false),
             handleCount: tree.read('handleCount', 5),
-            defaultConnectionType: tree.read('defaultConnectionType', ''),
+            refreshHierarchy: tree.read('refreshHierarchy', false),
             style: tree.read('style')
         };
     }

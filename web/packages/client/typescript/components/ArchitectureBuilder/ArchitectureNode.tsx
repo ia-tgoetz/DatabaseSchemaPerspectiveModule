@@ -25,11 +25,7 @@ export interface ArchitectureNodeData {
 const TEXT_PALETTE_IDS = new Set(['Note', 'Label']);
 
 const NodeImage = ({ src }: { src: string }) => {
-    // Stable per-instance ID — useMemo with [] never re-runs, unlike useRef(fn()) which
-    // evaluates fn() on every render (only the first result is kept, but the counter still
-    // increments wastefully on each call).
     const scopeId = React.useMemo(() => nextSvgScopeId(), []);
-    // Memoize DOMPurify work so it only runs when src changes, not on every re-render.
     const svgHtml = React.useMemo(() => extractSvgMarkup(src, scopeId), [src, scopeId]);
     if (svgHtml) {
         return (
@@ -77,26 +73,14 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
         boxShadow: selected ? '0 0 0 2px rgba(0, 123, 255, 0.25)' : (restStyle.boxShadow || '0 2px 4px rgba(0,0,0,0.1)')
     };
 
-    // Calculate border width to offset handles to the very outer edge.
-    // Absolute positioning top:0 is the inner edge of the border-box (the padding edge).
-    const bWidthRaw = restStyle.borderWidth || restStyle.border?.split(' ')[0] || '1px';
-    const bWidth = parseInt(String(bWidthRaw)) || 1;
-
-    // Calculate dynamic hit size for handles based on zoom.
-    // Base size is 20px (physical). Caps at 12px min to avoid being too small at high zoom.
     const hitSize = Math.max(12, Math.round(20 / zoom));
 
     const handleStyle: React.CSSProperties = {
-        background: 'transparent', // The ::after dot provides the visual
+        background: 'transparent',
         width: `${hitSize}px`,
         height: `${hitSize}px`,
-        minWidth: `${hitSize}px`,
-        minHeight: `${hitSize}px`,
         opacity: showHandles ? 1 : 0,
-        pointerEvents: showHandles ? 'auto' : 'none',
-        border: 'none',
-        transition: 'opacity 0.15s ease-in-out',
-        transform: 'translate(-50%, -50%)' // Ensure it's always centered on its coordinate
+        pointerEvents: showHandles ? 'auto' : 'none'
     };
     
     const handleCount = Math.max(1, Math.min(8, Number(data.handleCount) || 5));
@@ -106,11 +90,10 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
 
     return (
         <div style={combinedStyle} title={data.tooltip}>
-            {/* All handles are type="source"; ConnectionMode.Loose in the parent allows source-to-source connections */}
-            {positions.map((pos, i) => <Handle className={handleClass(`top-${i}`)} key={`top-${i}`} type="source" position={Position.Top} id={`top-${i}`} style={{ ...handleStyle, left: pos, top: `${-bWidth}px` }} />)}
-            {positions.map((pos, i) => <Handle className={handleClass(`right-${i}`)} key={`right-${i}`} type="source" position={Position.Right} id={`right-${i}`} style={{ ...handleStyle, top: pos, left: `calc(100% + ${bWidth}px)` }} />)}
-            {positions.map((pos, i) => <Handle className={handleClass(`bottom-${i}`)} key={`bottom-${i}`} type="source" position={Position.Bottom} id={`bottom-${i}`} style={{ ...handleStyle, left: pos, top: `calc(100% + ${bWidth}px)` }} />)}
-            {positions.map((pos, i) => <Handle className={handleClass(`left-${i}`)} key={`left-${i}`} type="source" position={Position.Left} id={`left-${i}`} style={{ ...handleStyle, top: pos, left: `${-bWidth}px` }} />)}
+            {positions.map((pos, i) => <Handle className={handleClass(`top-${i}`)} key={`top-${i}`} type="source" position={Position.Top} id={`top-${i}`} style={{ ...handleStyle, left: pos, top: '0px', transform: 'translate(-50%, -50%)' }} />)}
+            {positions.map((pos, i) => <Handle className={handleClass(`right-${i}`)} key={`right-${i}`} type="source" position={Position.Right} id={`right-${i}`} style={{ ...handleStyle, top: pos, left: '100%', transform: 'translate(-50%, -50%)' }} />)}
+            {positions.map((pos, i) => <Handle className={handleClass(`bottom-${i}`)} key={`bottom-${i}`} type="source" position={Position.Bottom} id={`bottom-${i}`} style={{ ...handleStyle, left: pos, top: '100%', transform: 'translate(-50%, -50%)' }} />)}
+            {positions.map((pos, i) => <Handle className={handleClass(`left-${i}`)} key={`left-${i}`} type="source" position={Position.Left} id={`left-${i}`} style={{ ...handleStyle, top: pos, left: '0px', transform: 'translate(-50%, -50%)' }} />)}
 
             <div
                 style={{

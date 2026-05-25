@@ -306,8 +306,9 @@ const computeHierarchyData = (nodesDict: any, edgesDict: any) => {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export interface ArchitectureBuilderProps {
-    enabled?: any; enableOnClickEvents?: any; hideHandles?: any; handleCount?: any; defaultConnectionType?: string;
-    snapEnabled?: any; snapPixels?: any; edgeWidth?: any; style?: any; connectionTypes: any; paletteItems: any[];
+    enabled?: any; enableOnClickEvents?: any; hideHandles?: any; handleCount?: any; 
+    refreshHierarchy?: boolean; snapEnabled?: any; snapPixels?: any; edgeWidth?: any; 
+    style?: any; connectionTypes: any; paletteItems: any[];
     nodes: any; edges: any; hierarchy?: any;
 }
 
@@ -370,7 +371,6 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         snapPixels:            extractDeep(props.props.snapPixels),
         hideHandles:           extractDeep(props.props.hideHandles),
         handleCount:           extractDeep(props.props.handleCount),
-        defaultConnectionType: extractDeep(props.props.defaultConnectionType),
         enabled:               extractDeep(props.props.enabled),
         enableOnClickEvents:   extractDeep(props.props.enableOnClickEvents),
     });
@@ -383,7 +383,6 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
 
     const globalHideHandles = rawConfig.hideHandles === true || String(rawConfig.hideHandles ?? '').toLowerCase() === 'true';
     const globalHandleCount = Number(rawConfig.handleCount) || 5;
-    const globalDefaultConnectionType = rawConfig.defaultConnectionType || '';
     const isEnabled = rawConfig.enabled !== false && String(rawConfig.enabled ?? 'true').toLowerCase() !== 'false';
     const enableOnClickEvents = rawConfig.enableOnClickEvents !== false && String(rawConfig.enableOnClickEvents ?? 'true').toLowerCase() !== 'false';
     const snapEnabled = rawConfig.snapEnabled !== false && String(rawConfig.snapEnabled ?? 'true').toLowerCase() !== 'false';
@@ -393,23 +392,30 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
 
     // ─── Hierarchy sync ────────────────────────────────────────────────────
 
-    // hierarchyWriteRef prevents infinite loops: writing enriched nodes back causes rawNodesDict
-    // to re-trigger this effect, but the serialized output is identical so the write is skipped.
     React.useEffect(() => {
-        if (!props.store?.props) return;
+        if (!props.store?.props || !rawNodesDict || !rawEdgesDict) return;
+
         const { nodeEnrichments, rootHierarchy } = computeHierarchyData(rawNodesDict, rawEdgesDict);
-        const serialized = JSON.stringify({ rootHierarchy, nodeEnrichments });
-        if (serialized === hierarchyWriteRef.current) return;
-        hierarchyWriteRef.current = serialized;
+        
+        // Always sync hierarchy
         props.store.props.write('hierarchy', rootHierarchy);
+
+        // Always update node enrichment
         const enrichedNodes: any = {};
         Object.keys(rawNodesDict).forEach(id => {
             if (!rawNodesDict[id]) return;
             const { image: _image, ...nodeWithoutImage } = rawNodesDict[id];
             enrichedNodes[id] = { ...nodeWithoutImage, ...nodeEnrichments[id] };
         });
-        props.store.props.write('nodes', enrichedNodes);
-    }, [rawNodesDict, rawEdgesDict, props.store]);
+        
+        // Only write back if it's different to prevent infinite cycles
+        const serialized = JSON.stringify(enrichedNodes);
+        if (serialized !== hierarchyWriteRef.current) {
+            hierarchyWriteRef.current = serialized;
+            props.store.props.write('nodes', enrichedNodes);
+        }
+        props.store.props.write('refreshHierarchy', false);
+    }, [props.props.refreshHierarchy, props.store]);
 
     // ─── Handlers hook ─────────────────────────────────────────────────────
 
@@ -435,7 +441,6 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         rawEdgesDict,
         connectionTypes,
         globalHandleCount,
-        globalDefaultConnectionType,
         paletteItems,
         snapEnabled,
         snapPixels,
@@ -539,8 +544,9 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     }
 
     const flyoutStyle: React.CSSProperties = (reactFlowWrapper.current && contextMenu && contextMenu.left + 310 > reactFlowWrapper.current.clientWidth)
-        ? { position: 'absolute', top: '-4px', right: '100%', marginRight: '4px' }
-        : { position: 'absolute', top: '-4px', left: '100%', marginLeft: '4px' };
+
+        ? { position: 'absolute', top: '-0px', right: '100%', marginRight: '0px' } 
+        : { position: 'absolute', top: '-0px', left: '100%', marginLeft: '0px' }; 
 
     const { classes, ...ignitionStyles } = props.props.style || {};
     const containerStyle: React.CSSProperties = { display: 'flex', width: '100%', height: '100%', backgroundColor: 'var(--neutral-00)', ...ignitionStyles };
@@ -605,12 +611,12 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                 onConnectEnd={isEnabled ? onConnectEnd : undefined}
                                 onNodeDragStart={isEnabled ? onNodeDragStart : undefined} onNodeDrag={isEnabled ? onNodeDrag : undefined} onNodeDragStop={isEnabled ? onNodeDragStop : undefined}
                                 onNodesChange={onNodesChange}
-                                onNodeClick={enableOnClickEvents ? onNodeClick : undefined} onEdgeClick={enableOnClickEvents ? onEdgeClick : undefined}
+                                onNodeClick={onNodeClick} onEdgeClick={onEdgeClick}
                                 onNodesDelete={isEnabled ? onNodesDelete : undefined} onEdgesDelete={isEnabled ? onEdgesDelete : undefined}
                                 onNodeContextMenu={isEnabled ? onNodeContextMenu : undefined} onEdgeContextMenu={isEnabled ? onEdgeContextMenu : undefined}
                                 onEdgeMouseEnter={(_evt, edge) => setHoveredEdgeId(edge.id)}
                                 onEdgeMouseLeave={() => setHoveredEdgeId(null)}
-                                onPaneClick={enableOnClickEvents ? onPaneClick : undefined} onPaneContextMenu={isEnabled ? onPaneContextMenu : undefined}
+                                onPaneClick={onPaneClick} onPaneContextMenu={isEnabled ? onPaneContextMenu : undefined}
                                 nodesDraggable={isEnabled} nodesConnectable={isEnabled} elementsSelectable={isEnabled}
                                 connectionMode={ConnectionMode.Loose} snapToGrid={snapEnabled} snapGrid={snapGrid}
                                 connectionLineStyle={{ stroke: '#cccccc', strokeWidth: 6 }}

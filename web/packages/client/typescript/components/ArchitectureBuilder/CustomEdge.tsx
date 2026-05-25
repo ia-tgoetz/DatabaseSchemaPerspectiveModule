@@ -35,12 +35,11 @@ export const CustomEdge = ({
     const hWidth = Math.max(24, Math.round(36 / zoom));
     const hHeight = Math.max(10, Math.round(14 / zoom));
 
-    // terminal points slightly into the node to close any visible gaps (~5px as reported)
-    const shift = 8;
-    const sx = sourceX + (sourcePosition === 'left' ? shift : (sourcePosition === 'right' ? -shift : 0));
-    const sy = sourceY + (sourcePosition === 'top' ? shift : (sourcePosition === 'bottom' ? -shift : 0));
-    const tx = targetX + (targetPosition === 'left' ? shift : (targetPosition === 'right' ? -shift : 0));
-    const ty = targetY + (targetPosition === 'top' ? shift : (targetPosition === 'bottom' ? -shift : 0));
+    // terminal points (native reactflow coordinates)
+    const sx = sourceX;
+    const sy = sourceY;
+    const tx = targetX;
+    const ty = targetY;
 
     // null = at rest (derive from props); non-null = user is actively dragging.
     const [liveWaypoints, setLiveWaypoints] = React.useState<Waypoint[] | null>(null);
@@ -170,7 +169,12 @@ export const CustomEdge = ({
             <BaseEdge
                 path={edgePath}
                 markerEnd={markerEnd}
-                style={{ ...style, fill: 'none', strokeLinecap: 'round' }}
+                style={{ 
+                    ...style, 
+                    fill: 'none', 
+                    strokeLinecap: 'round',
+                    filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.3))'
+                }}
                 interactionWidth={dynamicInteractionWidth}
             />
 

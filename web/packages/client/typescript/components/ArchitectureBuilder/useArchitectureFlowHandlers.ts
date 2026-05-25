@@ -32,7 +32,6 @@ export interface UseArchitectureFlowHandlersParams {
     rawEdgesDict: any;
     connectionTypes: any;
     globalHandleCount: number;
-    globalDefaultConnectionType: string;
     paletteItems: any[];
     snapEnabled: boolean;
     snapPixels: number;
@@ -58,7 +57,6 @@ export const useArchitectureFlowHandlers = ({
     rawEdgesDict,
     connectionTypes,
     globalHandleCount,
-    globalDefaultConnectionType,
     paletteItems,
     snapEnabled,
     snapPixels,
@@ -125,8 +123,8 @@ export const useArchitectureFlowHandlers = ({
             }
         } catch (error: any) {
             console.error("Error in handleWaypointsChange:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleWaypointsChange', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleWaypointsChange'));
             }
         }
     }, [store, rawEdgesDict, componentEvents]);
@@ -136,7 +134,6 @@ export const useArchitectureFlowHandlers = ({
             const validTypes = getValidIntersection(connectionParams.source, connectionParams.target);
             if (validTypes.length === 0) return;
             let selectedType = validTypes[0];
-            if (globalDefaultConnectionType && validTypes.includes(globalDefaultConnectionType)) selectedType = globalDefaultConnectionType;
             const typeDef = connectionTypes[selectedType] || {};
             if (store?.props) {
                 store.props.write('edges', {
@@ -146,11 +143,11 @@ export const useArchitectureFlowHandlers = ({
             }
         } catch (error: any) {
             console.error("Error in onConnect:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'onConnect', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onConnect'));
             }
         }
-    }, [store, rawEdgesDict, rawNodesDict, globalHandleCount, getValidIntersection, connectionTypes, globalDefaultConnectionType, componentEvents]);
+    }, [store, rawEdgesDict, rawNodesDict, globalHandleCount, getValidIntersection, connectionTypes, componentEvents]);
 
     const onEdgeUpdate = React.useCallback((oldEdge: Edge, newConnection: Connection) => {
         try {
@@ -169,8 +166,8 @@ export const useArchitectureFlowHandlers = ({
             }
         } catch (error: any) {
             console.error("Error in onEdgeUpdate:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'onEdgeUpdate', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onEdgeUpdate'));
             }
         }
     }, [store, rawEdgesDict, rawNodesDict, globalHandleCount, getValidIntersection, componentEvents]);
@@ -196,8 +193,8 @@ export const useArchitectureFlowHandlers = ({
             store.props.write('edges', nextEdges);
         } catch (error: any) {
             console.error("Error in onEdgesDelete:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'onEdgesDelete', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onEdgesDelete'));
             }
         }
     }, [store, rawEdgesDict, selectedId, setSelectedId, componentEvents]);
@@ -229,8 +226,8 @@ export const useArchitectureFlowHandlers = ({
             closeContextMenu();
         } catch (error: any) {
             console.error("Error in handleLineTypeChange:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleLineTypeChange', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleLineTypeChange'));
             }
         }
     }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
@@ -251,8 +248,8 @@ export const useArchitectureFlowHandlers = ({
             closeContextMenu();
         } catch (error: any) {
             console.error("Error in handleConnectionTypeChange:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleConnectionTypeChange', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleConnectionTypeChange'));
             }
         }
     }, [contextMenu, componentEvents, rawEdgesDict, connectionTypes, store, closeContextMenu]);
@@ -271,8 +268,8 @@ export const useArchitectureFlowHandlers = ({
             closeContextMenu();
         } catch (error: any) {
             console.error("Error in handleAnimationChange:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleAnimationChange', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleAnimationChange'));
             }
         }
     }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
@@ -307,8 +304,8 @@ export const useArchitectureFlowHandlers = ({
             }
         } catch (error: any) {
             console.error("Error in handleResizeEnd:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleResizeEnd', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleResizeEnd'));
             }
         }
     }, [store, rawNodesDict, componentEvents]);
@@ -324,8 +321,8 @@ export const useArchitectureFlowHandlers = ({
             }
         } catch (error: any) {
             console.error("Error in handleTextChange:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleTextChange', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleTextChange'));
             }
         }
     }, [store, rawNodesDict, componentEvents]);
@@ -425,8 +422,8 @@ export const useArchitectureFlowHandlers = ({
             }
         } catch (error: any) {
             console.error("Error in onNodeDragStop:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'onNodeDragStop', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodeDragStop'));
             }
         }
     }, [store, rawNodesDict, rawEdgesDict, componentEvents]);
@@ -448,8 +445,8 @@ export const useArchitectureFlowHandlers = ({
             if (edgesChanged) store.props.write('edges', nextEdges);
         } catch (error: any) {
             console.error("Error in onNodesDelete:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'onNodesDelete', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodesDelete'));
             }
         }
     }, [store, rawNodesDict, rawEdgesDict, selectedId, setSelectedId, componentEvents]);
@@ -529,8 +526,8 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             store.props.write('edges', nextEdges);
         } catch (error: any) {
             console.error("Error in executePaste:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'executePaste', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'executePaste'));
             }
         }
     }, [store, rawNodesDict, rawEdgesDict, setSelectedId, clipboardRef, componentEvents]);
@@ -578,14 +575,15 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
                 if (paletteItem.id === 'container') { newNodeData.width = 300; newNodeData.height = 300; newNodeData.zIndex = -1; }
                 const nextNodes = { ...rawNodesDict };
                 nextNodes[newNodeId] = newNodeData;
+                console.log("DEBUG: Writing nodes to store:", JSON.stringify(nextNodes));
                 store.props.write('nodes', nextNodes);
                 setSelectedId(newNodeId);
             }
             draggedItemRef.current = null;
         } catch (error: any) {
             console.error("Error in onDrop:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'onDrop', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onDrop'));
             }
         }
     }, [store, rawNodesDict, snapEnabled, snapPixels, reactFlowInstance, setSelectedId, draggedItemRef, componentEvents]);
@@ -594,6 +592,8 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
         setSelectedId(null);
         closeContextMenu();
         if (componentEvents) {
+            // UNCOMMENT FOR TESTING:
+            // throw new Error("Verification: Pane clicked, triggering test error");
             componentEvents.fireComponentEvent('onPaneClick', { type: 'pane' });
         }
     }, [setSelectedId, closeContextMenu, componentEvents]);
@@ -640,8 +640,8 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             closeContextMenu();
         } catch (error: any) {
             console.error("Error in handleNodeSwap:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleNodeSwap', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleNodeSwap'));
             }
         }
     }, [contextMenu, paletteItems, componentEvents, rawNodesDict, rawEdgesDict, store, closeContextMenu]);
@@ -811,8 +811,8 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             closeContextMenu();
         } catch (error: any) {
             console.error("Error in handleContextMenuAction:", error);
-            if (componentEvents) {
-                componentEvents.fireComponentEvent('onCanvasError', { source: 'handleContextMenuAction', message: error.message, stack: error.stack });
+            if (componentEvents?.fireComponentEvent) {
+                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleContextMenuAction'));
             }
         }
     }, [contextMenu, rawNodesDict, rawEdgesDict, selectedId, snapEnabled, snapPixels, reactFlowInstance, store, componentEvents, setStyleEditorNodeId, executeCopy, executePaste, closeContextMenu, setSelectedId]);
@@ -865,3 +865,22 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
         handleContextMenuAction,
     };
 };
+
+/**
+ * Safely extracts error information for Perspective event firing.
+ * Handles non-Error objects and ensures strings for all properties.
+ */
+export function getSafeError(error: any, source: string) {
+    if (error instanceof Error) {
+        return {
+            source,
+            message: error.message || String(error),
+            stack: error.stack || ''
+        };
+    }
+    return {
+        source,
+        message: typeof error === 'string' ? error : JSON.stringify(error) || 'Unknown error',
+        stack: ''
+    };
+}
