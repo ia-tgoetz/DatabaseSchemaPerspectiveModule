@@ -113,6 +113,9 @@ export const mapIgnitionToReactFlowEdges = (
         .map(([id, edgeData]: any) => {
             const typeConfig = connectionTypes[edgeData.connectionType] || {};
             const isSelected = id === selectedId;
+            const isAnimated = (edgeData.animation || 'none') !== 'none';
+            const zIndex = isAnimated ? 1000 : (isSelected ? 10 : 0);
+
             const strokeStyle: any = { stroke: typeConfig.color || '#888', strokeWidth: isSelected ? baseWidth + 2 : baseWidth };
             if (edgeData.dashed) strokeStyle.strokeDasharray = '8 5';
             const arrowMarker = edgeData.arrow !== false
@@ -121,6 +124,7 @@ export const mapIgnitionToReactFlowEdges = (
             return {
                 id, ...edgeData,
                 type: 'custom',
+                zIndex,
                 data: {
                     lineType: edgeData.lineType || 'smoothstep',
                     waypoints: edgeData.waypoints || [],

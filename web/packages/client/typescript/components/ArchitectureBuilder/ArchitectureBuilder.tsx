@@ -488,11 +488,18 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
             const local = localMap.get(fresh.id);
             const isHovered = fresh.id === hoveredEdgeId;
             const isSelected = fresh.data?.isSelected === true;
+            const isAnimated = fresh.data?.animation !== 'none';
+            
+            let zIndex = fresh.zIndex || 0;
+            if (isHovered) zIndex = Math.max(zIndex, 500);
+            if (isAnimated) zIndex = 1000; // Always top priority
+
             const strokeWidth = (isHovered || isSelected) ? globalEdgeWidth + 2 : globalEdgeWidth;
             const waypoints = local?.data?.waypoints ?? fresh.data?.waypoints;
             return {
                 ...fresh,
                 updatable: isEnabled,
+                zIndex,
                 style: { ...fresh.style, strokeWidth },
                 data: { ...fresh.data, waypoints, isEditable: isEnabled },
             };
