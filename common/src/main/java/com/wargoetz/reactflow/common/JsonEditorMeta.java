@@ -5,6 +5,9 @@ import com.inductiveautomation.ignition.common.gson.JsonObject;
 import com.inductiveautomation.perspective.common.api.BrowserResource;
 import com.inductiveautomation.perspective.common.api.ComponentDescriptor;
 import com.inductiveautomation.perspective.common.api.ComponentDescriptorImpl;
+import com.inductiveautomation.perspective.common.api.ComponentEventDescriptor;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 public class JsonEditorMeta {
@@ -25,6 +28,8 @@ public class JsonEditorMeta {
         BrowserResource.ResourceType.JS
     );
 
+    public static final JsonSchema ERROR_EVENT_SCHEMA = JsonSchema.parse(new ByteArrayInputStream("{ \"type\": \"object\", \"properties\": { \"source\": { \"type\": \"string\" }, \"message\": { \"type\": \"string\" }, \"stack\": { \"type\": \"string\" } } }".getBytes(StandardCharsets.UTF_8)));
+
     public static final ComponentDescriptor DESCRIPTOR = ComponentDescriptorImpl.ComponentBuilder.newBuilder()
             .setId(COMPONENT_ID)
             .setModuleId(MODULE_ID)
@@ -33,6 +38,9 @@ public class JsonEditorMeta {
             .addPaletteEntry("", "JSON Editor", "An interactive JSON viewer and editor.", null, null)
             .setDefaultMetaName("jsonEditor")
             .setResources(Set.of(JS_RESOURCE, DESIGNER_JS_RESOURCE)) 
+            .setEvents(Set.of(
+                new ComponentEventDescriptor("onCanvasError", "Fired when a rendering or interaction error occurs.", ERROR_EVENT_SCHEMA)
+            ))
             .setSchema(JsonSchema.parse(JsonEditorMeta.class.getResourceAsStream("/jsoneditor.props.json")))
             .setDefaultProps(createDefaultProps()) 
             .build();

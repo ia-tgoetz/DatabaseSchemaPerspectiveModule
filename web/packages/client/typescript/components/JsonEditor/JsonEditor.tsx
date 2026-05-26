@@ -3,6 +3,8 @@ import ReactJson, { InteractionProps } from 'react-json-view';
 import { ComponentProps } from '@inductiveautomation/perspective-client';
 import { observer } from 'mobx-react';
 
+import { ComponentErrorBoundary } from '../common/ComponentErrorBoundary';
+
 export interface JsonEditorProps {
     data: object;
     theme: string;
@@ -51,8 +53,15 @@ export const JsonEditor = observer((props: ComponentProps<JsonEditorProps>) => {
     const activeTheme = getActiveTheme();
     
     const handleUpdate = (edit: InteractionProps) => {
-        if (props.store?.props) {
-            props.store.props.write('data', edit.updated_src);
+        try {
+            if (props.store?.props) {
+                props.store.props.write('data', edit.updated_src);
+            }
+        } catch (error: any) {
+            console.error("Error updating JSON:", error);
+            if (props.componentEvents) {
+                props.componentEvents.fireComponentEvent('onCanvasError', { source: 'handleUpdate', message: error.message, stack: error.stack });
+            }
         }
     };
 
@@ -60,26 +69,28 @@ export const JsonEditor = observer((props: ComponentProps<JsonEditorProps>) => {
     const emitProps = props.emit({ classes: ['ia_jsonEditor', 'perspective-component'] });
 
     return (
-        <div 
-            {...emitProps} 
-            style={{ 
-                ...emitProps.style,      // CRITICAL: Inject Ignition's sizing (basis, grow, width, etc.)
-                boxSizing: 'border-box', // Ensure margins don't break the bounding box
-                overflow: 'auto',        // Ensure big JSON objects scroll inside the box
-                ...style                 // Inject the user's custom 'style' property from the Designer
-            }}
-        >
-            <ReactJson 
-                src={data || {}}
-                theme={activeTheme as any}
-                onEdit={editable !== false ? handleUpdate : undefined}
-                onAdd={editable !== false ? handleUpdate : undefined}
-                onDelete={editable !== false ? handleUpdate : undefined}
-                displayDataTypes={false}
-                displayObjectSize={true}
-                enableClipboard={true}
-                style={{padding: '10px' }} 
-            />
-        </div>
+        <ComponentErrorBoundary componentEvents={props.componentEvents}>
+            <div 
+                {...emitProps} 
+                style={{ 
+                    ...emitProps.style,      // CRITICAL: Inject Ignition's sizing (basis, grow, width, etc.)
+                    boxSizing: 'border-box', // Ensure margins don't break the bounding box
+                    overflow: 'auto',        // Ensure big JSON objects scroll inside the box
+                    ...style                 // Inject the user's custom 'style' property from the Designer
+                }}
+            >
+                <ReactJson 
+                    src={data || {}}
+                    theme={activeTheme as any}
+                    onEdit={editable !== false ? handleUpdate : undefined}
+                    onAdd={editable !== false ? handleUpdate : undefined}
+                    onDelete={editable !== false ? handleUpdate : undefined}
+                    displayDataTypes={false}
+                    displayObjectSize={true}
+                    enableClipboard={true}
+                    style={{padding: '10px' }} 
+                />
+            </div>
+        </ComponentErrorBoundary>
     );
 });

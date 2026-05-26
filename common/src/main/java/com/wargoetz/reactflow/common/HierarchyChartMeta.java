@@ -4,6 +4,9 @@ import com.inductiveautomation.ignition.common.jsonschema.JsonSchema;
 import com.inductiveautomation.perspective.common.api.BrowserResource;
 import com.inductiveautomation.perspective.common.api.ComponentDescriptor;
 import com.inductiveautomation.perspective.common.api.ComponentDescriptorImpl;
+import com.inductiveautomation.perspective.common.api.ComponentEventDescriptor;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 public class HierarchyChartMeta {
@@ -32,6 +35,8 @@ public class HierarchyChartMeta {
         BrowserResource.ResourceType.CSS
     );
 
+    public static final JsonSchema ERROR_EVENT_SCHEMA = JsonSchema.parse(new ByteArrayInputStream("{ \"type\": \"object\", \"properties\": { \"source\": { \"type\": \"string\" }, \"message\": { \"type\": \"string\" }, \"stack\": { \"type\": \"string\" } } }".getBytes(StandardCharsets.UTF_8)));
+
     public static final ComponentDescriptor DESCRIPTOR = ComponentDescriptorImpl.ComponentBuilder.newBuilder()
             .setId(COMPONENT_ID)
             .setModuleId(MODULE_ID)
@@ -40,6 +45,9 @@ public class HierarchyChartMeta {
             .addPaletteEntry("", "Hierarchy Chart", "Visualizes hierarchical process flows.", null, null)
             .setDefaultMetaName("HierarchyChart")
             .setResources(Set.of(JS_RESOURCE, DESIGNER_JS_RESOURCE, CSS_RESOURCE)) 
+            .setEvents(Set.of(
+                new ComponentEventDescriptor("onCanvasError", "Fired when a canvas rendering or interaction error occurs.", ERROR_EVENT_SCHEMA)
+            ))
             .setSchema(JsonSchema.parse(HierarchyChartMeta.class.getResourceAsStream("/hierarchychart.props.json")))
             .build();
 }

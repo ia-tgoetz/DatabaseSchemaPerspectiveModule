@@ -26,9 +26,22 @@ export const CustomEdge = ({
     const storedWaypoints: Waypoint[] = data?.waypoints ?? [];
     const showLabel = data?.showLabel === true;
     const { getZoom } = useReactFlow();
+    const zoom = getZoom();
+
+    // Calculate dynamic interaction width (selection/drag zone)
+    const dynamicInteractionWidth = Math.max(20, Math.round(24 / zoom));
+
+    // Calculate dynamic segment handle dimensions (colored pills)
+    const hWidth = Math.max(24, Math.round(36 / zoom));
+    const hHeight = Math.max(10, Math.round(14 / zoom));
+
+    // terminal points (native reactflow coordinates)
+    const sx = sourceX;
+    const sy = sourceY;
+    const tx = targetX;
+    const ty = targetY;
 
     // null = at rest (derive from props); non-null = user is actively dragging.
-    // No useEffect or useMemo sync — the component reads from storedWaypoints (props) directly.
     const [liveWaypoints, setLiveWaypoints] = React.useState<Waypoint[] | null>(null);
     const dragState = React.useRef<DragState | null>(null);
 
@@ -37,35 +50,30 @@ export const CustomEdge = ({
     const isHorizTgt = targetPosition === 'right' || targetPosition === 'left';
 
     // Priority: active drag > stored custom waypoints > auto-routed.
-    // Stored waypoints are never discarded in favour of auto-routing once they exist.
     const baseWaypoints: Waypoint[] =
         liveWaypoints ??
         (storedWaypoints.length > 0
             ? storedWaypoints
-            : computeAutoWaypoints(sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition));
+            : computeAutoWaypoints(sx, sy, sourcePosition, tx, ty, targetPosition));
 
-    // Pin the perpendicular axis of the first/last waypoint on every render so the
-    // edge always exits/enters perpendicular to the handle, even when nodes move.
-    // The parallel axis (the user's flat segment) is untouched.
-    // Both pins are applied sequentially so a single-waypoint L-shape corner tracks
-    // both the source AND target node positions correctly.
+    // Pin logic uses shifted terminal coordinates
     const pinnedWaypoints: Waypoint[] =
         isStepType && baseWaypoints.length > 0
             ? baseWaypoints.map((wp, i) => {
                 let result = wp;
                 if (i === 0)
-                    result = isHorizSrc ? { ...result, y: sourceY } : { ...result, x: sourceX };
+                    result = isHorizSrc ? { ...result, y: sy } : { ...result, x: sx };
                 if (i === baseWaypoints.length - 1)
-                    result = isHorizTgt ? { ...result, y: targetY } : { ...result, x: targetX };
+                    result = isHorizTgt ? { ...result, y: ty } : { ...result, x: tx };
                 return result;
             })
             : baseWaypoints;
 
-    const allPts: Waypoint[] = [{ x: sourceX, y: sourceY }, ...pinnedWaypoints, { x: targetX, y: targetY }];
+    const allPts: Waypoint[] = [{ x: sx, y: sy }, ...pinnedWaypoints, { x: tx, y: ty }];
 
-    // ─── Path computation (SVG math unchanged) ────────────────────────────
+    // ─── Path computation ────────────────────────────────────────────────
 
-    let edgePath = '', labelX = (sourceX + targetX) / 2, labelY = (sourceY + targetY) / 2;
+    let edgePath = '', labelX = (sx + tx) / 2, labelY = (sy + ty) / 2;
 
     if (isStepType) {
         edgePath = buildPolylinePath(allPts, data?.lineType === 'step' ? 0 : 12);
@@ -75,17 +83,15 @@ export const CustomEdge = ({
             labelY = (allPts[mid - 1].y + allPts[mid].y) / 2;
         }
     } else if (data?.lineType === 'straight') {
-        [edgePath, labelX, labelY] = getStraightPath({ sourceX, sourceY, targetX, targetY });
+        [edgePath, labelX, labelY] = getStraightPath({ sourceX: sx, sourceY: sy, targetX: tx, targetY: ty });
     } else {
-        [edgePath, labelX, labelY] = getBezierPath({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition });
+        [edgePath, labelX, labelY] = getBezierPath({ sourceX: sx, sourceY: sy, targetX: tx, targetY: ty, sourcePosition, targetPosition });
     }
 
     // ─── Pointer-capture drag engine ──────────────────────────────────────
 
     const canEdit = data?.isSelected && isStepType && data?.isEditable !== false;
 
-    // Shared delta computation — reads only from dragState (ref, always current)
-    // and getZoom (stable hook reference), so it never goes stale.
     const applyDelta = (ref: DragState, clientX: number, clientY: number): Waypoint[] => {
         const zoom = getZoom();
         const rawDelta = ref.isH
@@ -100,14 +106,12 @@ export const CustomEdge = ({
         );
     };
 
-    // Not memoized: it closes over pinnedWaypoints (render-scope) and data snap settings,
-    // both of which are intentionally captured fresh at the moment the user presses down.
     const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, segIdx: number, isH: boolean) => {
         e.stopPropagation();
         e.preventDefault();
         e.currentTarget.setPointerCapture(e.pointerId);
 
-        const startWps = pinnedWaypoints; // capture visual truth at drag start
+        const startWps = pinnedWaypoints;
         dragState.current = {
             startClientX: e.clientX,
             startClientY: e.clientY,
@@ -137,7 +141,6 @@ export const CustomEdge = ({
         setLiveWaypoints(null);
     };
 
-    // Cancel (e.g. Escape, touch interrupt) — revert without persisting
     const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
         if (!dragState.current) return;
         e.currentTarget.releasePointerCapture(e.pointerId);
@@ -147,7 +150,7 @@ export const CustomEdge = ({
 
     // ─── Render ───────────────────────────────────────────────────────────
 
-    const segHandlePts: Waypoint[] = [{ x: sourceX, y: sourceY }, ...pinnedWaypoints, { x: targetX, y: targetY }];
+    const segHandlePts: Waypoint[] = [{ x: sx, y: sy }, ...pinnedWaypoints, { x: tx, y: ty }];
     const animation = data?.animation ?? 'none';
     
     // Shared overlay style for particles
@@ -166,8 +169,13 @@ export const CustomEdge = ({
             <BaseEdge
                 path={edgePath}
                 markerEnd={markerEnd}
-                style={{ ...style, fill: 'none' }}
-                interactionWidth={interactionWidth}
+                style={{ 
+                    ...style, 
+                    fill: 'none', 
+                    strokeLinecap: 'round',
+                    filter: 'drop-shadow(0px 1px 1px rgba(0,0,0,0.3))'
+                }}
+                interactionWidth={dynamicInteractionWidth}
             />
 
             {/* 2. Animation Layers (Overlays) */}
@@ -260,9 +268,9 @@ export const CustomEdge = ({
                                 style={{
                                     position: 'absolute',
                                     transform: `translate(-50%, -50%) translate(${mx}px, ${my}px)`,
-                                    width: isH ? '36px' : '14px',
-                                    height: isH ? '14px' : '36px',
-                                    borderRadius: '7px',
+                                    width: isH ? `${hWidth}px` : `${hHeight}px`,
+                                    height: isH ? `${hHeight}px` : `${hWidth}px`,
+                                    borderRadius: `${hHeight / 2}px`,
                                     backgroundColor: 'var(--callToAction)',
                                     opacity: 0.85,
                                     cursor: isH ? 'ns-resize' : 'ew-resize',

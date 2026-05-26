@@ -6,6 +6,8 @@ import ReactFlow, { Background, Controls, Node, Edge, Handle, Position, useNodes
 import 'reactflow/dist/style.css'; 
 import './DatabaseSchema.css'; 
 
+import { ComponentErrorBoundary } from '../common/ComponentErrorBoundary';
+
 export interface DatabaseSchemaProps {
     style?: any; 
     tables: Array<{ id: string, name: string, columns: string[], headerStyle?: any, rowStyle?: any, position?: { x: number, y: number } }>;
@@ -85,65 +87,72 @@ export const DatabaseSchema = observer((props: ComponentProps<DatabaseSchemaProp
     const relsStr = JSON.stringify(plainRels);
 
     React.useEffect(() => {
-        const mappedNodes: Node[] = plainTables.map((table: any, index: number) => {
-            const finalHeaderStyle = getStyle(table.headerStyle);
-            const finalRowStyle = getStyle(table.rowStyle);
-            const posX = table.position?.x !== undefined ? table.position.x : (index % 3) * 350;
-            const posY = table.position?.y !== undefined ? table.position.y : Math.floor(index / 3) * 300;
+        try {
+            const mappedNodes: Node[] = plainTables.map((table: any, index: number) => {
+                const finalHeaderStyle = getStyle(table.headerStyle);
+                const finalRowStyle = getStyle(table.rowStyle);
+                const posX = table.position?.x !== undefined ? table.position.x : (index % 3) * 350;
+                const posY = table.position?.y !== undefined ? table.position.y : Math.floor(index / 3) * 300;
 
-            return {
-                id: String(table.id),
-                type: 'tableNode',
-                data: { 
-                    name: table.name, 
-                    columns: table.columns || [], 
-                    headerStyle: Object.keys(finalHeaderStyle).length > 0 ? finalHeaderStyle : undefined, 
-                    rowStyle: Object.keys(finalRowStyle).length > 0 ? finalRowStyle : undefined,
-                    onRowClick: (columnName: string) => {
-                        if (props.componentEvents) {
-                            props.componentEvents.fireComponentEvent('onRowClick', { tableId: table.id, column: columnName });
+                return {
+                    id: String(table.id),
+                    type: 'tableNode',
+                    data: { 
+                        name: table.name, 
+                        columns: table.columns || [], 
+                        headerStyle: Object.keys(finalHeaderStyle).length > 0 ? finalHeaderStyle : undefined, 
+                        rowStyle: Object.keys(finalRowStyle).length > 0 ? finalRowStyle : undefined,
+                        onRowClick: (columnName: string) => {
+                            if (props.componentEvents) {
+                                props.componentEvents.fireComponentEvent('onRowClick', { tableId: table.id, column: columnName });
+                            }
                         }
-                    }
-                },
-                position: { x: posX, y: posY }
-            };
-        });
+                    },
+                    position: { x: posX, y: posY }
+                };
+            });
 
-        const mappedEdges: Edge[] = plainRels.map((rel: any, index: number) => {
-            const hasSourceCol = !!rel.sourceColumn;
-            const hasTargetCol = !!rel.targetColumn;
-            const edgeColor = rel.lineColor || 'var(--callToAction)';
-            const inlineEdgeStyle: any = { ...getStyle(rel.style), stroke: edgeColor };
-            if (rel.lineWidth) inlineEdgeStyle.strokeWidth = rel.lineWidth;
+            const mappedEdges: Edge[] = plainRels.map((rel: any, index: number) => {
+                const hasSourceCol = !!rel.sourceColumn;
+                const hasTargetCol = !!rel.targetColumn;
+                const edgeColor = rel.lineColor || 'var(--callToAction)';
+                const inlineEdgeStyle: any = { ...getStyle(rel.style), stroke: edgeColor };
+                if (rel.lineWidth) inlineEdgeStyle.strokeWidth = rel.lineWidth;
 
-            let markerStart, markerEnd;
-            let isAnimated = false;
+                let markerStart, markerEnd;
+                let isAnimated = false;
 
-            switch (rel.type) {
-                case 'one-to-many': markerEnd = { type: MarkerType.ArrowClosed, color: edgeColor }; isAnimated = true; break;
-                case 'many-to-one': markerStart = { type: MarkerType.ArrowClosed, color: edgeColor }; isAnimated = true; break;
-                case 'one-to-one': markerStart = { type: MarkerType.ArrowClosed, color: edgeColor }; markerEnd = { type: MarkerType.ArrowClosed, color: edgeColor }; isAnimated = false; break;
-                case 'none': default: isAnimated = false; break;
+                switch (rel.type) {
+                    case 'one-to-many': markerEnd = { type: MarkerType.ArrowClosed, color: edgeColor }; isAnimated = true; break;
+                    case 'many-to-one': markerStart = { type: MarkerType.ArrowClosed, color: edgeColor }; isAnimated = true; break;
+                    case 'one-to-one': markerStart = { type: MarkerType.ArrowClosed, color: edgeColor }; markerEnd = { type: MarkerType.ArrowClosed, color: edgeColor }; isAnimated = false; break;
+                    case 'none': default: isAnimated = false; break;
+                }
+
+                return {
+                    id: `edge-${index}`,
+                    source: String(rel.source),
+                    target: String(rel.target),
+                    className: 'db-schema-edge',
+                    data: { sourceCol: rel.sourceColumn, targetCol: rel.targetColumn, lineType: rel.lineType || 'default' }, 
+                    sourceHandle: hasSourceCol ? `${rel.sourceColumn}-right-source` : 'table-bottom-source',
+                    targetHandle: hasTargetCol ? `${rel.targetColumn}-left-target` : 'table-top-target',
+                    type: rel.lineType || 'default', 
+                    animated: isAnimated,
+                    markerStart: markerStart,
+                    markerEnd: markerEnd,
+                    style: Object.keys(inlineEdgeStyle).length > 0 ? inlineEdgeStyle : undefined
+                };
+            });
+
+            setNodes(mappedNodes);
+            setEdges(mappedEdges);
+        } catch (error: any) {
+            console.error("Error in DatabaseSchema effect:", error);
+            if (props.componentEvents) {
+                props.componentEvents.fireComponentEvent('onCanvasError', { source: 'DatabaseSchemaEffect', message: error.message, stack: error.stack });
             }
-
-            return {
-                id: `edge-${index}`,
-                source: String(rel.source),
-                target: String(rel.target),
-                className: 'db-schema-edge',
-                data: { sourceCol: rel.sourceColumn, targetCol: rel.targetColumn, lineType: rel.lineType || 'default' }, 
-                sourceHandle: hasSourceCol ? `${rel.sourceColumn}-right-source` : 'table-bottom-source',
-                targetHandle: hasTargetCol ? `${rel.targetColumn}-left-target` : 'table-top-target',
-                type: rel.lineType || 'default', 
-                animated: isAnimated,
-                markerStart: markerStart,
-                markerEnd: markerEnd,
-                style: Object.keys(inlineEdgeStyle).length > 0 ? inlineEdgeStyle : undefined
-            };
-        });
-
-        setNodes(mappedNodes);
-        setEdges(mappedEdges);
+        }
         
     }, [tablesStr, relsStr, setNodes, setEdges, props]); 
 
@@ -184,33 +193,49 @@ export const DatabaseSchema = observer((props: ComponentProps<DatabaseSchemaProp
     }, [nodes, setEdges]);
 
     const onConnect = React.useCallback((params: Edge | Connection) => {
-        const parseHandle = (handleId?: string | null) => {
-            if (!handleId || handleId.startsWith('table-')) return '';
-            return handleId.replace(/-left-source$|-right-source$|-left-target$|-right-target$/, '');
-        };
-        const newEdge = { 
-            ...params, 
-            data: { sourceCol: parseHandle(params.sourceHandle), targetCol: parseHandle(params.targetHandle), lineType: 'default' },
-            type: 'default', 
-            animated: true, 
-            className: 'db-schema-edge'
-        };
-        setEdges((eds) => addEdge(newEdge, eds));
-    }, [setEdges]);
+        try {
+            const parseHandle = (handleId?: string | null) => {
+                if (!handleId || handleId.startsWith('table-')) return '';
+                return handleId.replace(/-left-source$|-right-source$|-left-target$|-right-target$/, '');
+            };
+            const newEdge = { 
+                ...params, 
+                data: { sourceCol: parseHandle(params.sourceHandle), targetCol: parseHandle(params.targetHandle), lineType: 'default' },
+                type: 'default', 
+                animated: true, 
+                className: 'db-schema-edge'
+            };
+            setEdges((eds) => addEdge(newEdge, eds));
+        } catch (error: any) {
+            console.error("Error in onConnect:", error);
+            if (props.componentEvents) {
+                props.componentEvents.fireComponentEvent('onCanvasError', { source: 'onConnect', message: error.message, stack: error.stack });
+            }
+        }
+    }, [setEdges, props.componentEvents]);
 
     const onNodeDragStop = React.useCallback((event: React.MouseEvent, node: Node) => {
-        const safeTables = extractDeep(props.props.tables) || [];
-        const tableIndex = safeTables.findIndex((t: any) => String(t.id) === node.id);
-        if (tableIndex !== -1 && props.store?.props) {
-            props.store.props.write(`tables[${tableIndex}].position`, { x: Math.round(node.position.x), y: Math.round(node.position.y) });
+        try {
+            const safeTables = extractDeep(props.props.tables) || [];
+            const tableIndex = safeTables.findIndex((t: any) => String(t.id) === node.id);
+            if (tableIndex !== -1 && props.store?.props) {
+                props.store.props.write(`tables[${tableIndex}].position`, { x: Math.round(node.position.x), y: Math.round(node.position.y) });
+            }
+        } catch (error: any) {
+            console.error("Error in onNodeDragStop:", error);
+            if (props.componentEvents) {
+                props.componentEvents.fireComponentEvent('onCanvasError', { source: 'onNodeDragStop', message: error.message, stack: error.stack });
+            }
         }
-    }, [props.props.tables, props.store]);
+    }, [props.props.tables, props.store, props.componentEvents]);
 
     return (
-        <div {...props.emit({ classes: ['db-schema-root'] })}>
-            <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} onNodeDragStop={onNodeDragStop} connectionMode={ConnectionMode.Loose} fitView>
-                <Background /><Controls />
-            </ReactFlow>
-        </div>
+        <ComponentErrorBoundary componentEvents={props.componentEvents}>
+            <div {...props.emit({ classes: ['db-schema-root'] })}>
+                <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} onNodeDragStop={onNodeDragStop} connectionMode={ConnectionMode.Loose} fitView>
+                    <Background /><Controls />
+                </ReactFlow>
+            </div>
+        </ComponentErrorBoundary>
     );
 });

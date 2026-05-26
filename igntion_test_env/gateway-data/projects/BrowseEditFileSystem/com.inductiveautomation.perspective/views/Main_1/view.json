@@ -1,0 +1,61 @@
+{
+  "custom": {},
+  "params": {},
+  "props": {
+    "defaultSize": {
+      "height": 980,
+      "width": 967
+    }
+  },
+  "root": {
+    "children": [
+      {
+        "meta": {
+          "name": "FileSystemTree"
+        },
+        "position": {
+          "basis": "364px",
+          "shrink": 0
+        },
+        "props": {
+          "params": {
+            "json": {}
+          },
+          "path": "FileSystemTree"
+        },
+        "type": "ia.display.view"
+      },
+      {
+        "meta": {
+          "name": "jsonEditor"
+        },
+        "propConfig": {
+          "props.data": {
+            "binding": {
+              "config": {
+                "path": "../FileSystemTree.props.params.json"
+              },
+              "type": "property"
+            }
+          }
+        },
+        "props": {
+          "style": {
+            "borderStyle": "solid",
+            "margin": "8px",
+            "overflow": "auto"
+          },
+          "theme": "pop"
+        },
+        "type": "com.wargoetz.reactflow.jsoneditor"
+      }
+    ],
+    "meta": {
+      "name": "root"
+    },
+    "props": {
+      "direction": "column"
+    },
+    "type": "ia.container.flex"
+  }
+}

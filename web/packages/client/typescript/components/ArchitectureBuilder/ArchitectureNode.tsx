@@ -1,6 +1,6 @@
 import React from 'react';
 // @ts-ignore
-import { Handle, Position, NodeProps } from 'reactflow';
+import { Handle, Position, NodeProps, useViewport } from 'reactflow';
 import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
 
 export interface ArchitectureNodeData {
@@ -25,11 +25,7 @@ export interface ArchitectureNodeData {
 const TEXT_PALETTE_IDS = new Set(['Note', 'Label']);
 
 const NodeImage = ({ src }: { src: string }) => {
-    // Stable per-instance ID — useMemo with [] never re-runs, unlike useRef(fn()) which
-    // evaluates fn() on every render (only the first result is kept, but the counter still
-    // increments wastefully on each call).
     const scopeId = React.useMemo(() => nextSvgScopeId(), []);
-    // Memoize DOMPurify work so it only runs when src changes, not on every re-render.
     const svgHtml = React.useMemo(() => extractSvgMarkup(src, scopeId), [src, scopeId]);
     if (svgHtml) {
         return (
@@ -45,6 +41,7 @@ const NodeImage = ({ src }: { src: string }) => {
 };
 
 export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureNodeData>) => {
+    const { zoom } = useViewport();
     const showHandles = !data.globalHideHandles && !data.hideHandles;
     const isTextNode = TEXT_PALETTE_IDS.has(data.paletteId);
 
@@ -58,12 +55,13 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
     const { backgroundColor: imageBg, ...restStyle } = data.style || {};
 
     const combinedStyle: React.CSSProperties = {
-        padding: '10px',
+        padding: '0px',
         borderRadius: '8px',
         backgroundColor: 'var(--neutral-10)',
         border: '1px solid var(--neutral-50)',
         color: 'var(--neutral-90)',
         display: 'flex',
+
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
@@ -76,16 +74,22 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
         boxShadow: selected ? '0 0 0 2px rgba(0, 123, 255, 0.25)' : (restStyle.boxShadow || '0 2px 4px rgba(0,0,0,0.1)')
     };
 
-    const handleStyle: React.CSSProperties = {
-        background: 'var(--neutral-90)',
-        width: '8px',
-        height: '8px',
-        minWidth: '8px',
-        minHeight: '8px',
+    // Enhanced hit area: generous size that remains consistent in screen pixels for usability.
+    // Targeting ~24px at 1.0 zoom, scaling up to ~40px as we zoom out.
+    const hitSize = Math.min(40, Math.max(16, Math.round(24 / zoom)));
+
+    const handleStyle: any = {
+        background: 'transparent',
+        width: '4px',
+        height: '4px',
+        // Control interaction and base visibility via showHandles.
+        // We keep the element size small and fixed (4px) to ensure React Flow 
+        // maintains perfect edge alignment regardless of zoom.
+        // The actual hit area is rendered via ::before in the CSS.
         opacity: showHandles ? 1 : 0,
         pointerEvents: showHandles ? 'auto' : 'none',
-        border: showHandles ? '1px solid var(--neutral-90)' : 'none',
-        transition: 'all 0.15s ease-in-out'
+        zIndex: 20, // Ensure handles are above node content and labels
+        '--hit-size': `${hitSize}px`
     };
     
     const handleCount = Math.max(1, Math.min(8, Number(data.handleCount) || 5));
@@ -95,11 +99,10 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
 
     return (
         <div style={combinedStyle} title={data.tooltip}>
-            {/* All handles are type="source"; ConnectionMode.Loose in the parent allows source-to-source connections */}
-            {positions.map((pos, i) => <Handle className={handleClass(`top-${i}`)} key={`top-${i}`} type="source" position={Position.Top} id={`top-${i}`} style={{ ...handleStyle, left: pos }} />)}
-            {positions.map((pos, i) => <Handle className={handleClass(`right-${i}`)} key={`right-${i}`} type="source" position={Position.Right} id={`right-${i}`} style={{ ...handleStyle, top: pos }} />)}
-            {positions.map((pos, i) => <Handle className={handleClass(`bottom-${i}`)} key={`bottom-${i}`} type="source" position={Position.Bottom} id={`bottom-${i}`} style={{ ...handleStyle, left: pos }} />)}
-            {positions.map((pos, i) => <Handle className={handleClass(`left-${i}`)} key={`left-${i}`} type="source" position={Position.Left} id={`left-${i}`} style={{ ...handleStyle, top: pos }} />)}
+            {positions.map((pos, i) => <Handle className={handleClass(`top-${i}`)} key={`top-${i}`} type="source" position={Position.Top} id={`top-${i}`} style={{ ...handleStyle, left: pos, top: '0px', transform: 'translate(-50%, -50%)' }} />)}
+            {positions.map((pos, i) => <Handle className={handleClass(`right-${i}`)} key={`right-${i}`} type="source" position={Position.Right} id={`right-${i}`} style={{ ...handleStyle, top: pos, left: '100%', transform: 'translate(-50%, -50%)' }} />)}
+            {positions.map((pos, i) => <Handle className={handleClass(`bottom-${i}`)} key={`bottom-${i}`} type="source" position={Position.Bottom} id={`bottom-${i}`} style={{ ...handleStyle, left: pos, top: '100%', transform: 'translate(-50%, -50%)' }} />)}
+            {positions.map((pos, i) => <Handle className={handleClass(`left-${i}`)} key={`left-${i}`} type="source" position={Position.Left} id={`left-${i}`} style={{ ...handleStyle, top: pos, left: '0px', transform: 'translate(-50%, -50%)' }} />)}
 
             <div
                 style={{
