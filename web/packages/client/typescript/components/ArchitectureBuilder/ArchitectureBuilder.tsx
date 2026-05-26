@@ -691,7 +691,8 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                 connectionLineStyle={{ stroke: '#cccccc', strokeWidth: 6 }}
                                 elevateNodesOnSelect={false}
                                 minZoom={0.05}
-                                panOnScroll={true}
+                                panOnScroll={false}
+                                zoomOnScroll={true}
                                 panOnDrag={true}
                                 selectionOnDrag={false}
                             >
