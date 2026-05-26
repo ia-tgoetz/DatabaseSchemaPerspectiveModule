@@ -27,7 +27,8 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
         ...(data.style || {}),
         
         outline: selected ? '2px solid var(--callToAction)' : 'none',
-        outlineOffset: '2px'
+        outlineOffset: '2px',
+        pointerEvents: 'none'
     };
 
     // Calculate dynamic resizer handle size based on zoom.
@@ -41,13 +42,15 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                 isVisible={selected && data.isEditable !== false}
                 minWidth={150} 
                 minHeight={150}
-                handleStyle={{ width: `${resizerSize}px`, height: `${resizerSize}px`, borderRadius: '4px' }} 
+                handleStyle={{ width: `${resizerSize}px`, height: `${resizerSize}px`, borderRadius: '4px', pointerEvents: 'auto' }} 
                 onResizeEnd={(e, params) => {
                     if (data.onResizeEnd) data.onResizeEnd(id, params.x, params.y, params.width, params.height);
                 }}
             />
             <div style={combinedStyle}>
                 <div
+                    className="custom-drag-handle"
+                    onPointerDown={(e) => { e.stopPropagation(); }}
                     style={{
                         position: 'absolute', top: 0, left: 0,
                         maxWidth: '100%', boxSizing: 'border-box', 
@@ -56,9 +59,17 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                         borderTopRightRadius: '7px', 
                         borderBottomRightRadius: '8px',
                         fontSize: '12px', fontWeight: 'bold', color: finalLabelColor,
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                        cursor: 'grab', display: 'flex', alignItems: 'center', gap: '6px',
                         overflow: 'hidden',
+                        transition: 'background-color 0.2s ease',
+                        pointerEvents: 'auto', // Explicitly enabled for handle
                         ...(data.labelStyle || {}) 
+                    }}
+                    onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--neutral-40)';
+                    }}
+                    onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = finalLabelBg;
                     }}
                     onClick={(e) => {
                         e.stopPropagation();

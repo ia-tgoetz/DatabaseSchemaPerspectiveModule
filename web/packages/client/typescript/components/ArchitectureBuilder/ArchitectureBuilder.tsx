@@ -232,7 +232,8 @@ const mapIgnitionToReactFlowNodes = (
                 id, type: isContainer ? 'container' : 'architecture', selected: id === selectedId,
                 position: { x: nodeData.x || 0, y: nodeData.y || 0 },
                 zIndex: isContainer ? (nodeData.zIndex ?? -1) : 1000,
-                style: isContainer ? { width: nodeData.width || 300, height: nodeData.height || 300 } : undefined,
+                style: isContainer ? { width: nodeData.width || 300, height: nodeData.height || 300, pointerEvents: 'none' } : undefined,
+                dragHandle: isContainer ? '.custom-drag-handle' : undefined,
                 data: {
                     label: nodeData.label || 'Unknown', image: paletteImage || nodeData.image || '', text: nodeData.text || '', tooltip: nodeData.tooltip || '', configs: nodeData.configs || {},
                     style: nodeData.style || {}, labelStyle: nodeData.labelStyle || {}, textStyle: nodeData.textStyle || {},
@@ -690,6 +691,9 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                 connectionLineStyle={{ stroke: '#cccccc', strokeWidth: 6 }}
                                 elevateNodesOnSelect={false}
                                 minZoom={0.05}
+                                panOnScroll={true}
+                                panOnDrag={true}
+                                selectionOnDrag={false}
                             >
                                 <Background gap={snapPixels} />
                                 <Controls showInteractive={false} />
