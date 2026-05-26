@@ -45,9 +45,12 @@ The `web/` directory uses the `com.github.node-gradle.node` plugin.
 
 ## 🛠️ Development Conventions
 
-### Component Registration (Critical)
-- **Backend:** Components are registered in `GatewayHook.java` using the `PerspectiveContext` component registry.
-- **Frontend Wiring:** Every property defined in a component's `*.props.json` MUST be wired in `perspective-client.ts` inside the `getPropsReducer(tree)` method. If a prop is missing there, it will not be accessible in the React component.
+### Canvas Interaction Standards
+To maintain consistent UX patterns, always refer to the **[Canvas Interaction Standards skill](../.skills/canvas-interaction-standards/SKILL.md)**:
+- **Panning**: Left-click-and-drag.
+- **Zooming**: Mouse wheel scroll.
+- **Node Interaction**: Container bodies are transparent to pointer events, drag-handles are opaque.
+- **Z-Indexing**: Interaction elements (waypoints) must remain on top of animated edge layers.
 
 ### Architecture Builder Routing & Handle Standards (The "Holy Grail" Design)
 The `ArchitectureBuilder` component follows 11 strict rules to ensure functional usability, visual precision, and structural integrity:
