@@ -574,13 +574,74 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                 @keyframes arch-flow-reverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 100; } }
                 
                 /* Base handle is a transparent anchor — React Flow's translate(-50%,-50%) is forced via !important */
-                .arch-node-handle { background: transparent !important; border-color: transparent !important; transform: translate(-50%, -50%) !important; }
-                /* ::after renders the visible dot and owns all visual transitions */
-                .arch-node-handle::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; border-radius: 50%; background: var(--neutral-90); border: 1px solid var(--neutral-90); pointer-events: none; transition: transform 0.15s ease-in-out, background 0.15s ease-in-out, border-color 0.15s ease-in-out; }
-                /* Hover: scale ::after from its own center — base anchor is untouched */
-                .arch-node-handle:hover::after { background: var(--callToAction) !important; border-color: var(--callToAction) !important; transform: translate(-50%, -50%) scale(1.5); }
-                /* Connected handle: shown when the selected edge touches this handle */
-                .arch-node-handle--connected::after { background: var(--callToAction) !important; border-color: var(--callToAction) !important; width: 12px !important; height: 12px !important; box-shadow: 0 0 5px var(--callToAction); }
+                .arch-node-handle { 
+                    background: transparent !important; 
+                    border-color: transparent !important; 
+                    transform: translate(-50%, -50%) !important; 
+                }
+
+                /* ::before provides the large, zoom-aware hit area (interaction zone).
+                   It uses the --hit-size variable passed from React state. */
+                .arch-node-handle::before {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: var(--hit-size, 24px);
+                    height: var(--hit-size, 24px);
+                    background: transparent;
+                    pointer-events: auto;
+                }
+                
+                /* ::after renders the visible dot and owns all visual transitions.
+                   By default, it is invisible (opacity: 0) to maintain a zero-footprint aesthetic when idle. */
+                .arch-node-handle::after { 
+                    content: ''; 
+                    position: absolute; 
+                    top: 50%; 
+                    left: 50%; 
+                    transform: translate(-50%, -50%); 
+                    width: 6px; 
+                    height: 6px; 
+                    border-radius: 50%; 
+                    background: var(--neutral-90); 
+                    border: 1px solid var(--neutral-90); 
+                    pointer-events: none; 
+                    opacity: 0;
+                    transition: transform 0.15s ease-in-out, background 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out; 
+                }
+
+                /* Show handles when: 
+                   1. The specific handle is hovered.
+                   2. The parent node is hovered or selected.
+                   3. The user is actively creating or moving an edge on the canvas. 
+                */
+                .arch-node-handle:hover::after,
+                .react-flow__node:hover .arch-node-handle::after,
+                .react-flow__node.selected .arch-node-handle::after,
+                .arch-creating-edge .arch-node-handle::after,
+                .arch-moving-edge .arch-node-handle::after {
+                    opacity: 1;
+                }
+
+                /* Handle Hover State: Provide clear feedback and scale the dot. */
+                .arch-node-handle:hover::after { 
+                    background: var(--callToAction) !important; 
+                    border-color: var(--callToAction) !important; 
+                    transform: translate(-50%, -50%) scale(2.0); 
+                    opacity: 1 !important;
+                }
+
+                /* Connected handle: Always visible and emphasized when the edge/node is selected. */
+                .arch-node-handle--connected::after { 
+                    opacity: 1 !important;
+                    background: var(--callToAction) !important; 
+                    border-color: var(--callToAction) !important; 
+                    width: 10px !important; 
+                    height: 10px !important; 
+                    box-shadow: 0 0 8px var(--callToAction); 
+                }
                 /* React Flow connection states: base stays transparent, ::after carries the color */
                 .react-flow__handle.connecting { background: transparent !important; border-color: transparent !important; }
                 .react-flow__handle.connecting::after { background: #3b82f6 !important; border-color: #2563eb !important; width: 14px !important; height: 14px !important; }

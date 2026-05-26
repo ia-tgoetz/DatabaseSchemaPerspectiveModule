@@ -185,7 +185,7 @@ Container items appear above the category groups, separated by a divider.
 
 Each node renders handles on all four sides (Top, Right, Bottom, Left). The number of handles per side is controlled by `handleCount` (global) or `hideHandles` (per-node). All handles use `type="source"` — `ConnectionMode.Loose` in the ReactFlow instance allows source-to-source connections.
 
-Handle positions are evenly distributed along each side. For example, with `handleCount = 5`, handles appear at 10%, 30%, 50%, 70%, and 90% of the side length.
+**Structural Integrity (Persistence):** To ensure edges remain firmly anchored, handles ALWAYS exist in the DOM with stable dimensions (4x4 px). They are never removed from the DOM, even when hidden, to prevent React Flow routing "snap" or drift.
 
 ### Connection Validation
 
@@ -193,13 +193,18 @@ A connection is valid when `getValidIntersection(source, target)` returns at lea
 
 ### Handle Visual States
 
+Handles follow a **Visual Minimalism** (Zero-Footprint) aesthetic. They are invisible (`opacity: 0`) when idle and only appear during active context.
+
 | State | Appearance |
 |---|---|
-| Default (hidden handles off) | 8×8 px, `var(--neutral-90)` background |
-| Hover (no drag in progress) | Scales 1.5×, `var(--callToAction)` color |
-| Source handle (drag in progress) | 14×14 px, blue (`#3b82f6`) |
-| Valid target (hovering a compatible node) | 14×14 px, green (`#22c55e`), crosshair cursor |
-| Invalid target (hovering an incompatible node) | 14×14 px, red (`#ef4444`), not-allowed cursor |
+| **Idle** | Invisible (Opacity 0), zero layout impact. |
+| **Hover (Node/Handle)** | Dots appear at 6x6 px, `var(--neutral-90)`. |
+| **Selected (Node)** | All handles on the node become visible. |
+| **Connecting/Moving** | All handles on the canvas become visible to show valid targets. |
+| **Handle Hover** | Dot scales 2.0x, color changes to `var(--callToAction)`. |
+| **Connected & Selected** | Dot remains visible at 10x10 px with a `var(--callToAction)` glow. |
+| **Valid Target** | Dot scales to 14x14 px, green (`#22c55e`), crosshair cursor. |
+| **Invalid Target** | Dot scales to 14x14 px, red (`#ef4444`), not-allowed cursor. |
 
 ### ReactFlow CSS Class Behavior (v11)
 
@@ -211,11 +216,14 @@ The invalid target detection therefore uses:
 .arch-node-handle.connecting:not(.valid):hover { ... }
 ```
 
-This requires `.connecting` (hovered target OR source), excludes `.valid` (valid targets), and uses `:hover` to distinguish the hovered target from the stationary source handle (which also has `.connecting` but is not `:hover`).
-
 ### Hit Area
 
-Each handle has a transparent 30×30 px `::after` pseudo-element to expand the clickable area without changing the visual size.
+**Interaction Generosity:** To ensure handles are "zoom-proof," the interaction target is decoupled from the visual dot:
+- **Anchor Element:** A fixed 4x4 px transparent div (ensures precise connection points).
+- **Hit Area (`::before`):** A transparent pseudo-element that scales with zoom (targeting 24px at 1.0 zoom, up to 40px at low zoom). 
+- **Visual Dot (`::after`):** The visible minimalist dot that handles all transitions and scaling.
+
+This decoupling ensures that connections are always flush with the node edge while providing a massive, easy-to-hit target.
 
 ### Cursor Context
 
@@ -404,7 +412,7 @@ When `snapEnabled` is true, node drops and drags snap to a `snapPixels × snapPi
 
 ### Connected Handle Highlight
 
-When an edge is selected, the two handles it connects to are highlighted: they grow to 12 px and glow in `var(--callToAction)`. This makes it immediately clear which endpoints an edge spans, even when handles are normally hidden (`hideHandles: true`).
+When an edge is selected, the two handles it connects to are highlighted: they grow to 10px and glow in `var(--callToAction)`. This makes it immediately clear which endpoints an edge spans, even when handles are normally hidden (`hideHandles: true`).
 
 ### Read-only Mode
 

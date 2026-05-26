@@ -74,14 +74,22 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
         boxShadow: selected ? '0 0 0 2px rgba(0, 123, 255, 0.25)' : (restStyle.boxShadow || '0 2px 4px rgba(0,0,0,0.1)')
     };
 
-    const hitSize = Math.max(12, Math.round(20 / zoom));
+    // Enhanced hit area: generous size that remains consistent in screen pixels for usability.
+    // Targeting ~24px at 1.0 zoom, scaling up to ~40px as we zoom out.
+    const hitSize = Math.min(40, Math.max(16, Math.round(24 / zoom)));
 
-    const handleStyle: React.CSSProperties = {
+    const handleStyle: any = {
         background: 'transparent',
-        width: showHandles ? `${hitSize}px` : '0px',
-        height: showHandles ?`${hitSize}px` : '0px',
+        width: '4px',
+        height: '4px',
+        // Control interaction and base visibility via showHandles.
+        // We keep the element size small and fixed (4px) to ensure React Flow 
+        // maintains perfect edge alignment regardless of zoom.
+        // The actual hit area is rendered via ::before in the CSS.
         opacity: showHandles ? 1 : 0,
-        pointerEvents: showHandles ? 'auto' : 'none'
+        pointerEvents: showHandles ? 'auto' : 'none',
+        zIndex: 20, // Ensure handles are above node content and labels
+        '--hit-size': `${hitSize}px`
     };
     
     const handleCount = Math.max(1, Math.min(8, Number(data.handleCount) || 5));

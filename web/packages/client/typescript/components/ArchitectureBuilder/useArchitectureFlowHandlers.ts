@@ -158,10 +158,18 @@ export const useArchitectureFlowHandlers = ({
                 const nextEdges = { ...rawEdgesDict };
                 const oldData = nextEdges[oldEdge.id];
                 if (!validTypes.includes(oldData.connectionType)) return;
-                const src = getHandlePixelPos(newConnection.source, newConnection.sourceHandle || '', rawNodesDict, globalHandleCount);
-                const tgt = getHandlePixelPos(newConnection.target, newConnection.targetHandle || '', rawNodesDict, globalHandleCount);
-                const waypoints = src && tgt ? computeAutoWaypoints(src.x, src.y, src.position, tgt.x, tgt.y, tgt.position) : [];
-                nextEdges[oldEdge.id] = { ...oldData, source: newConnection.source, target: newConnection.target, sourceHandle: newConnection.sourceHandle, targetHandle: newConnection.targetHandle, waypoints };
+                
+                // Clear waypoints after the edge has been moved/reconnected.
+                // This ensures the edge re-routes automatically based on its new handles.
+                nextEdges[oldEdge.id] = { 
+                    ...oldData, 
+                    source: newConnection.source, 
+                    target: newConnection.target, 
+                    sourceHandle: newConnection.sourceHandle, 
+                    targetHandle: newConnection.targetHandle, 
+                    waypoints: [] 
+                };
+                
                 store.props.write('edges', nextEdges);
             }
         } catch (error: any) {
@@ -170,7 +178,7 @@ export const useArchitectureFlowHandlers = ({
                 componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onEdgeUpdate'));
             }
         }
-    }, [store, rawEdgesDict, rawNodesDict, globalHandleCount, getValidIntersection, componentEvents]);
+    }, [store, rawEdgesDict, getValidIntersection, componentEvents]);
 
     const onEdgeUpdateStart = React.useCallback((event: any, edge: any) => {
         updatingEdgeRef.current = edge?.id || null;
@@ -398,6 +406,9 @@ export const useArchitectureFlowHandlers = ({
                 const dy = Math.round(node.position.y) - nextNodes[node.id].y;
                 nextNodes[node.id] = { ...nextNodes[node.id], x: Math.round(node.position.x), y: Math.round(node.position.y) };
 
+                const nextEdges = { ...rawEdgesDict };
+                let edgesChanged = false;
+
                 if (isContainer && dragStartPos.current && (dx !== 0 || dy !== 0)) {
                     Object.keys(dragStartPos.current.nodes).forEach(childId => {
                         if (nextNodes[childId]) {
@@ -406,18 +417,42 @@ export const useArchitectureFlowHandlers = ({
                     });
 
                     const edgeDragData = dragStartPos.current.edges as Record<string, { x: number; y: number }[]>;
-                    if (Object.keys(edgeDragData).length > 0) {
-                        const nextEdges = { ...rawEdgesDict };
-                        Object.entries(edgeDragData).forEach(([edgeId, originalWps]: [string, { x: number; y: number }[]]) => {
-                            if (nextEdges[edgeId]) {
-                                nextEdges[edgeId] = { ...nextEdges[edgeId], waypoints: originalWps.map(wp => ({ x: wp.x + dx, y: wp.y + dy })) };
+                    // Translate waypoints for captured edges (those that were entirely inside the container)
+                    Object.entries(edgeDragData).forEach(([edgeId, originalWps]: [string, { x: number; y: number }[]]) => {
+                        if (nextEdges[edgeId]) {
+                            nextEdges[edgeId] = { ...nextEdges[edgeId], waypoints: originalWps.map(wp => ({ x: wp.x + dx, y: wp.y + dy })) };
+                            edgesChanged = true;
+                        }
+                    });
+
+                    // Clear waypoints for ANY other edges connected to the container or its moved children 
+                    // that weren't translated above (meaning they had waypoints outside the container).
+                    const movedNodeIds = new Set([node.id, ...Object.keys(dragStartPos.current.nodes)]);
+                    Object.keys(nextEdges).forEach(edgeId => {
+                        if (edgeDragData[edgeId]) return; // Already translated
+                        const edge = nextEdges[edgeId];
+                        if (movedNodeIds.has(edge.source) || movedNodeIds.has(edge.target)) {
+                            if (Array.isArray(edge.waypoints) && edge.waypoints.length > 0) {
+                                nextEdges[edgeId] = { ...edge, waypoints: [] };
+                                edgesChanged = true;
                             }
-                        });
-                        store.props.write('edges', nextEdges);
-                    }
+                        }
+                    });
+                } else if (dx !== 0 || dy !== 0) {
+                    // Regular node move: clear waypoints for all connected edges to force re-routing
+                    Object.keys(nextEdges).forEach(edgeId => {
+                        const edge = nextEdges[edgeId];
+                        if (edge.source === node.id || edge.target === node.id) {
+                            if (Array.isArray(edge.waypoints) && edge.waypoints.length > 0) {
+                                nextEdges[edgeId] = { ...edge, waypoints: [] };
+                                edgesChanged = true;
+                            }
+                        }
+                    });
                 }
 
                 store.props.write('nodes', nextNodes);
+                if (edgesChanged) store.props.write('edges', nextEdges);
                 dragStartPos.current = null;
             }
         } catch (error: any) {
