@@ -55,12 +55,13 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
     const { backgroundColor: imageBg, ...restStyle } = data.style || {};
 
     const combinedStyle: React.CSSProperties = {
-        padding: '10px',
+        padding: '0px',
         borderRadius: '8px',
         backgroundColor: 'var(--neutral-10)',
         border: '1px solid var(--neutral-50)',
         color: 'var(--neutral-90)',
         display: 'flex',
+
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
@@ -77,8 +78,8 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
 
     const handleStyle: React.CSSProperties = {
         background: 'transparent',
-        width: `${hitSize}px`,
-        height: `${hitSize}px`,
+        width: showHandles ? `${hitSize}px` : '0px',
+        height: showHandles ?`${hitSize}px` : '0px',
         opacity: showHandles ? 1 : 0,
         pointerEvents: showHandles ? 'auto' : 'none'
     };
