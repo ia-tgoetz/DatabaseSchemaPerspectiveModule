@@ -1,0 +1,25 @@
+{
+  "profile": {
+    "type": "mongoDB"
+  },
+  "settings": {
+    "connectionProperties": "name\u003dvalue",
+    "connectionRetryMs": 30000,
+    "databaseName": "architectures",
+    "hosts": [
+      "10.10.85.36:27017"
+    ],
+    "password": {
+      "data": {
+        "ciphertext": "-tNgzjtSprGW2Q",
+        "encrypted_key": "ntV-_Uhm7l5AMGBEuAR4rdqqWLK9HodruwfQcWM153Odaj3sdRMzZw",
+        "iv": "F2KZxl5Ifk_DsuKb",
+        "protected": "eyJhbGciOiJBMjU2S1ciLCJlbmMiOiJBMjU2R0NNIiwiaWF0IjoxNzc4NzcyNzM3LCJ6aXAiOiJERUYifQ",
+        "tag": "HGQiwWRfrquLmmTjGUyuxw"
+      },
+      "type": "Embedded"
+    },
+    "scheme": "mongodb",
+    "username": "admin"
+  }
+}

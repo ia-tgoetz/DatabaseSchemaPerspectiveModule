@@ -238,6 +238,7 @@ export const CustomEdge = ({
                             backgroundColor: 'var(--neutral-10)', padding: '2px 8px', borderRadius: '4px',
                             border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
                             color: style?.stroke || 'var(--neutral-90)', pointerEvents: 'none',
+                            zIndex: 1002,
                         }}
                         className="nodrag nopan"
                     >
