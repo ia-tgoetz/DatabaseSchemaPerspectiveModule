@@ -67,9 +67,11 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                     }}
                     onMouseEnter={(e) => {
                         (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--neutral-40)';
+                        (e.currentTarget as HTMLElement).style.cursor = 'pointer';
                     }}
                     onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.backgroundColor = finalLabelBg;
+                        (e.currentTarget as HTMLElement).style.cursor = 'grab';
                     }}
                     onClick={(e) => {
                         e.stopPropagation();
