@@ -31,13 +31,13 @@ const NodeImage = ({ src }: { src: string }) => {
         return (
             <div
                 id={scopeId}
-                style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+                style={{padding: '4px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
                 dangerouslySetInnerHTML={{ __html: svgHtml }}
             />
         );
     }
     const dataUri = toSafeDataUri(src);
-    return dataUri ? <img src={dataUri} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null;
+    return dataUri ? <img src={dataUri} style={{padding: '4px', width: '100%', height: '100%', objectFit: 'contain' }} /> : null;
 };
 
 export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureNodeData>) => {
@@ -75,8 +75,8 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
     };
 
     // Enhanced hit area: generous size that remains consistent in screen pixels for usability.
-    // Targeting ~24px at 1.0 zoom, scaling up to ~40px as we zoom out.
-    const hitSize = Math.min(40, Math.max(16, Math.round(24 / zoom)));
+    // Targeting ~24px at 1.0 zoom, scaling up to ~22px as we zoom out.
+    const hitSize = Math.min(22, Math.max(16, Math.round(24 / zoom)));
 
     const handleStyle: any = {
         background: 'transparent',

@@ -274,7 +274,7 @@ export const CustomEdge = ({
                                     backgroundColor: 'var(--callToAction)',
                                     opacity: 0.85,
                                     cursor: isH ? 'ns-resize' : 'ew-resize',
-                                    zIndex: 10,
+                                    zIndex: 1001,
                                     pointerEvents: 'all',
                                     touchAction: 'none',
                                     boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
