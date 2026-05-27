@@ -1,0 +1,616 @@
+{
+  "custom": {
+    "date": {
+      "$": [
+        "ts",
+        192,
+        1779894804430
+      ],
+      "$ts": 1779894804430
+    },
+    "filename": "Architecture_260527111324",
+    "lastSave": "658c503d91d54e5232a3afed"
+  },
+  "events": {
+    "system": {
+      "onStartup": {
+        "config": {
+          "script": "\t# Defines the type of Ignition resource being accessed (e.g., a Perspective View, Scripting Package, )\n\tresourceType\u003d\"view\"\n\t# Specific name of the current resource\n\tresourceName\u003dself.view.id.split(\"/\")[-1]\n\t# Custom logger name to define purpose of log\n\tloggerName\u003d\"LoadMongoData\"\n\tfullLoggerName\u003d\u0027exchange.archBuilder.{resourceType}.{resourceName}.{loggerName}\u0027.format(resourceType\u003dresourceType,resourceName\u003dresourceName,loggerName\u003dloggerName)\n\tlogger\u003dsystem.util.getLogger(fullLoggerName)\n\n\n\tdef getConnectorState(name):\n\t\tallow\u003dTrue\n\t\tfor connector in self.session.custom.admin.mongoAccess:\n\t\t\tif name\u003d\u003dconnector[\u0027name\u0027]:\n\t\t\t\tallow\u003dconnector[\u0027allow\u0027]\n\t\t\t\tbreak\n\t\treturn allow\n\t\n\tself.custom.date\u003dsystem.date.now()\n\tconnectors\u003dsystem.mongodb.listConnectorInfo()\n\tsystem.perspective.print(connectors)\n\tconnectorDrop\u003d[]\n\tfor connector in connectors:\n\t\tconnectorDrop.append({\n\t\t  \"value\": connector[\u0027name\u0027],\n\t\t  \"label\": connector[\u0027name\u0027]\n\t\t})\n\n\t\t\n\tself.getChild(\"root\").getChild(\"Connectors\").getChild(\"Connectors\").props.options\u003dconnectorDrop\n\tif len(connectorDrop)\u003e0:\n\t\tfirstCollection\u003dconnectorDrop[-1][\u0027value\u0027]\n\t\tself.getChild(\"root\").getChild(\"Connectors\").getChild(\"Connectors\").props.value\u003dfirstCollection\n\t\n\tself.getChild(\"root\").getChild(\"File\").getChild(\"File\").props.value\u003dNone\n\tself.getChild(\"root\").getChild(\"Collections\").getChild(\"Collectios\").props.value\u003dNone"
+        },
+        "scope": "G",
+        "type": "script"
+      }
+    }
+  },
+  "params": {
+    "load": true
+  },
+  "propConfig": {
+    "custom.date": {
+      "persistent": true
+    },
+    "custom.filename": {
+      "binding": {
+        "config": {
+          "path": "view.custom.date"
+        },
+        "transforms": [
+          {
+            "formatType": "datetime",
+            "formatValue": "YYMMddHHmmss",
+            "type": "format"
+          },
+          {
+            "code": "\treturn \u0027Architecture_{}\u0027.format(value)",
+            "type": "script"
+          }
+        ],
+        "type": "property"
+      },
+      "persistent": true
+    },
+    "params.load": {
+      "paramDirection": "input",
+      "persistent": true
+    },
+    "props.defaultSize.height": {
+      "binding": {
+        "config": {
+          "expression": "if({view.params.load},230,\r\nif(!{/root/ToggleSwitch.props.selected},260,428))"
+        },
+        "type": "expr"
+      }
+    }
+  },
+  "props": {
+    "defaultSize": {
+      "width": 473
+    }
+  },
+  "root": {
+    "children": [
+      {
+        "children": [
+          {
+            "meta": {
+              "name": "Label"
+            },
+            "position": {
+              "basis": "100px"
+            },
+            "props": {
+              "style": {
+                "marginRight": "2px"
+              },
+              "text": "Connector:",
+              "textStyle": {
+                "textAlign": "right"
+              }
+            },
+            "type": "ia.display.label"
+          },
+          {
+            "meta": {
+              "name": "Connectors"
+            },
+            "position": {
+              "grow": 1
+            },
+            "props": {
+              "options": [
+                {
+                  "label": "SE-Notes",
+                  "value": "SE-Notes"
+                },
+                {
+                  "label": "se-notes-arch",
+                  "value": "se-notes-arch"
+                }
+              ],
+              "showClearIcon": true,
+              "value": "se-notes-arch"
+            },
+            "type": "ia.input.dropdown"
+          }
+        ],
+        "meta": {
+          "name": "Connectors"
+        },
+        "position": {
+          "basis": "34px",
+          "shrink": 0
+        },
+        "props": {
+          "style": {
+            "margin": "8px"
+          }
+        },
+        "type": "ia.container.flex"
+      },
+      {
+        "children": [
+          {
+            "meta": {
+              "name": "Label"
+            },
+            "position": {
+              "basis": "100px"
+            },
+            "props": {
+              "style": {
+                "marginRight": "2px"
+              },
+              "text": "Collection:",
+              "textStyle": {
+                "textAlign": "right"
+              }
+            },
+            "type": "ia.display.label"
+          },
+          {
+            "meta": {
+              "name": "Collectios"
+            },
+            "position": {
+              "grow": 1
+            },
+            "propConfig": {
+              "props.options": {
+                "binding": {
+                  "config": {
+                    "path": ".../Connectors/Connectors.props.value"
+                  },
+                  "transforms": [
+                    {
+                      "code": "\tdef getCollectionState(collection,connector):\n\t\tallow\u003dTrue\n\t\ttry:\n\t\t\tfor con in self.session.custom.admin.mongoAccess:\n\t\t\t\tif con[\u0027name\u0027]\u003d\u003dconnector:\n\t\t\t\t\tfor col in con.collections:\n\t\t\t\t\t\tsystem.perspective.print(col)\n\t\t\t\t\t\tif collection\u003d\u003dcol[\u0027name\u0027]:\n\t\t\t\t\t\t\tallow\u003dcol[\u0027allow\u0027]\n\t\t\t\t\t\t\tsystem.perspective.print(allow)\n\t\t\t\t\t\t\tbreak\n\t\texcept:\n\t\t\tpass\n\t\treturn allow \n\tif value\u003d\u003d\u0027\u0027 or value\u003d\u003dNone:\n\t\treturn []\n\t\n\tcollections\u003dsystem.mongodb.listCollectionNames(value)\n\tcollectionDrop\u003d[]\n\tfor collection in collections:\n\t\t#return getCollectionState(\u0027Architecture\u0027,value)\n\t\tif getCollectionState(collection,value):\n\t\t\tcollectionDrop.append({\n\t\t\t  \"value\": collection,\n\t\t\t  \"label\": collection\n\t\t\t})\n\treturn collectionDrop",
+                      "type": "script"
+                    }
+                  ],
+                  "type": "property"
+                }
+              },
+              "props.value": {
+                "binding": {
+                  "config": {
+                    "path": ".../Connectors/Connectors.props.value"
+                  },
+                  "enabled": false,
+                  "transforms": [
+                    {
+                      "code": "\tif value\u003d\u003d\u0027\u0027:\n\t\treturn None\n\tcollections\u003dsystem.mongodb.listCollectionNames(value)\n\tif len(collections)\u003e0:\n\t\treturn collections[0]\n\telse:\n\t\treturn None",
+                      "type": "script"
+                    }
+                  ],
+                  "type": "property"
+                }
+              }
+            },
+            "props": {
+              "showClearIcon": true,
+              "value": null
+            },
+            "type": "ia.input.dropdown"
+          }
+        ],
+        "meta": {
+          "name": "Collections"
+        },
+        "position": {
+          "basis": "34px",
+          "shrink": 0
+        },
+        "props": {
+          "style": {
+            "margin": "8px",
+            "marginTop": 0
+          }
+        },
+        "type": "ia.container.flex"
+      },
+      {
+        "children": [
+          {
+            "meta": {
+              "name": "Label"
+            },
+            "position": {
+              "basis": "100px"
+            },
+            "props": {
+              "style": {
+                "marginRight": "2px",
+                "paddingRight": 2
+              },
+              "text": "Filter:",
+              "textStyle": {
+                "fontStyle": "italic",
+                "textAlign": "right"
+              }
+            },
+            "type": "ia.display.label"
+          },
+          {
+            "meta": {
+              "name": "TextField"
+            },
+            "position": {
+              "basis": "150px",
+              "grow": 1
+            },
+            "props": {
+              "deferUpdates": false,
+              "placeholder": "Filename/MeetingID..."
+            },
+            "type": "ia.input.text-field"
+          }
+        ],
+        "meta": {
+          "name": "Filter"
+        },
+        "position": {
+          "basis": "34px",
+          "shrink": 0
+        },
+        "props": {
+          "style": {
+            "margin": "8px",
+            "marginTop": 0
+          }
+        },
+        "type": "ia.container.flex"
+      },
+      {
+        "children": [
+          {
+            "meta": {
+              "name": "Label"
+            },
+            "position": {
+              "basis": "100px",
+              "shrink": 0
+            },
+            "props": {
+              "style": {
+                "marginRight": "2px"
+              },
+              "text": "Architecture:",
+              "textStyle": {
+                "textAlign": "right"
+              }
+            },
+            "type": "ia.display.label"
+          },
+          {
+            "meta": {
+              "name": "File"
+            },
+            "position": {
+              "grow": 1
+            },
+            "propConfig": {
+              "props.options": {
+                "binding": {
+                  "config": {
+                    "struct": {
+                      "collection": "{.../Collections/Collectios.props.value}",
+                      "connection": "{.../Connectors/Connectors.props.value}",
+                      "keyword": "{.../Filter/TextField.props.text}"
+                    },
+                    "waitOnAll": true
+                  },
+                  "transforms": [
+                    {
+                      "code": "\tif value[\u0027collection\u0027]\u003d\u003d\u0027\u0027 or value[\u0027collection\u0027]\u003d\u003dNone or value[\u0027connection\u0027]\u003d\u003dNone:\n\t\treturn []\n\tcollection\u003dvalue[\u0027collection\u0027]\n\tkeyword\u003dvalue[\u0027keyword\u0027]\n\tconnection\u003dvalue[\u0027connection\u0027]\n#\tarchs\u003dsystem.mongodb.find(connection, collection, {\n#\t  \u0027$or\u0027: [\n#\t    { \u0027filename\u0027: { \u0027$regex\u0027: keyword, \u0027$options\u0027: \"i\" } },\n#\t    { \u0027meetingId\u0027: { \u0027$regex\u0027: keyword, \u0027$options\u0027: \"i\" } }\n#\t  ]\n#\t},{\u0027filename\u0027:1})\n\ttry:\n\t\tarchs\u003dsystem.mongodb.aggregate(connection,collection,\n\t\t\t[\n\t\t\t{\n\t\t\t  \u0027$match\u0027: {\n\t\t\t    \u0027$or\u0027: [\n\t\t\t      { \u0027filename\u0027: { \u0027$regex\u0027: keyword, \u0027$options\u0027: \"i\" } },\n\t\t\t      { \u0027meetingId\u0027: { \u0027$regex\u0027: keyword, \u0027$options\u0027: \"i\" } }\n\t\t\t    ]\n\t\t\t  }\n\t\t\t},\n\t\t\t{\n\t\t\t  \u0027$sort\u0027: { \u0027saveDate\u0027: -1 }\n\t\t\t},\n\t\t\t{\n\t\t\t  \u0027$limit\u0027: 25\n\t\t\t},\n\t\t\t{\n\t\t\t  \u0027$project\u0027: { \u0027filename\u0027: 1 , \u0027saveDate\u0027: 1}\n\t\t\t}\n\t\t\t]\n\t\t\t)\n\texcept:\n\t\tarchs\u003d[]\n\toptions\u003d[]\n\tfor arch in archs:\n\t\toptions.append({\n\t\t\t\"value\": arch[\u0027_id\u0027],\n\t\t\t\"label\": \"{}- ({})\".format( arch[\u0027filename\u0027], system.date.format(arch[\u0027saveDate\u0027],\"MM/dd/yy HH:MM\"))\n\t\t\t})\n\treturn options",
+                      "type": "script"
+                    }
+                  ],
+                  "type": "expr-struct"
+                }
+              },
+              "props.placeholder.text": {
+                "binding": {
+                  "config": {
+                    "path": "this.props.options"
+                  },
+                  "transforms": [
+                    {
+                      "code": "\treturn \u0027Select Architecture ({} options shown)...\u0027.format(len(value))",
+                      "type": "script"
+                    }
+                  ],
+                  "type": "property"
+                }
+              }
+            },
+            "props": {
+              "placeholder": {},
+              "showClearIcon": true,
+              "value": null
+            },
+            "type": "ia.input.dropdown"
+          }
+        ],
+        "meta": {
+          "name": "File"
+        },
+        "position": {
+          "basis": "34px",
+          "shrink": 0
+        },
+        "props": {
+          "style": {
+            "margin": "8px",
+            "marginTop": 0
+          }
+        },
+        "type": "ia.container.flex"
+      },
+      {
+        "meta": {
+          "name": "ToggleSwitch"
+        },
+        "position": {
+          "basis": "36px",
+          "shrink": 0
+        },
+        "propConfig": {
+          "position.display": {
+            "binding": {
+              "config": {
+                "expression": "!{view.params.load}"
+              },
+              "type": "expr"
+            }
+          }
+        },
+        "props": {
+          "label": {
+            "text": "Instance Wizard"
+          }
+        },
+        "type": "ia.input.toggle-switch"
+      },
+      {
+        "events": {
+          "component": {
+            "onActionPerformed": {
+              "config": {
+                "script": "\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027,True)\n\tsystem.perspective.sendMessage(\u0027selectFrame\u0027, {\u0027selected\u0027:True})\n\tconnector\u003d self.parent.getChild(\"Connectors\").getChild(\"Connectors\").props.value\n\tcollection\u003dself.parent.getChild(\"Collections\").getChild(\"Collectios\").props.value\n\tdocId\u003dself.parent.getChild(\"File\").getChild(\"File\").props.value\n\tsystem.perspective.sendMessage(\u0027loadArchitecture\u0027, {\u0027connector\u0027:connector, \u0027collection\u0027:collection,\u0027id\u0027:docId, \u0027load\u0027:self.view.params.load}, scope\u003d\u0027session\u0027)\n\tsystem.perspective.closePopup(\"insertArch\")"
+              },
+              "scope": "G",
+              "type": "script"
+            }
+          }
+        },
+        "meta": {
+          "name": "Button"
+        },
+        "position": {
+          "shrink": 0
+        },
+        "propConfig": {
+          "position.display": {
+            "binding": {
+              "config": {
+                "expression": "{view.params.load}||!{../ToggleSwitch.props.selected}"
+              },
+              "type": "expr"
+            }
+          },
+          "props.enabled": {
+            "binding": {
+              "config": {
+                "expression": "{../File/File.props.value}!\u003dnull"
+              },
+              "type": "expr"
+            }
+          },
+          "props.text": {
+            "binding": {
+              "config": {
+                "path": "view.params.load"
+              },
+              "transforms": [
+                {
+                  "fallback": null,
+                  "inputType": "scalar",
+                  "mappings": [
+                    {
+                      "input": true,
+                      "output": "Load"
+                    },
+                    {
+                      "input": false,
+                      "output": "Insert"
+                    }
+                  ],
+                  "outputType": "scalar",
+                  "type": "map"
+                }
+              ],
+              "type": "property"
+            }
+          }
+        },
+        "props": {
+          "style": {
+            "backgroundColor": "--success",
+            "margin": "8px",
+            "marginTop": "8px",
+            "overflow": "auto"
+          }
+        },
+        "type": "ia.input.button"
+      },
+      {
+        "children": [
+          {
+            "meta": {
+              "name": "Label"
+            },
+            "position": {
+              "basis": "32px",
+              "shrink": 0
+            },
+            "props": {
+              "style": {
+                "textAlign": "center"
+              },
+              "text": "Multi-Instance Wizard"
+            },
+            "type": "ia.display.label"
+          },
+          {
+            "meta": {
+              "name": "MultiStateButton"
+            },
+            "position": {
+              "basis": "34px"
+            },
+            "propConfig": {
+              "props.indicatorValue": {
+                "binding": {
+                  "config": {
+                    "path": "this.props.controlValue"
+                  },
+                  "type": "property"
+                }
+              }
+            },
+            "props": {
+              "controlValue": 0,
+              "orientation": "row",
+              "states": [
+                {
+                  "selectedStyle": {
+                    "backgroundColor": "--callToAction--active",
+                    "classes": ""
+                  },
+                  "text": "Horizontal",
+                  "unselectedStyle": {
+                    "classes": ""
+                  },
+                  "value": 0
+                },
+                {
+                  "selectedStyle": {
+                    "backgroundColor": "--callToAction--active",
+                    "classes": ""
+                  },
+                  "text": "Vertical",
+                  "unselectedStyle": {
+                    "classes": ""
+                  },
+                  "value": 1
+                }
+              ],
+              "style": {
+                "margin": "8px"
+              }
+            },
+            "type": "ia.input.multi-state-button"
+          },
+          {
+            "meta": {
+              "name": "Instances"
+            },
+            "props": {
+              "params": {
+                "label": "Instances:",
+                "labelSize": 170,
+                "value": 2
+              },
+              "path": "Exchange/ArchitectureBuilder/General/NumericInput",
+              "style": {
+                "margin": "8px"
+              }
+            },
+            "type": "ia.display.view"
+          },
+          {
+            "meta": {
+              "name": "Spacing"
+            },
+            "props": {
+              "params": {
+                "label": "Instance Spacing (px):",
+                "labelSize": 170,
+                "value": 20
+              },
+              "path": "Exchange/ArchitectureBuilder/General/NumericInput",
+              "style": {
+                "margin": "8px"
+              }
+            },
+            "type": "ia.display.view"
+          },
+          {
+            "events": {
+              "component": {
+                "onActionPerformed": {
+                  "config": {
+                    "script": "\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027,True)\n\tsystem.perspective.sendMessage(\u0027selectFrame\u0027, {\u0027selected\u0027:True})\n\tconnector\u003d self.parent.parent.getChild(\"Connectors\").getChild(\"Connectors\").props.value\n\tcollection\u003dself.parent.parent.getChild(\"Collections\").getChild(\"Collectios\").props.value\n\tdocId\u003dself.parent.parent.getChild(\"File\").getChild(\"File\").props.value\n\tsystem.perspective.sendMessage(\u0027multiInstanceArchitecture\u0027, {\u0027connector\u0027:connector, \u0027collection\u0027:collection,\u0027id\u0027:docId, \u0027instances\u0027: self.getSibling(\"Instances\").props.params.value, \u0027spacing\u0027: self.getSibling(\"Spacing\").props.params.value, \u0027direction\u0027: self.getSibling(\"MultiStateButton\").props.controlValue}, scope\u003d\u0027session\u0027)\n\tsystem.perspective.closePopup(\u0027insertArch\u0027)\n\t"
+                  },
+                  "scope": "G",
+                  "type": "script"
+                }
+              }
+            },
+            "meta": {
+              "name": "Button"
+            },
+            "position": {
+              "shrink": 0
+            },
+            "propConfig": {
+              "props.enabled": {
+                "binding": {
+                  "config": {
+                    "expression": "{.../File/File.props.value}!\u003dNull"
+                  },
+                  "type": "expr"
+                }
+              }
+            },
+            "props": {
+              "style": {
+                "margin": "8px",
+                "marginTop": "8px",
+                "overflow": "auto"
+              },
+              "text": "Insert"
+            },
+            "type": "ia.input.button"
+          }
+        ],
+        "meta": {
+          "name": "root"
+        },
+        "position": {
+          "shrink": 0
+        },
+        "propConfig": {
+          "position.display": {
+            "binding": {
+              "config": {
+                "expression": "{../ToggleSwitch.props.selected}"
+              },
+              "type": "expr"
+            }
+          }
+        },
+        "props": {
+          "direction": "column"
+        },
+        "type": "ia.container.flex"
+      }
+    ],
+    "meta": {
+      "name": "root"
+    },
+    "props": {
+      "direction": "column"
+    },
+    "type": "ia.container.flex"
+  }
+}

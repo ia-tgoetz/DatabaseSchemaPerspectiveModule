@@ -11,6 +11,10 @@ services:
       - module-dev-ignition-data-config-resources:/usr/local/bin/ignition/data/config/resources
       - module-dev-ignition-projects:/usr/local/bin/ignition/data/projects
       - ../build:/usr/local/bin/ignition/external-modules
+      # 1. Mount your local modules to a temporary "staging" directory
+      - module-dev-ignition-modules:/staging-modules:ro
+      # 2. Mount the startup script
+      - ./copy-modules.sh:/usr/local/bin/ignition/data/init.d/copy-modules.sh
     labels:
       - traefik.enable=true
       - traefik.hostname=${IGN_HOSTNAME:-module-dev-ignition}
@@ -81,5 +85,10 @@ volumes:
       type: none
       device: gateway-data/projects
       o: bind
+  module-dev-ignition-modules:
+    driver: local
+    driver_opts:
+      type: none
+      device: modules
+      o: bind 
   pgModDev:
-

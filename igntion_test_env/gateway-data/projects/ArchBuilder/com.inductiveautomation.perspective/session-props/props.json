@@ -64,6 +64,9 @@
   },
   "props": {
     "address": "172.18.0.3",
+    "appBar": {
+      "togglePosition": "hidden"
+    },
     "device": {},
     "geolocation": {},
     "locale": "en-US",
