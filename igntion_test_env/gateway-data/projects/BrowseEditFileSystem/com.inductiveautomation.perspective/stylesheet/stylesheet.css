@@ -25,3 +25,20 @@
 ::-webkit-scrollbar-thumb:hover { 
   background:var(--neutral-70);  */
 } 
+
+/* 1. Define the rotation movement */
+@keyframes spin-animation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 2. Apply it to a style class */
+.psc-infinite-rotate {
+  /* animation: [name] [duration] [timing-function] [iteration-count] */
+  animation: spin-animation 1s linear infinite;
+  overflow: hidden;
+}

@@ -49,7 +49,7 @@ export const CustomEdge = ({
     const isHorizSrc = sourcePosition === 'right' || sourcePosition === 'left';
     const isHorizTgt = targetPosition === 'right' || targetPosition === 'left';
 
-    // Priority: active drag > stored custom waypoints > auto-routed.
+    // Priority: active drag > stored custom waypoints > auto-routed (only if NO waypoints exist).
     const baseWaypoints: Waypoint[] =
         liveWaypoints ??
         (storedWaypoints.length > 0

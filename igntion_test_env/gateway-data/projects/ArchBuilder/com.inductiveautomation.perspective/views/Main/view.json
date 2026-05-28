@@ -3235,7 +3235,10 @@
       "userName": "admin"
     },
     "onclick": {
-      "type": "pane"
+      "action": "delete",
+      "id": "I0fc23963",
+      "paletteId": "container",
+      "type": "node"
     },
     "paletteItems": [
       {
@@ -4534,13 +4537,13 @@
           "classes": ""
         },
         "supportedConnections": [
-          "standard",
+          "client",
           "rest",
           "gateway-network",
           "opc-ua",
           "mqtt",
           "kafka",
-          "client",
+          "standard",
           "opc-com",
           "mongodb",
           "device-driver",
@@ -4733,7 +4736,7 @@
           "standard"
         ],
         "swappableWith": [
-          "erp-system"
+          "Note"
         ],
         "tooltip": "Manufacturing Execution System",
         "typeId": "Label"
@@ -4753,7 +4756,7 @@
           "standard"
         ],
         "swappableWith": [
-          "erp-system"
+          "Label"
         ],
         "tooltip": "",
         "typeId": "Note"
@@ -5413,18 +5416,6 @@
                 {
                   "enabled": true,
                   "icon": {
-                    "path": "material/dashboard"
-                  },
-                  "items": [],
-                  "label": "Insert",
-                  "style": {
-                    "classes": ""
-                  },
-                  "target": ""
-                },
-                {
-                  "enabled": true,
-                  "icon": {
                     "path": "material/save"
                   },
                   "items": [],
@@ -5437,34 +5428,10 @@
                 {
                   "enabled": true,
                   "icon": {
-                    "path": "material/save"
-                  },
-                  "items": [],
-                  "label": "Save As...",
-                  "style": {
-                    "classes": ""
-                  },
-                  "target": ""
-                },
-                {
-                  "enabled": true,
-                  "icon": {
                     "path": "material/file_copy"
                   },
                   "items": [],
                   "label": "Manage Files",
-                  "style": {
-                    "classes": ""
-                  },
-                  "target": ""
-                },
-                {
-                  "enabled": true,
-                  "icon": {
-                    "path": "material/local_printshop"
-                  },
-                  "items": [],
-                  "label": "Print",
                   "style": {
                     "classes": ""
                   },
@@ -9061,14 +9028,14 @@
                     "typeId": "Device"
                   },
                   {
-                    "id": "Ic323e976",
-                    "label": "Client",
-                    "typeId": "Client"
-                  },
-                  {
                     "id": "I8b418f0f",
                     "label": "Standard",
                     "typeId": "standard"
+                  },
+                  {
+                    "id": "Ic323e976",
+                    "label": "Client",
+                    "typeId": "Client"
                   },
                   {
                     "id": "Ie62f42c2",
@@ -9089,11 +9056,6 @@
                 "label": "Local Visibility",
                 "nodes": [
                   {
-                    "id": "I646528ab",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
                     "id": "Icc4331bd",
                     "label": "Edge IIoT",
                     "typeId": "edge-panel"
@@ -9102,6 +9064,11 @@
                     "id": "Icac69c5e",
                     "label": "Client",
                     "typeId": "Client"
+                  },
+                  {
+                    "id": "I646528ab",
+                    "label": "Device",
+                    "typeId": "Device"
                   }
                 ],
                 "typeId": "container"
@@ -9117,11 +9084,6 @@
                     "typeId": "edge-iiot"
                   },
                   {
-                    "id": "I8c5711b2",
-                    "label": "Edge IIoT",
-                    "typeId": "edge-iiot"
-                  },
-                  {
                     "id": "I0a9c51bb",
                     "label": "Device",
                     "typeId": "Device"
@@ -9130,6 +9092,11 @@
                     "id": "Ife18f906",
                     "label": "Device",
                     "typeId": "Device"
+                  },
+                  {
+                    "id": "I8c5711b2",
+                    "label": "Edge IIoT",
+                    "typeId": "edge-iiot"
                   }
                 ],
                 "typeId": "container"
@@ -9145,6 +9112,16 @@
                     "typeId": "Client"
                   },
                   {
+                    "id": "I99c88086",
+                    "label": "Client",
+                    "typeId": "Client"
+                  },
+                  {
+                    "id": "I9886b433",
+                    "label": "Device",
+                    "typeId": "Device"
+                  },
+                  {
                     "id": "I22d98cfe",
                     "label": "Edge IIoT",
                     "typeId": "edge-panel"
@@ -9158,16 +9135,6 @@
                     "id": "I2c1bb43c",
                     "label": "Edge IIoT",
                     "typeId": "edge-panel"
-                  },
-                  {
-                    "id": "I99c88086",
-                    "label": "Client",
-                    "typeId": "Client"
-                  },
-                  {
-                    "id": "I9886b433",
-                    "label": "Device",
-                    "typeId": "Device"
                   }
                 ],
                 "typeId": "container"
@@ -9176,42 +9143,14 @@
                 "areas": [
                   {
                     "areas": [],
-                    "id": "I14067906",
-                    "label": "Availability Zone B (Backups)",
-                    "nodes": [
-                      {
-                        "id": "I7b930f5a",
-                        "label": "Engine Gateway 1",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "I9efc1e39",
-                        "label": "Engine Gateway 2",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "I1ab81a37",
-                        "label": "IIoT",
-                        "typeId": "Broker"
-                      },
-                      {
-                        "id": "I76484f75",
-                        "label": "Task Gateway",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "I2ced0084",
-                        "label": "Additional Engine Gateways If needed",
-                        "typeId": "standard"
-                      }
-                    ],
-                    "typeId": "container"
-                  },
-                  {
-                    "areas": [],
                     "id": "I0e637e4a",
                     "label": "Availability Zone A",
                     "nodes": [
+                      {
+                        "id": "Icd5cf9b6",
+                        "label": "Label",
+                        "typeId": "Label"
+                      },
                       {
                         "id": "I33be4465",
                         "label": "Note",
@@ -9246,11 +9185,39 @@
                         "id": "Ie0d58f48",
                         "label": "Server",
                         "typeId": "server"
+                      }
+                    ],
+                    "typeId": "container"
+                  },
+                  {
+                    "areas": [],
+                    "id": "I14067906",
+                    "label": "Availability Zone B (Backups)",
+                    "nodes": [
+                      {
+                        "id": "I7b930f5a",
+                        "label": "Engine Gateway 1",
+                        "typeId": "standard"
                       },
                       {
-                        "id": "Icd5cf9b6",
-                        "label": "Label",
-                        "typeId": "Label"
+                        "id": "I9efc1e39",
+                        "label": "Engine Gateway 2",
+                        "typeId": "standard"
+                      },
+                      {
+                        "id": "I1ab81a37",
+                        "label": "IIoT",
+                        "typeId": "Broker"
+                      },
+                      {
+                        "id": "I76484f75",
+                        "label": "Task Gateway",
+                        "typeId": "standard"
+                      },
+                      {
+                        "id": "I2ced0084",
+                        "label": "Additional Engine Gateways If needed",
+                        "typeId": "standard"
                       }
                     ],
                     "typeId": "container"
@@ -10615,13 +10582,13 @@
                 "classes": ""
               },
               "supportedConnections": [
-                "standard",
+                "client",
                 "rest",
                 "gateway-network",
                 "opc-ua",
                 "mqtt",
                 "kafka",
-                "client",
+                "standard",
                 "opc-com",
                 "mongodb",
                 "device-driver",
@@ -10814,7 +10781,7 @@
                 "standard"
               ],
               "swappableWith": [
-                "erp-system"
+                "Note"
               ],
               "tooltip": "Manufacturing Execution System",
               "typeId": "Label"
@@ -10834,7 +10801,7 @@
                 "standard"
               ],
               "swappableWith": [
-                "erp-system"
+                "Label"
               ],
               "tooltip": "",
               "typeId": "Note"

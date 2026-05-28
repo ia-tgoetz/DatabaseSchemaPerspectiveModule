@@ -7,6 +7,7 @@ import 'reactflow/dist/style.css';
 import { Sidebar, PaletteItem } from './Sidebar';
 import { ArchitectureNode } from './ArchitectureNode';
 import { ContainerNode } from './ContainerNode';
+import { NoteLabelNode } from './NoteLabelNode';
 import { edgeTypes } from './CustomEdge';
 import { mapIgnitionToReactFlowEdges } from './EdgeUtils';
 import { useArchitectureFlowHandlers } from './useArchitectureFlowHandlers';

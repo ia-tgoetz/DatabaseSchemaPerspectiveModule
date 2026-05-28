@@ -1,3 +1,6 @@
+import json
+import os
+
 def saveAsMongo(connector, collection, saveItems):
 	_id=system.mongodb.insertOne(connector, collection, saveItems)
 	return _id
@@ -7,8 +10,18 @@ def saveMongo(_id, connector, collection, saveItems):
 	filter = {"_id": ObjectId(_id)}
 	update=system.mongodb.replaceOne(connector, collection, filter, saveItems)
 	return _id
+
+def mongoSaveProcedure(connector, collection, payload, _id=None):
+	#----------------------------------mongoDB----------------------------------------
+	if _id is not None:
+		saveId=saveMongo(_id, connector, collection, payload)
 	
-def configPayload(save, connector, collection, filename, nodes, edges, eamUnlimited, config, username, _id=None, meetingId=None, version='V260518'):
+	else:
+		saveId=saveAsMongo(connector, collection, payload)
+	return saveId	
+
+
+def configPayload(saveToMongo, connector, collection, filename, nodes, edges, eamUnlimited, config, username, _id=None, meetingId=None, version='V260518'):
 	saveDate=system.date.now()
 	payload={
 		"nodes": nodes,
@@ -22,24 +35,13 @@ def configPayload(save, connector, collection, filename, nodes, edges, eamUnlimi
 	}
 	if _id is not None:
 		payload['_id']=_id
-		
 	if meetingId is not None:
 		payload['meetingId']=meetingId
-	
-	
-	
-	
-	#----------------------------------mongoDB----------------------------------------
-	if save and _id is not None:
-		saveId=saveMongo(_id, connector, collection, payload)
-	
-	else:
-		saveId=saveAsMongo(connector, collection, payload)
-		
-	
-	
-	
-	
-	
-	
+
+	if saveToMongo:
+		saveId=mongoSaveProcedure(connector, collection, payload)
+
 	return {'filename':filename, 'id':saveId, 'saveDate':saveDate, 'connector':connector, 'collection':collection, 'meetingId':meetingid, "userName":userName}
+	
+
+	

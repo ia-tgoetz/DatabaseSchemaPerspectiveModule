@@ -47,7 +47,7 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                     if (data.onResizeEnd) data.onResizeEnd(id, params.x, params.y, params.width, params.height);
                 }}
             />
-            <div style={combinedStyle}>
+            <div style={combinedStyle} onContextMenu={(e) => { e.preventDefault(); console.log('Context menu for container:', id); }}>
                 <div
                     className="custom-drag-handle"
                     onPointerDown={(e) => { e.stopPropagation(); }}
