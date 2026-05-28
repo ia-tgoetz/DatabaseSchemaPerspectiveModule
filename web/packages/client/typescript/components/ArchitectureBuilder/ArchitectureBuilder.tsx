@@ -197,7 +197,7 @@ const StyleEditorModal = ({ node, onSave, onCancel }: { node: any, onSave: (styl
 
 // ─── Node types registration ──────────────────────────────────────────────────
 
-const nodeTypes = { architecture: ArchitectureNode, container: ContainerNode };
+const nodeTypes = { architecture: ArchitectureNode, container: ContainerNode, Note: NoteLabelNode, Label: NoteLabelNode };
 
 // ─── Utility functions (used only by ArchitectureBuilder) ─────────────────────
 
@@ -226,15 +226,28 @@ const mapIgnitionToReactFlowNodes = (
     return Object.entries(ignitionNodes)
         .filter(([id, nodeData]: any) => nodeData !== null && nodeData !== undefined)
         .map(([id, nodeData]: any) => {
-            const isContainer = nodeData.paletteId === 'container';
             const palette = paletteItems.find((p: any) => p.id === nodeData.paletteId);
+            const isContainer = nodeData.paletteId === 'container';
+            const isTextNode = TEXT_NODE_PALETTE_IDS.has(nodeData.paletteId);
             const paletteImage = (nodeData.useOverrideImage && palette?.overrideImage) ? palette.overrideImage : palette?.image || '';
+            
+            let type = 'architecture';
+            if (isContainer) type = 'container';
+            else if (isTextNode) type = nodeData.paletteId;
+
+            const isMovementUnlocked = nodeData.configs?.unlockMovement === true;
+            const isResizeEnabled = nodeData.configs?.enableResize === true;
+
             return {
-                id, type: isContainer ? 'container' : 'architecture', selected: id === selectedId,
+                id, type, selected: id === selectedId,
                 position: { x: nodeData.x || 0, y: nodeData.y || 0 },
                 zIndex: isContainer ? (nodeData.zIndex ?? -1) : 1000,
-                style: isContainer ? { width: nodeData.width || 300, height: nodeData.height || 300, pointerEvents: 'none' } : undefined,
-                dragHandle: isContainer ? '.custom-drag-handle' : undefined,
+                style: isContainer ? { 
+                    width: nodeData.width || 300, 
+                    height: nodeData.height || 300,
+                    pointerEvents: isMovementUnlocked ? 'auto' : 'none'
+                } : { pointerEvents: 'auto' },
+                dragHandle: (isContainer && !isMovementUnlocked) ? '.custom-drag-handle' : undefined,
                 data: {
                     label: nodeData.label || 'Unknown', image: paletteImage || nodeData.image || '', text: nodeData.text || '', tooltip: nodeData.tooltip || '', configs: nodeData.configs || {},
                     style: nodeData.style || {}, labelStyle: nodeData.labelStyle || {}, textStyle: nodeData.textStyle || {},
@@ -242,8 +255,10 @@ const mapIgnitionToReactFlowNodes = (
                     hideHandles: nodeData.hideHandles, globalHideHandles, handleCount: globalHandleCount,
                     highlightedHandles: highlightedHandlesMap[id] || [],
                     isEditable,
+                    unlockMovement: isMovementUnlocked,
+                    enableResize: isResizeEnabled,
                     onGearClick: handleGearClick, onTextChange: handleTextChange,
-                    onResizeEnd: isContainer ? handleResizeEnd : undefined,
+                    onResizeEnd: (isContainer || isTextNode) ? handleResizeEnd : undefined,
                 },
             };
         });
@@ -735,6 +750,24 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                         {contextMenu.type === 'node' && (
                                             <>
                                                 <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--callToAction)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('editStyle')}>🎨 Edit Style</div>
+                                                {contextMenu.isContainer && (
+                                                    <>
+                                                        <div style={{ borderTop: '1px solid var(--neutral-40)', margin: '4px 0' }} />
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleMovement')}>
+                                                            {rawNodesDict[contextMenu.id]?.configs?.unlockMovement ? (
+                                                                <><span>🔒 Lock Movement</span><span>✓</span></>
+                                                            ) : (
+                                                                <><span>🔓 Unlock Movement</span><span></span></>
+                                                            )}
+                                                        </div>
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleResize')}>
+                                                            <span>↔️ Enable Resizing</span><span>{rawNodesDict[contextMenu.id]?.configs?.enableResize ? '✓' : ''}</span>
+                                                        </div>
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLink')}>
+                                                            <span>🔗 Link Contents</span><span>{!rawNodesDict[contextMenu.id]?.configs?.unlinked ? '✓' : ''}</span>
+                                                        </div>
+                                                    </>
+                                                )}
                                                 {!contextMenu.isContainer && (
                                                     <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleGrayscale')}>
                                                         <span>⬜ Toggle Inactive</span><span>{rawNodesDict[contextMenu.id]?.inactive ? '✓' : ''}</span>
@@ -743,26 +776,21 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                                 <div style={{ borderTop: '1px solid var(--neutral-40)', margin: '4px 0' }} />
                                                 <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('copy')}>📋 Copy</div>
                                                 {contextMenu.isContainer && (
-                                                    <>
-                                                        <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>📋 Paste</div>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', borderTop: '1px solid var(--neutral-40)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLink')}>
-                                                            {rawNodesDict[contextMenu.id]?.configs?.unlinked ? '🔗 Link Contents' : '🔓 Unlink Contents'}
-                                                        </div>
-                                                        <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('order')}>
-                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'order' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                                <span>📑 Order</span><span>▶</span>
-                                                            </div>
-                                                            {activeSubMenu === 'order' && (
-                                                                <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '150px' }}>
-                                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('bringToFront')}>⏫ Bring to Front</div>
-                                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('bringForward')}>🔼 Bring Forward</div>
-                                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('sendBackward')}>🔽 Send Backward</div>
-                                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('sendToBack')}>⏬ Send to Back</div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </>
+                                                    <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>📋 Paste</div>
                                                 )}
+                                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('order')}>
+                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'order' ? 'var(--neutral-30)' : 'transparent' }}>
+                                                        <span>📑 Order</span><span>▶</span>
+                                                    </div>
+                                                    {activeSubMenu === 'order' && (
+                                                        <div style={{ ...flyoutStyle, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '150px' }}>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('bringToFront')}>⏫ Bring to Front</div>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('bringForward')}>🔼 Bring Forward</div>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('sendBackward')}>🔽 Send Backward</div>
+                                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onClick={() => handleContextMenuAction('sendToBack')}>⏬ Send to Back</div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 {validSwapItems.length > 0 && (
                                                     <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('swapNode')}>
                                                         <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'swapNode' ? 'var(--neutral-30)' : 'transparent' }}>

@@ -425,30 +425,11 @@ export const useArchitectureFlowHandlers = ({
                         }
                     });
 
-                    // Clear waypoints for ANY other edges connected to the container or its moved children 
-                    // that weren't translated above (meaning they had waypoints outside the container).
-                    const movedNodeIds = new Set([node.id, ...Object.keys(dragStartPos.current.nodes)]);
-                    Object.keys(nextEdges).forEach(edgeId => {
-                        if (edgeDragData[edgeId]) return; // Already translated
-                        const edge = nextEdges[edgeId];
-                        if (movedNodeIds.has(edge.source) || movedNodeIds.has(edge.target)) {
-                            if (Array.isArray(edge.waypoints) && edge.waypoints.length > 0) {
-                                nextEdges[edgeId] = { ...edge, waypoints: [] };
-                                edgesChanged = true;
-                            }
-                        }
-                    });
+                    // We no longer clear waypoints for other edges; CustomEdge's pinning logic 
+                    // will handle stretching the segments to the new handle positions while 
+                    // preserving the manual waypoints.
                 } else if (dx !== 0 || dy !== 0) {
-                    // Regular node move: clear waypoints for all connected edges to force re-routing
-                    Object.keys(nextEdges).forEach(edgeId => {
-                        const edge = nextEdges[edgeId];
-                        if (edge.source === node.id || edge.target === node.id) {
-                            if (Array.isArray(edge.waypoints) && edge.waypoints.length > 0) {
-                                nextEdges[edgeId] = { ...edge, waypoints: [] };
-                                edgesChanged = true;
-                            }
-                        }
-                    });
+                    // Regular node move: we no longer clear waypoints here.
                 }
 
                 store.props.write('nodes', nextNodes);
@@ -636,11 +617,42 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
     const onPaneContextMenu = React.useCallback((event: any) => {
         event.preventDefault();
         const bounds = reactFlowWrapper.current?.getBoundingClientRect();
-        if (bounds) {
-            setContextMenu({ id: 'pane', top: event.clientY - bounds.top, left: event.clientX - bounds.left, type: 'pane', clientX: event.clientX, clientY: event.clientY });
+        if (bounds && reactFlowInstance) {
+            const flowPos = reactFlowInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
+            
+            // Search for containers that the click might have landed on (since they may be pointer-events: none)
+            const containerEntry = Object.entries(rawNodesDict)
+                .filter(([id, n]: any) => n && n.paletteId === 'container')
+                .sort((a: any, b: any) => (b[1].zIndex ?? -1) - (a[1].zIndex ?? -1)) // Top-most z-index first
+                .find(([id, n]: any) => {
+                    const w = n.width || 300, h = n.height || 300;
+                    return flowPos.x >= n.x && flowPos.x <= n.x + w && flowPos.y >= n.y && flowPos.y <= n.y + h;
+                });
+
+            if (containerEntry) {
+                const [id] = containerEntry;
+                setContextMenu({ 
+                    id, 
+                    top: event.clientY - bounds.top, 
+                    left: event.clientX - bounds.left, 
+                    type: 'node', 
+                    isContainer: true, 
+                    clientX: event.clientX, 
+                    clientY: event.clientY 
+                });
+            } else {
+                setContextMenu({ 
+                    id: 'pane', 
+                    top: event.clientY - bounds.top, 
+                    left: event.clientX - bounds.left, 
+                    type: 'pane', 
+                    clientX: event.clientX, 
+                    clientY: event.clientY 
+                });
+            }
             setActiveSubMenu(null);
         }
-    }, [reactFlowWrapper, setContextMenu, setActiveSubMenu]);
+    }, [reactFlowWrapper, reactFlowInstance, rawNodesDict, setContextMenu, setActiveSubMenu]);
 
     // ─── Context menu actions ─────────────────────────────────────────────────
 
@@ -690,6 +702,30 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             if (isNode) currentPaletteId = rawNodesDict[contextMenu.id]?.paletteId;
             if (isEdge) currentPaletteId = rawEdgesDict[contextMenu.id]?.connectionType;
             if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: currentPaletteId, type: contextMenu.type, action });
+
+            if (action === 'toggleMovement' && isNode) {
+                const nextNodes = { ...rawNodesDict };
+                const node = nextNodes[contextMenu.id];
+                if (node) {
+                    node.configs = { ...node.configs, unlockMovement: !node.configs.unlockMovement };
+                    store.props.write('nodes', nextNodes);
+                }
+                closeContextMenu();
+                return;
+            }
+
+            if (action === 'toggleResize' && isNode) {
+                const nextNodes = { ...rawNodesDict };
+                const node = nextNodes[contextMenu.id];
+                if (node) {
+                    node.configs = { ...node.configs, enableResize: !node.configs.enableResize };
+                    store.props.write('nodes', nextNodes);
+                }
+                closeContextMenu();
+                return;
+            }
+
+            if (action === 'selectNode' && isNode) { setSelectedId(contextMenu.id); closeContextMenu(); return; }
 
             if (action === 'reverseEdge' && isEdge) {
                 if (store?.props) {
