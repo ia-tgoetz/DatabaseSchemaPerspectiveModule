@@ -75,6 +75,7 @@ export const useArchitectureFlowHandlers = ({
     draggedItemRef,
 }: UseArchitectureFlowHandlersParams) => {
     const [isUpdatingEdge, setIsUpdatingEdge] = React.useState(false);
+    const [isDraggingNode, setIsDraggingNode] = React.useState(false);
     const [isConnecting, setIsConnecting] = React.useState(false);
     const updatingEdgeRef = React.useRef<string | null>(null);
     const dragStartPos = React.useRef<any>(null);
@@ -351,6 +352,7 @@ export const useArchitectureFlowHandlers = ({
     }, [setLocalNodes]);
 
     const onNodeDragStart = React.useCallback((event: any, node: any) => {
+        setIsDraggingNode(true);
         const rawNode = rawNodesDict[node.id];
         if (rawNode?.paletteId === 'container' && !rawNode?.configs?.unlinked) {
             const cWidth = rawNode.width || 300;
@@ -445,9 +447,26 @@ export const useArchitectureFlowHandlers = ({
 
                 store.props.write('nodes', nextNodes);
                 if (edgesChanged) store.props.write('edges', nextEdges);
+                
+                // Final optimistic sync to ensure local state reflects final rounded positions
+                setLocalNodes(nds => nds.map(n => {
+                    const final = nextNodes[n.id];
+                    if (final) return { ...n, position: { x: final.x, y: final.y } };
+                    return n;
+                }));
+                if (edgesChanged) {
+                    setLocalEdges(edges => edges.map(e => {
+                        const final = nextEdges[e.id];
+                        if (final) return { ...e, data: { ...e.data, waypoints: final.waypoints } };
+                        return e;
+                    }));
+                }
+
                 dragStartPos.current = null;
+                setIsDraggingNode(false);
             }
         } catch (error: any) {
+            setIsDraggingNode(false);
             console.error("Error in onNodeDragStop:", error);
             if (componentEvents?.fireComponentEvent) {
                 componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodeDragStop'));
@@ -906,6 +925,7 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
     return {
         // State
         isUpdatingEdge,
+        isDraggingNode,
         isConnecting,
         updatingEdgeRef,
         // Shared

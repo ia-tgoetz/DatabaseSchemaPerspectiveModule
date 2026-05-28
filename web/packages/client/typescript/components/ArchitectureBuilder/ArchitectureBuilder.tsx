@@ -436,7 +436,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     // ─── Handlers hook ─────────────────────────────────────────────────────
 
     const {
-        isUpdatingEdge, isConnecting,
+        isUpdatingEdge, isDraggingNode, isConnecting, updatingEdgeRef,
         closeContextMenu,
         getValidIntersection,
         isValidConnection,
@@ -495,12 +495,21 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         [rawEdgesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth]
     );
 
-    React.useEffect(() => { setLocalNodes(flowNodes); }, [flowNodes]);
-    React.useEffect(() => { setLocalEdges(flowEdges); }, [flowEdges]);
+    React.useEffect(() => {
+        if (!isDraggingNode) {
+            setLocalNodes(flowNodes);
+        }
+    }, [flowNodes, isDraggingNode]);
+    
+    React.useEffect(() => {
+        if (!isUpdatingEdge && !isDraggingNode) {
+            setLocalEdges(flowEdges);
+        }
+    }, [flowEdges, isUpdatingEdge, isDraggingNode]);
 
     const displayEdges = React.useMemo(() => {
         const localMap = new Map(localEdges.map((e: any) => [e.id, e]));
-        return flowEdges.map((fresh: any) => {
+        return flowEdges.filter(e => !isUpdatingEdge || e.id !== updatingEdgeRef.current).map((fresh: any) => {
             const local = localMap.get(fresh.id);
             const isHovered = fresh.id === hoveredEdgeId;
             const isSelected = fresh.data?.isSelected === true;
@@ -520,7 +529,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                 data: { ...fresh.data, waypoints, isEditable: isEnabled },
             };
         });
-    }, [localEdges, flowEdges, hoveredEdgeId, globalEdgeWidth, isEnabled]);
+    }, [localEdges, flowEdges, hoveredEdgeId, globalEdgeWidth, isEnabled, isUpdatingEdge]);
 
     // ─── Keyboard shortcuts ────────────────────────────────────────────────
 
