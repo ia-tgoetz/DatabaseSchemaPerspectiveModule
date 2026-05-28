@@ -1,11 +1,12 @@
 import React from 'react';
 // @ts-ignore
-import { NodeProps, NodeResizer, Handle, Position } from 'reactflow';
+import { NodeProps, NodeResizer, Handle, Position, useViewport } from 'reactflow';
 
 export interface NoteLabelNodeData {
     label: string;
     text: string;
     isEditable?: boolean;
+    isEditing?: boolean; // New flag for external triggers
     style?: any;
     textStyle?: any;
     paletteId: string;
@@ -14,6 +15,7 @@ export interface NoteLabelNodeData {
 }
 
 export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeData>) => {
+    const { zoom } = useViewport();
     const [isEditing, setIsEditing] = React.useState(false);
     const [text, setText] = React.useState(data.text || data.label || '');
 
@@ -21,6 +23,13 @@ export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeDat
     React.useEffect(() => {
         setText(data.text || data.label || '');
     }, [data.text, data.label]);
+
+    // Support external edit mode trigger from context menu
+    React.useEffect(() => {
+        if (data.isEditing) {
+            setIsEditing(true);
+        }
+    }, [data.isEditing]);
 
     const handleDoubleClick = (e: React.MouseEvent) => {
         if (data.isEditable !== false) {
@@ -63,9 +72,13 @@ export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeDat
         textAlign: 'center',
         width: '100%',
         wordBreak: 'break-word',
+        whiteSpace: 'pre-wrap',
         userSelect: isEditing ? 'text' : 'none',
         ...data.textStyle
     };
+
+    // Calculate dynamic resizer handle size based on zoom (matching ContainerNode logic)
+    const resizerSize = Math.max(10, Math.round(16 / zoom));
 
     return (
         <div onDoubleClick={handleDoubleClick} style={nodeStyle} className={isEditing ? 'nodrag' : ''}>
@@ -78,46 +91,41 @@ export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeDat
                 isVisible={selected && data.isEditable !== false}
                 minWidth={40}
                 minHeight={20}
+                handleStyle={{ width: `${resizerSize}px`, height: `${resizerSize}px`, borderRadius: '4px' }}
                 onResizeEnd={(e, params) => {
                     if (data.onResizeEnd) data.onResizeEnd(id, params.x, params.y, params.width, params.height);
                 }}
             />
             {isEditing ? (
-                isNote ? (
-                    <textarea
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        onBlur={handleBlur}
-                        autoFocus
-                        style={{ 
-                            ...textStyle,
-                            border: 'none', 
-                            background: 'rgba(255,255,255,0.1)', 
-                            outline: 'none',
-                            resize: 'none',
-                            height: '100%',
-                            padding: '4px'
-                        }}
-                    />
-                ) : (
-                    <input
-                        type="text"
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        onBlur={handleBlur}
-                        autoFocus
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleBlur(); }}
-                        style={{ 
-                            ...textStyle,
-                            border: 'none', 
-                            background: 'rgba(255,255,255,0.1)', 
-                            outline: 'none',
-                            padding: '4px'
-                        }}
-                    />
-                )
+                <textarea
+                    className="nodrag nopan"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onBlur={handleBlur}
+                    autoFocus
+                    onKeyDown={(e) => {
+                        // For Labels, we still treat Enter as "done" unless Shift is held.
+                        // Notes allow free-form Enter.
+                        if (!isNote && e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleBlur();
+                        }
+                    }}
+                    style={{ 
+                        ...textStyle,
+                        border: 'none', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        outline: 'none',
+                        resize: 'none',
+                        width: '100%',
+                        height: '100%',
+                        padding: '4px',
+                        boxSizing: 'border-box',
+                        overflow: 'hidden'
+                    }}
+                />
             ) : (
-                <div style={textStyle}>
+                <div style={{ ...textStyle, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {text || (isNote ? 'Double-click to add note' : 'Label')}
                 </div>
             )}

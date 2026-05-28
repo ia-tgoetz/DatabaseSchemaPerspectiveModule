@@ -10,11 +10,9 @@ services:
       - module-dev-ignition-data:/usr/local/bin/ignition/data
       - module-dev-ignition-data-config-resources:/usr/local/bin/ignition/data/config/resources
       - module-dev-ignition-projects:/usr/local/bin/ignition/data/projects
-      - ../build:/usr/local/bin/ignition/external-modules
-      # 1. Mount your local modules to a temporary "staging" directory
-      - module-dev-ignition-modules:/staging-modules:ro
-      # 2. Mount the startup script
-      - ./copy-modules.sh:/usr/local/bin/ignition/data/init.d/copy-modules.sh
+      # Mount both modules directly into your defined external-modules folder
+      - ../build/ReactFlow.modl:/usr/local/bin/ignition/external-modules/ReactFlow.modl
+      - ./modules/MongoDB Connector-module.modl:/usr/local/bin/ignition/external-modules/MongoDB Connector-module.modl
     labels:
       - traefik.enable=true
       - traefik.hostname=${IGN_HOSTNAME:-module-dev-ignition}
@@ -29,9 +27,9 @@ services:
       IGNITION_EDITION: ${IGN_EDITION:-standard}
       TZ: ${IGN_TZ:-America/New_York}
       DISABLE_QUICKSTART: ${ING_SKIP_QUICKSTART:-true}
-      GATEWAY_MODULES_ACCEPTED: ${IGN_DEV_MODULE:-com.wargoetz.reactflow}
-      ACCEPT_MODULE_LICENSES: ${IGN_DEV_MODULE:-com.wargoetz.reactflow}
-      ACCEPT_MODULE_CERTS: ${IGN_DEV_MODULE:-com.wargoetz.reactflow}
+      GATEWAY_MODULES_ACCEPTED: com.inductiveautomation.connectors.mongodb,${IGN_DEV_MODULE:-com.wargoetz.reactflow}
+      ACCEPT_MODULE_LICENSES: com.inductiveautomation.connectors.mongodb,${IGN_DEV_MODULE:-com.wargoetz.reactflow}
+      ACCEPT_MODULE_CERTS: com.inductiveautomation.connectors.mongodb,${IGN_DEV_MODULE:-com.wargoetz.reactflow}
 
     command: >
       -n "${IGN_GATEWAY_NAME:-module-dev-ignition}"

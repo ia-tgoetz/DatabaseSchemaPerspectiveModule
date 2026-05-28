@@ -3235,10 +3235,7 @@
       "userName": "admin"
     },
     "onclick": {
-      "id": "I0e637e4a",
-      "paletteId": "container",
-      "type": "node",
-      "typeId": "container"
+      "type": "pane"
     },
     "paletteItems": [
       {

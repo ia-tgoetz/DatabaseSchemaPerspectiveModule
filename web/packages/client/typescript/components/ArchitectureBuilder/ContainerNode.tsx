@@ -18,6 +18,9 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
     const finalLabelBg = data.labelStyle?.backgroundColor || 'var(--neutral-30)';
     const finalLabelColor = data.labelStyle?.color || 'var(--neutral-90)';
     const finalGearColor = data.labelStyle?.fill || finalLabelColor; 
+    
+    // Use the unified flag passed from mapIgnitionToReactFlowNodes
+    const isUnlocked = data.unlockMovement;
 
     const combinedStyle: React.CSSProperties = {
         width: '100%',
@@ -31,11 +34,7 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
         
         outline: (selected && !data.enableResize) ? '2px solid var(--callToAction)' : 'none',
         outlineOffset: '2px',
-        // If movement is locked, we make the shell transparent to pointer events.
-        // This allows the user to click/drag 'through' the container to pan the canvas.
-        // The header and resize handles override this with 'auto'.
-        // Right-click is handled at the Pane level via coordinate detection.
-        pointerEvents: data.unlockMovement ? 'auto' : 'none'
+        // Panning fall-through handled at the node-wrapper level in ArchitectureBuilder.tsx
     };
 
     // Calculate dynamic resizer handle size based on zoom.
@@ -63,7 +62,7 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                     opacity: 0.9,
                     filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.5))'
                 }}>
-                    {data.unlockMovement ? (
+                    {isUnlocked ? (
                         /* Unlocked Icon (Lock Open) */
                         <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor">
                             <path d="M240-640v-80q0-100 70-170t170-70q100 0 170 70t70 170h-80q0-66-47-113t-113-47q-66 0-113 47t-47 113v80H240Zm560 560H160V-560h640v480ZM240-160h480v-320H240v320Zm240-160q33 0 56.5-23.5T560-400q0-33-23.5-56.5T480-480q-33 0-56.5 23.5T400-400q0 33 23.5 56.5T480-320ZM240-160v-320 320Z"/>
@@ -86,7 +85,7 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                         borderTopRightRadius: '7px', 
                         borderBottomRightRadius: '8px',
                         fontSize: '12px', fontWeight: 'bold', color: finalLabelColor,
-                        cursor: data.unlockMovement ? 'inherit' : 'grab', 
+                        cursor: isUnlocked ? 'inherit' : 'grab', 
                         display: 'flex', alignItems: 'center', gap: '6px',
                         overflow: 'hidden',
                         transition: 'background-color 0.2s ease',
@@ -97,11 +96,13 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                     onMouseEnter={(e) => {
                         if (!data.unlockMovement) {
                             (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--neutral-40)';
+                            (e.currentTarget as HTMLElement).style.cursor = 'pointer';
                         }
                     }}
                     onMouseLeave={(e) => {
                         if (!data.unlockMovement) {
                             (e.currentTarget as HTMLElement).style.backgroundColor = finalLabelBg;
+                            (e.currentTarget as HTMLElement).style.cursor = 'drag';
                         }
                     }}
                     onClick={(e) => {

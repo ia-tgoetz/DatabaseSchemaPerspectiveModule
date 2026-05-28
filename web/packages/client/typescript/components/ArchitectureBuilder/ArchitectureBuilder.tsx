@@ -235,19 +235,18 @@ const mapIgnitionToReactFlowNodes = (
             if (isContainer) type = 'container';
             else if (isTextNode) type = nodeData.paletteId;
 
-            const isMovementUnlocked = nodeData.configs?.unlockMovement === true;
-            const isResizeEnabled = nodeData.configs?.enableResize === true;
+            const isUnlocked = nodeData.configs?.unlocked === true;
 
             return {
                 id, type, selected: id === selectedId,
                 position: { x: nodeData.x || 0, y: nodeData.y || 0 },
                 zIndex: isContainer ? (nodeData.zIndex ?? -1) : 1000,
-                style: isContainer ? { 
-                    width: nodeData.width || 300, 
-                    height: nodeData.height || 300,
-                    pointerEvents: isMovementUnlocked ? 'auto' : 'none'
+                style: (isContainer || isTextNode) ? { 
+                    width: nodeData.width || (isContainer ? 300 : 150), 
+                    height: nodeData.height || (isContainer ? 300 : 80),
+                    pointerEvents: (isContainer && !isUnlocked) ? 'none' : 'auto'
                 } : { pointerEvents: 'auto' },
-                dragHandle: (isContainer && !isMovementUnlocked) ? '.custom-drag-handle' : undefined,
+                dragHandle: (isContainer && !isUnlocked) ? '.custom-drag-handle' : undefined,
                 data: {
                     label: nodeData.label || 'Unknown', image: paletteImage || nodeData.image || '', text: nodeData.text || '', tooltip: nodeData.tooltip || '', configs: nodeData.configs || {},
                     style: nodeData.style || {}, labelStyle: nodeData.labelStyle || {}, textStyle: nodeData.textStyle || {},
@@ -255,8 +254,8 @@ const mapIgnitionToReactFlowNodes = (
                     hideHandles: nodeData.hideHandles, globalHideHandles, handleCount: globalHandleCount,
                     highlightedHandles: highlightedHandlesMap[id] || [],
                     isEditable,
-                    unlockMovement: isMovementUnlocked,
-                    enableResize: isResizeEnabled,
+                    unlockMovement: isUnlocked,
+                    enableResize: isUnlocked,
                     onGearClick: handleGearClick, onTextChange: handleTextChange,
                     onResizeEnd: (isContainer || isTextNode) ? handleResizeEnd : undefined,
                 },
@@ -750,25 +749,25 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                         {contextMenu.type === 'node' && (
                                             <>
                                                 <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--callToAction)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('editStyle')}>🎨 Edit Style</div>
+                                                {TEXT_NODE_PALETTE_IDS.has(rawNodesDict[contextMenu.id]?.paletteId) && (
+                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('editContent')}>📝 Edit Content</div>
+                                                )}
                                                 {contextMenu.isContainer && (
                                                     <>
                                                         <div style={{ borderTop: '1px solid var(--neutral-40)', margin: '4px 0' }} />
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleMovement')}>
-                                                            {rawNodesDict[contextMenu.id]?.configs?.unlockMovement ? (
-                                                                <><span>🔒 Lock Movement</span><span>✓</span></>
+                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleUnlocked')}>
+                                                            {rawNodesDict[contextMenu.id]?.configs?.unlocked ? (
+                                                                <><span>🔒 Lock Interaction</span><span>✓</span></>
                                                             ) : (
-                                                                <><span>🔓 Unlock Movement</span><span></span></>
+                                                                <><span>🔓 Unlock Interaction</span><span></span></>
                                                             )}
-                                                        </div>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleResize')}>
-                                                            <span>↔️ Enable Resizing</span><span>{rawNodesDict[contextMenu.id]?.configs?.enableResize ? '✓' : ''}</span>
                                                         </div>
                                                         <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLink')}>
                                                             <span>🔗 Link Contents</span><span>{!rawNodesDict[contextMenu.id]?.configs?.unlinked ? '✓' : ''}</span>
                                                         </div>
                                                     </>
                                                 )}
-                                                {!contextMenu.isContainer && (
+                                                {!contextMenu.isContainer && !TEXT_NODE_PALETTE_IDS.has(rawNodesDict[contextMenu.id]?.paletteId) && (
                                                     <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleGrayscale')}>
                                                         <span>⬜ Toggle Inactive</span><span>{rawNodesDict[contextMenu.id]?.inactive ? '✓' : ''}</span>
                                                     </div>

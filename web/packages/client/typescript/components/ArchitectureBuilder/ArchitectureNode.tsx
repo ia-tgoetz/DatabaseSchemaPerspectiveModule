@@ -134,31 +134,13 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
                 </span>
             </div>
 
-            {isTextNode ? (
-                <textarea
-                    className="nodrag nopan"
-                    value={localText}
-                    onChange={e => setLocalText(e.target.value)}
-                    onBlur={() => { if (data.onTextChange) data.onTextChange(id, localText); }}
-                    onMouseDown={e => e.stopPropagation()}
-                    placeholder="Type here..."
-                    style={{
-                        flex: 1, width: '100%', minHeight: 0, marginTop: '28px',
-                        background: 'transparent', border: 'none', outline: 'none', resize: 'none',
-                        color: data.textStyle?.color || 'var(--neutral-90)',
-                        fontSize: data.textStyle?.fontSize || '12px',
-                        fontFamily: 'inherit', padding: '6px', boxSizing: 'border-box', cursor: 'text'
-                    }}
-                />
-            ) : (
-                data.image && (
-                    <div
-                        className="arch-node-svg-wrapper"
-                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0, zIndex: 1, backgroundColor: imageBg || undefined }}
-                    >
-                        <NodeImage src={data.image} />
-                    </div>
-                )
+            {data.image && (
+                <div
+                    className="arch-node-svg-wrapper"
+                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0, zIndex: 1, backgroundColor: imageBg || undefined }}
+                >
+                    <NodeImage src={data.image} />
+                </div>
             )}
         </div>
     );

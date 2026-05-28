@@ -159,15 +159,26 @@ export const useArchitectureFlowHandlers = ({
                 const oldData = nextEdges[oldEdge.id];
                 if (!validTypes.includes(oldData.connectionType)) return;
                 
-                // Clear waypoints after the edge has been moved/reconnected.
-                // This ensures the edge re-routes automatically based on its new handles.
+                const isHoriz = (side: string | undefined) => side === 'left' || side === 'right';
+                const oldSrcSide = oldEdge.sourceHandle?.split('-')[0];
+                const newSrcSide = newConnection.sourceHandle?.split('-')[0];
+                const oldTgtSide = oldEdge.targetHandle?.split('-')[0];
+                const newTgtSide = newConnection.targetHandle?.split('-')[0];
+
+                const srcAxisChanged = isHoriz(oldSrcSide) !== isHoriz(newSrcSide);
+                const tgtAxisChanged = isHoriz(oldTgtSide) !== isHoriz(newTgtSide);
+
+                // Re-route (clear waypoints) only if the handle orientation fundamentally changed.
+                // Otherwise, keep existing manual waypoints (terminal segments will stretch).
+                const nextWaypoints = (srcAxisChanged || tgtAxisChanged) ? [] : (oldData.waypoints || []);
+
                 nextEdges[oldEdge.id] = { 
                     ...oldData, 
                     source: newConnection.source, 
                     target: newConnection.target, 
                     sourceHandle: newConnection.sourceHandle, 
                     targetHandle: newConnection.targetHandle, 
-                    waypoints: [] 
+                    waypoints: nextWaypoints
                 };
                 
                 store.props.write('edges', nextEdges);
@@ -703,22 +714,26 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             if (isEdge) currentPaletteId = rawEdgesDict[contextMenu.id]?.connectionType;
             if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: currentPaletteId, type: contextMenu.type, action });
 
-            if (action === 'toggleMovement' && isNode) {
-                const nextNodes = { ...rawNodesDict };
-                const node = nextNodes[contextMenu.id];
-                if (node) {
-                    node.configs = { ...node.configs, unlockMovement: !node.configs.unlockMovement };
-                    store.props.write('nodes', nextNodes);
-                }
+            if (action === 'editContent' && isNode) {
+                setLocalNodes(prev => prev.map(n => {
+                    if (n.id === contextMenu.id) {
+                        return { ...n, data: { ...n.data, isEditing: true } };
+                    }
+                    return n;
+                }));
                 closeContextMenu();
                 return;
             }
 
-            if (action === 'toggleResize' && isNode) {
+            if (action === 'toggleUnlocked' && isNode) {
                 const nextNodes = { ...rawNodesDict };
                 const node = nextNodes[contextMenu.id];
                 if (node) {
-                    node.configs = { ...node.configs, enableResize: !node.configs.enableResize };
+                    const newUnlocked = !node.configs.unlocked;
+                    node.configs = { ...node.configs, unlocked: newUnlocked };
+                    // Clean up old individual flags if they exist
+                    delete node.configs.unlockMovement;
+                    delete node.configs.enableResize;
                     store.props.write('nodes', nextNodes);
                 }
                 closeContextMenu();

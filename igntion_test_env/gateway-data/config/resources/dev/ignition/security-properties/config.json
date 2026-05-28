@@ -13,20 +13,65 @@
   "designerAuthTokenInactivityTimeout": 10,
   "designerAuthTokenTimeToLive": 0,
   "designerPermissions": {
-    "securityLevels": [],
+    "securityLevels": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "name": "Administrator"
+              }
+            ],
+            "name": "Roles"
+          }
+        ],
+        "name": "Authenticated"
+      }
+    ],
     "type": "AnyOf"
   },
   "designerRoleName": "Administrator",
   "forceIdpAuth": true,
   "readPermissions": {
-    "securityLevels": [],
+    "securityLevels": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "name": "Administrator"
+              }
+            ],
+            "name": "Roles"
+          }
+        ],
+        "name": "Authenticated"
+      }
+    ],
     "type": "AnyOf"
   },
-  "systemAuthProfile": "default",
-  "systemIdentityProvider": "default",
+  "systemAuthProfile": "temp_0",
+  "systemIdentityProvider": "temp_0",
   "userInactivityTimeout": 10,
   "writePermissions": {
-    "securityLevels": [],
+    "securityLevels": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "name": "Administrator"
+              }
+            ],
+            "name": "Roles"
+          }
+        ],
+        "name": "Authenticated"
+      }
+    ],
     "type": "AnyOf"
   }
 }

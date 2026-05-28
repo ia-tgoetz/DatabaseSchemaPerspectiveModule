@@ -56,20 +56,42 @@ export const CustomEdge = ({
             ? storedWaypoints
             : computeAutoWaypoints(sx, sy, sourcePosition, tx, ty, targetPosition));
 
-    // Pin logic uses shifted terminal coordinates
+    // Pin logic uses shifted terminal coordinates to enforce orthogonality on manual paths.
     const pinnedWaypoints: Waypoint[] =
         isStepType && baseWaypoints.length > 0
             ? baseWaypoints.map((wp, i) => {
-                let result = wp;
-                if (i === 0)
-                    result = isHorizSrc ? { ...result, y: sy } : { ...result, x: sx };
-                if (i === baseWaypoints.length - 1)
-                    result = isHorizTgt ? { ...result, y: ty } : { ...result, x: tx };
+                const result = { ...wp }; // Shallow copy to avoid mutation
+                // Pin FIRST waypoint to the handle's exit axis.
+                // If it's a side handle (horiz), force WP0.y to handle's Y.
+                // If it's a top/bottom handle (vert), force WP0.x to handle's X.
+                if (i === 0) {
+                    if (isHorizSrc) result.y = sy;
+                    else result.x = sx;
+                }
+                // Pin LAST waypoint to the handle's entry axis.
+                if (i === baseWaypoints.length - 1) {
+                    if (isHorizTgt) result.y = ty;
+                    else result.x = tx;
+                }
                 return result;
             })
             : baseWaypoints;
 
-    const allPts: Waypoint[] = [{ x: sx, y: sy }, ...pinnedWaypoints, { x: tx, y: ty }];
+    // Filter out redundant waypoints (points that coincide with handles) to prevent 
+    // zero-length segments that cause rendering artifacts or 'weird' line jumps.
+    const filteredWaypoints = pinnedWaypoints.filter((wp, i) => {
+        if (i === 0) {
+            // First point is redundant if it exactly matches the source handle
+            return Math.hypot(wp.x - sx, wp.y - sy) > 1;
+        }
+        if (i === pinnedWaypoints.length - 1) {
+            // Last point is redundant if it exactly matches the target handle
+            return Math.hypot(wp.x - tx, wp.y - ty) > 1;
+        }
+        return true;
+    });
+
+    const allPts: Waypoint[] = [{ x: sx, y: sy }, ...filteredWaypoints, { x: tx, y: ty }];
 
     // ─── Path computation ────────────────────────────────────────────────
 
