@@ -3235,8 +3235,8 @@
       "userName": "admin"
     },
     "onclick": {
-      "action": "delete",
-      "id": "I0fc23963",
+      "action": "config",
+      "id": "Ice4f98a7",
       "paletteId": "container",
       "type": "node"
     },
@@ -8884,7 +8884,7 @@
           "component": {
             "onCanvasError": {
               "config": {
-                "script": "\tself.view.custom.onclick\u003devent.message\n\tlogger\u003dsystem.util.getLogger(\"React.Errors\")\n\tlogger.error(event.message)"
+                "script": "\tself.view.custom.onclick\u003devent.message\n\tlogger\u003dsystem.util.getLogger(\"React.Errors\")\n\tlogger.error(event.message)\n\tsystem.perspective.print(event.message)"
               },
               "scope": "G",
               "type": "script"
