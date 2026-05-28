@@ -75,6 +75,7 @@ export const useArchitectureFlowHandlers = ({
     draggedItemRef,
 }: UseArchitectureFlowHandlersParams) => {
     const [isUpdatingEdge, setIsUpdatingEdge] = React.useState(false);
+    const [isDraggingNode, setIsDraggingNode] = React.useState(false);
     const [isConnecting, setIsConnecting] = React.useState(false);
     const updatingEdgeRef = React.useRef<string | null>(null);
     const dragStartPos = React.useRef<any>(null);
@@ -159,15 +160,26 @@ export const useArchitectureFlowHandlers = ({
                 const oldData = nextEdges[oldEdge.id];
                 if (!validTypes.includes(oldData.connectionType)) return;
                 
-                // Clear waypoints after the edge has been moved/reconnected.
-                // This ensures the edge re-routes automatically based on its new handles.
+                const isHoriz = (side: string | undefined) => side === 'left' || side === 'right';
+                const oldSrcSide = oldEdge.sourceHandle?.split('-')[0];
+                const newSrcSide = newConnection.sourceHandle?.split('-')[0];
+                const oldTgtSide = oldEdge.targetHandle?.split('-')[0];
+                const newTgtSide = newConnection.targetHandle?.split('-')[0];
+
+                const srcAxisChanged = isHoriz(oldSrcSide) !== isHoriz(newSrcSide);
+                const tgtAxisChanged = isHoriz(oldTgtSide) !== isHoriz(newTgtSide);
+
+                // Re-route (clear waypoints) only if the handle orientation fundamentally changed.
+                // Otherwise, keep existing manual waypoints (terminal segments will stretch).
+                const nextWaypoints = (srcAxisChanged || tgtAxisChanged) ? [] : (oldData.waypoints || []);
+
                 nextEdges[oldEdge.id] = { 
                     ...oldData, 
                     source: newConnection.source, 
                     target: newConnection.target, 
                     sourceHandle: newConnection.sourceHandle, 
                     targetHandle: newConnection.targetHandle, 
-                    waypoints: [] 
+                    waypoints: nextWaypoints
                 };
                 
                 store.props.write('edges', nextEdges);
@@ -340,6 +352,7 @@ export const useArchitectureFlowHandlers = ({
     }, [setLocalNodes]);
 
     const onNodeDragStart = React.useCallback((event: any, node: any) => {
+        setIsDraggingNode(true);
         const rawNode = rawNodesDict[node.id];
         if (rawNode?.paletteId === 'container' && !rawNode?.configs?.unlinked) {
             const cWidth = rawNode.width || 300;
@@ -425,37 +438,35 @@ export const useArchitectureFlowHandlers = ({
                         }
                     });
 
-                    // Clear waypoints for ANY other edges connected to the container or its moved children 
-                    // that weren't translated above (meaning they had waypoints outside the container).
-                    const movedNodeIds = new Set([node.id, ...Object.keys(dragStartPos.current.nodes)]);
-                    Object.keys(nextEdges).forEach(edgeId => {
-                        if (edgeDragData[edgeId]) return; // Already translated
-                        const edge = nextEdges[edgeId];
-                        if (movedNodeIds.has(edge.source) || movedNodeIds.has(edge.target)) {
-                            if (Array.isArray(edge.waypoints) && edge.waypoints.length > 0) {
-                                nextEdges[edgeId] = { ...edge, waypoints: [] };
-                                edgesChanged = true;
-                            }
-                        }
-                    });
+                    // We no longer clear waypoints for other edges; CustomEdge's pinning logic 
+                    // will handle stretching the segments to the new handle positions while 
+                    // preserving the manual waypoints.
                 } else if (dx !== 0 || dy !== 0) {
-                    // Regular node move: clear waypoints for all connected edges to force re-routing
-                    Object.keys(nextEdges).forEach(edgeId => {
-                        const edge = nextEdges[edgeId];
-                        if (edge.source === node.id || edge.target === node.id) {
-                            if (Array.isArray(edge.waypoints) && edge.waypoints.length > 0) {
-                                nextEdges[edgeId] = { ...edge, waypoints: [] };
-                                edgesChanged = true;
-                            }
-                        }
-                    });
+                    // Regular node move: we no longer clear waypoints here.
                 }
 
                 store.props.write('nodes', nextNodes);
                 if (edgesChanged) store.props.write('edges', nextEdges);
+                
+                // Final optimistic sync to ensure local state reflects final rounded positions
+                setLocalNodes(nds => nds.map(n => {
+                    const final = nextNodes[n.id];
+                    if (final) return { ...n, position: { x: final.x, y: final.y } };
+                    return n;
+                }));
+                if (edgesChanged) {
+                    setLocalEdges(edges => edges.map(e => {
+                        const final = nextEdges[e.id];
+                        if (final) return { ...e, data: { ...e.data, waypoints: final.waypoints } };
+                        return e;
+                    }));
+                }
+
                 dragStartPos.current = null;
+                setIsDraggingNode(false);
             }
         } catch (error: any) {
+            setIsDraggingNode(false);
             console.error("Error in onNodeDragStop:", error);
             if (componentEvents?.fireComponentEvent) {
                 componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodeDragStop'));
@@ -636,11 +647,42 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
     const onPaneContextMenu = React.useCallback((event: any) => {
         event.preventDefault();
         const bounds = reactFlowWrapper.current?.getBoundingClientRect();
-        if (bounds) {
-            setContextMenu({ id: 'pane', top: event.clientY - bounds.top, left: event.clientX - bounds.left, type: 'pane', clientX: event.clientX, clientY: event.clientY });
+        if (bounds && reactFlowInstance) {
+            const flowPos = reactFlowInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
+            
+            // Search for containers that the click might have landed on (since they may be pointer-events: none)
+            const containerEntry = Object.entries(rawNodesDict)
+                .filter(([id, n]: any) => n && n.paletteId === 'container')
+                .sort((a: any, b: any) => (b[1].zIndex ?? -1) - (a[1].zIndex ?? -1)) // Top-most z-index first
+                .find(([id, n]: any) => {
+                    const w = n.width || 300, h = n.height || 300;
+                    return flowPos.x >= n.x && flowPos.x <= n.x + w && flowPos.y >= n.y && flowPos.y <= n.y + h;
+                });
+
+            if (containerEntry) {
+                const [id] = containerEntry;
+                setContextMenu({ 
+                    id, 
+                    top: event.clientY - bounds.top, 
+                    left: event.clientX - bounds.left, 
+                    type: 'node', 
+                    isContainer: true, 
+                    clientX: event.clientX, 
+                    clientY: event.clientY 
+                });
+            } else {
+                setContextMenu({ 
+                    id: 'pane', 
+                    top: event.clientY - bounds.top, 
+                    left: event.clientX - bounds.left, 
+                    type: 'pane', 
+                    clientX: event.clientX, 
+                    clientY: event.clientY 
+                });
+            }
             setActiveSubMenu(null);
         }
-    }, [reactFlowWrapper, setContextMenu, setActiveSubMenu]);
+    }, [reactFlowWrapper, reactFlowInstance, rawNodesDict, setContextMenu, setActiveSubMenu]);
 
     // ─── Context menu actions ─────────────────────────────────────────────────
 
@@ -690,6 +732,34 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             if (isNode) currentPaletteId = rawNodesDict[contextMenu.id]?.paletteId;
             if (isEdge) currentPaletteId = rawEdgesDict[contextMenu.id]?.connectionType;
             if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: currentPaletteId, type: contextMenu.type, action });
+
+            if (action === 'editContent' && isNode) {
+                setLocalNodes(prev => prev.map(n => {
+                    if (n.id === contextMenu.id) {
+                        return { ...n, data: { ...n.data, isEditing: true } };
+                    }
+                    return n;
+                }));
+                closeContextMenu();
+                return;
+            }
+
+            if (action === 'toggleUnlocked' && isNode) {
+                const nextNodes = { ...rawNodesDict };
+                const node = nextNodes[contextMenu.id];
+                if (node) {
+                    const newUnlocked = !node.configs.unlocked;
+                    node.configs = { ...node.configs, unlocked: newUnlocked };
+                    // Clean up old individual flags if they exist
+                    delete node.configs.unlockMovement;
+                    delete node.configs.enableResize;
+                    store.props.write('nodes', nextNodes);
+                }
+                closeContextMenu();
+                return;
+            }
+
+            if (action === 'selectNode' && isNode) { setSelectedId(contextMenu.id); closeContextMenu(); return; }
 
             if (action === 'reverseEdge' && isEdge) {
                 if (store?.props) {
@@ -855,6 +925,7 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
     return {
         // State
         isUpdatingEdge,
+        isDraggingNode,
         isConnecting,
         updatingEdgeRef,
         // Shared

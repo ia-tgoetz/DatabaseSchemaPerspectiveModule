@@ -149,7 +149,12 @@ Edge data is stored in `props.edges` as a flat dictionary keyed by short hex IDs
 
 Stroke width is driven by the `edgeWidth` prop (default 6). Hovered and selected edges render at `edgeWidth + 2`. `waypoints[]` is the only routing storage — there are no offset fields.
 
-New connections are created with `waypoints: []`. The edge routes automatically via live path computation until the user drags a segment, at which point the waypoints are persisted. Reconnecting an existing endpoint immediately recomputes a clean route.
+New connections are created with `waypoints: []`. The edge routes automatically via live path computation until the user drags a segment. Once a segment is dragged, the waypoints are persisted to the Ignition store.
+
+Unlike default React Flow behavior, **manual waypoints now PERSIST** when edges or nodes are moved.
+- **Node Move:** If a parent node is repositioned, the middle of the manually routed path stays exactly where it was. The first and last segments automatically "stretch" to follow the handles while maintaining their perpendicular exit/entry angles.
+- **Edge Move (Endpoint):** If you reconnect an edge handle to a different anchor, existing waypoints are retained. This allows you to fine-tune the connection site without losing your custom pathing.
+- **Clearing:** Manual paths can be reset at any time using the **"⊙ Clear Path"** option in the edge's right-click context menu. This reverts the edge to live auto-routing.
 
 ---
 

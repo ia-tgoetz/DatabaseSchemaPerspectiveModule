@@ -7,6 +7,8 @@ export interface ContainerNodeData {
     style?: any;
     labelStyle?: any;
     isEditable?: boolean;
+    unlockMovement?: boolean;
+    enableResize?: boolean;
     onGearClick?: (id: string, event: React.MouseEvent) => void;
     onResizeEnd?: (id: string, x: number, y: number, width: number, height: number) => void;
 }
@@ -16,38 +18,62 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
     const finalLabelBg = data.labelStyle?.backgroundColor || 'var(--neutral-30)';
     const finalLabelColor = data.labelStyle?.color || 'var(--neutral-90)';
     const finalGearColor = data.labelStyle?.fill || finalLabelColor; 
+    
+    // Use the unified flag passed from mapIgnitionToReactFlowNodes
+    const isUnlocked = data.unlockMovement;
 
     const combinedStyle: React.CSSProperties = {
         width: '100%',
         height: '100%',
         backgroundColor: data.style?.backgroundColor || data.style?.fill || 'rgba(128, 128, 128, 0.2)',
-        border: '2px dashed var(--neutral-50)', 
+        border: selected ? '2px solid var(--callToAction)' : '2px dashed var(--neutral-50)', 
         borderRadius: '8px',
         position: 'relative',
+        boxSizing: 'border-box',
         ...(data.style || {}),
         
-        outline: selected ? '2px solid var(--callToAction)' : 'none',
+        outline: (selected && !data.enableResize) ? '2px solid var(--callToAction)' : 'none',
         outlineOffset: '2px',
-        pointerEvents: 'none'
+        // Panning fall-through handled at the node-wrapper level in ArchitectureBuilder.tsx
     };
 
     // Calculate dynamic resizer handle size based on zoom.
-    // Base size is 16px (physical). Caps at 10px min.
     const resizerSize = Math.max(10, Math.round(16 / zoom));
 
     return (
         <>
             <NodeResizer 
                 color="var(--callToAction)" 
-                isVisible={selected && data.isEditable !== false}
+                isVisible={selected && data.enableResize === true}
                 minWidth={150} 
                 minHeight={150}
+                // Resize handles MUST remain interactive even if the shell is 'none'
                 handleStyle={{ width: `${resizerSize}px`, height: `${resizerSize}px`, borderRadius: '4px', pointerEvents: 'auto' }} 
                 onResizeEnd={(e, params) => {
                     if (data.onResizeEnd) data.onResizeEnd(id, params.x, params.y, params.width, params.height);
                 }}
             />
             <div style={combinedStyle}>
+                {/* Lock/Unlock Indicator in the top-right corner */}
+                <div style={{
+                    position: 'absolute', top: '8px', right: '8px',
+                    zIndex: 20, color: 'var(--neutral-60)',
+                    display: 'flex', alignItems: 'center', pointerEvents: 'none',
+                    opacity: 0.9,
+                    filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.5))'
+                }}>
+                    {isUnlocked ? (
+                        /* Unlocked Icon (Lock Open) */
+                        <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor">
+                            <path d="M240-640v-80q0-100 70-170t170-70q100 0 170 70t70 170h-80q0-66-47-113t-113-47q-66 0-113 47t-47 113v80H240Zm560 560H160V-560h640v480ZM240-160h480v-320H240v320Zm240-160q33 0 56.5-23.5T560-400q0-33-23.5-56.5T480-480q-33 0-56.5 23.5T400-400q0 33 23.5 56.5T480-320ZM240-160v-320 320Z"/>
+                        </svg>
+                    ) : (
+                        /* Locked Icon */
+                        <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor">
+                            <path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H240v400Zm240-120q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80ZM240-160v-400 400Z"/>
+                        </svg>
+                    )}
+                </div>
                 <div
                     className="custom-drag-handle"
                     onPointerDown={(e) => { e.stopPropagation(); }}
@@ -59,19 +85,25 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                         borderTopRightRadius: '7px', 
                         borderBottomRightRadius: '8px',
                         fontSize: '12px', fontWeight: 'bold', color: finalLabelColor,
-                        cursor: 'grab', display: 'flex', alignItems: 'center', gap: '6px',
+                        cursor: isUnlocked ? 'inherit' : 'grab', 
+                        display: 'flex', alignItems: 'center', gap: '6px',
                         overflow: 'hidden',
                         transition: 'background-color 0.2s ease',
-                        pointerEvents: 'auto', // Explicitly enabled for handle
+                        zIndex: 10,
+                        pointerEvents: 'auto', // Always interactive for dragging
                         ...(data.labelStyle || {}) 
                     }}
                     onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--neutral-40)';
-                        (e.currentTarget as HTMLElement).style.cursor = 'pointer';
+                        if (!data.unlockMovement) {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--neutral-40)';
+                            (e.currentTarget as HTMLElement).style.cursor = 'pointer';
+                        }
                     }}
                     onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = finalLabelBg;
-                        (e.currentTarget as HTMLElement).style.cursor = 'grab';
+                        if (!data.unlockMovement) {
+                            (e.currentTarget as HTMLElement).style.backgroundColor = finalLabelBg;
+                            (e.currentTarget as HTMLElement).style.cursor = 'drag';
+                        }
                     }}
                     onClick={(e) => {
                         e.stopPropagation();

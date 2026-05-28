@@ -156,7 +156,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 env/
-build/
+# build/
 develop-eggs/
 dist/
 downloads/
@@ -229,7 +229,7 @@ $RECYCLE.BIN/
 *.lnk
 ### Gradle template
 .gradle
-build/
+# build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -258,7 +258,7 @@ designer/out/
 # root dev ignores
 .gradle/
 .idea/
-build/
+# build/
 
 # dynamically generated resources
 gateway/src/main/resources/mounted/js/RadComponents.js

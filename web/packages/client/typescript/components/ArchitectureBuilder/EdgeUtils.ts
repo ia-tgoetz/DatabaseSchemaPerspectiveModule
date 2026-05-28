@@ -117,7 +117,7 @@ export const mapIgnitionToReactFlowEdges = (
             const zIndex = isAnimated ? 1000 : (isSelected ? 10 : 0);
 
             const strokeStyle: any = { stroke: typeConfig.color || '#888', strokeWidth: isSelected ? baseWidth + 2 : baseWidth };
-            if (edgeData.dashed) strokeStyle.strokeDasharray = '8 5';
+            if (edgeData.dashed) strokeStyle.strokeDasharray = '10 15';
             const arrowMarker = edgeData.arrow !== false
                 ? { type: MarkerType.ArrowClosed, width: 10, height: 10, color: strokeStyle.stroke }
                 : undefined;
