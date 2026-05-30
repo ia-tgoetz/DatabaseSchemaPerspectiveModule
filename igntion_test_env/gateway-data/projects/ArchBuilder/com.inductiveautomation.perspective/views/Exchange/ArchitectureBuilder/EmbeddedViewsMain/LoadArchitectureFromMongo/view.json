@@ -4,11 +4,11 @@
       "$": [
         "ts",
         192,
-        1779894804430
+        1780167042891
       ],
-      "$ts": 1779894804430
+      "$ts": 1780167042891
     },
-    "filename": "Architecture_260527111324",
+    "filename": "Architecture_260530145042",
     "lastSave": "658c503d91d54e5232a3afed"
   },
   "events": {
@@ -187,7 +187,7 @@
             },
             "props": {
               "showClearIcon": true,
-              "value": null
+              "value": "Customers"
             },
             "type": "ia.input.dropdown"
           }
@@ -325,7 +325,7 @@
             "props": {
               "placeholder": {},
               "showClearIcon": true,
-              "value": null
+              "value": "69e8ece78df853680415b28e"
             },
             "type": "ia.input.dropdown"
           }

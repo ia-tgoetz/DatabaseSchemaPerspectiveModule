@@ -623,7 +623,6 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                     width: var(--hit-size, 24px);
                     height: var(--hit-size, 24px);
                     background: transparent;
-                    pointer-events: auto;
                 }
                 
                 /* ::after renders the visible dot and owns all visual transitions.

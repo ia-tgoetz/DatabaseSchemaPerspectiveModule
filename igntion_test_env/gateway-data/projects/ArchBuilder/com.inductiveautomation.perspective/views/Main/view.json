@@ -5210,7 +5210,7 @@
           "component": {
             "onItemClicked": {
               "config": {
-                "script": "\t# if event.enabled:\n\t\t# add your action handling code\n\t#----File Menu Items------------------------------------------------------------\n\tif event.label\u003d\u003d\u0027New\u0027:\n\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/EmbeddedViews/NewPopup\u0027\n\t\tsystem.perspective.openPopup(\u0027saveNew\u0027, view, title\u003d\u0027Save?\u0027, params\u003d{\u0027lastLoad\u0027: self.view.params.lastLoad})\n\t\t\n\telif event.label\u003d\u003d\u0027Open\u0027:\n#\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/LoadArchitectureFromMongo\u0027\n\t\tsystem.perspective.openPopup(\u0027insertArch\u0027, view, title\u003d\u0027Open Architecture\u0027, params\u003d{\u0027load\u0027: True})\n\t\t\n\telif event.label\u003d\u003d\u0027Insert\u0027:\n\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tif self.session.custom.saveToMongo:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/LoadArchitectureFromMongo\u0027\n\t\telse:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/LoadArchitectureFromFileSystem\u0027\n\t\tsystem.perspective.openPopup(\u0027insertArch\u0027, view, title\u003d\u0027Insert Architecture\u0027, params\u003d{\u0027load\u0027: False})\n\t\t\n\telif event.label in [\u0027Save...\u0027,\u0027Save As...\u0027]and (not self.session.custom.admin.savingDisabled):\n\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tif self.session.custom.saveToMongo:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/SaveArchitectureToMongo\u0027\n\t\telse:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/SaveArchitectureToFileSystem\u0027\n\t\tsystem.perspective.openPopup(\u0027saveArchitecture\u0027, view, params\u003d{\u0027lastLoad\u0027: self.view.params.lastLoad}, title\u003d\"Save Architecture\")\t\t\n\n\telif event.label\u003d\u003d\u0027Manage Files\u0027 and (not self.session.custom.admin.deletingDisabled):\n\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tif self.session.custom.saveToMongo:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/FileManagerMongo\u0027\n\t\telse:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/FileManagerFileSystem\u0027\n\t\tsystem.perspective.openPopup(\u0027manageFiles\u0027, view, title\u003d\u0027Manage Files\u0027, params\u003d{\u0027load\u0027: True})\n\t\t\n\telif event.label\u003d\u003d\u0027Print\u0027:\n\t\tsystem.perspective.sendMessage(\u0027Print\u0027, True, scope\u003d\u0027session\u0027)\n\n\telif event.label\u003d\u003d\u0027Export\u0027:\n\t\t#system.perspective.sendMessage(\u0027downloadLayout\u0027, True, scope\u003d\u0027session\u0027)\n\t\tsystem.perspective.openPopup(\"Export\", \"Exchange/ArchitectureBuilder/BOM/Popups/Export\", title\u003d\"Download\", )\n\t\t\n\telif event.label\u003d\u003d\u0027Import\u0027:\n\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/UploadArchitecture\u0027\n\t\tsystem.perspective.openPopup(\u0027uploadArch\u0027, view, title\u003d\u0027Upload Architecture\u0027)\n\t\t\n\t#----BOM Menu Items------------------------------------------------------------\n\telif event.label\u003d\u003d\u0027Clear\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.nodes\u003d{}\n\t\tself.getSibling(\"ArchitectureBuilder\").props.edges\u003d{}\n\t\t\n\telif event.label\u003d\u003d\u0027Decrease Snap (-5)\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.snapPixels-\u003d5\n\n\telif event.label\u003d\u003d\u0027Increase Snap (+5)\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.snapPixels+\u003d5\n\n\telif event.label\u003d\u003d\u0027Disable Snap\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.snapEnabled\u003dFalse\n\t\t\n\telif event.label\u003d\u003d\u0027Enable Snap\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.snapEnabled\u003dTrue\n\n\telif event.label\u003d\u003d\u0027Hide Handles\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.hideHandles\u003dTrue\n\n\telif event.label\u003d\u003d\u0027Show Handles\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.hideHandles\u003dFalse\n\n\telif event.label\u003d\u003d\u0027Disable Interaction\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.enabled\u003dFalse\n\t\t\n\telif event.label\u003d\u003d\u0027Enable Interaction\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.enabled\u003dTrue\n\t\t\n\t#----BOM Menu Items------------------------------------------------------------\n\telif event.label\u003d\u003d\u0027Open BOM\u0027:\n\t\tsystem.perspective.navigate(\u0027/BOM\u0027,newTab\u003dTrue)\n\telif event.label\u003d\u003d\u0027Map\u0027:\n\t\tsystem.perspective.navigate(\u0027/Map\u0027,newTab\u003dTrue)\n\telif event.label\u003d\u003d\u0027JSON Structure\u0027:\n\t\tsystem.perspective.openDock(\"structure\")\n#\t\tsystem.perspective.openPopup(\u0027JSON\u0027, \u0027Exchange/ArchitectureBuilder/StructureViewPrettyPrint\u0027, title\u003d\u0027JSON Structure\u0027, resizable \u003d True, modal\u003dTrue, viewportBound\u003dTrue, position \u003d {\u0027height\u0027: \u0027auto\u0027, \u0027width\u0027: \u0027300px\u0027} )\n\telif event.label\u003d\u003d\u0027JSON Configs\u0027:\n\t\tsystem.perspective.openPopup(\u0027JSON\u0027, \u0027Exchange/ArchitectureBuilder/ConfigViewPrettyPrint\u0027, title\u003d\u0027JSON Configs\u0027, resizable \u003d True, modal\u003dTrue, viewportBound\u003dTrue, position \u003d {\u0027height\u0027: \u002750%\u0027, \u0027width\u0027: \u0027300px\u0027} )\n\t\t\n"
+                "script": "\t# if event.enabled:\n\t\t# add your action handling code\n\t#----File Menu Items------------------------------------------------------------\n\tif event.label\u003d\u003d\u0027New\u0027:\n\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/EmbeddedViews/NewPopup\u0027\n\t\tsystem.perspective.openPopup(\u0027saveNew\u0027, view, title\u003d\u0027Save?\u0027, params\u003d{\u0027lastLoad\u0027: self.view.params.lastLoad})\n\t\t\n\telif event.label\u003d\u003d\u0027Open\u0027:\n#\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/LoadArchitectureFromMongo\u0027\n\t\tsystem.perspective.openPopup(\u0027insertArch\u0027, view, title\u003d\u0027Open Architecture\u0027, params\u003d{\u0027load\u0027: True})\n\t\t\n\telif event.label\u003d\u003d\u0027Insert\u0027:\n\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tif self.session.custom.saveToMongo:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/LoadArchitectureFromMongo\u0027\n\t\telse:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/LoadArchitectureFromFileSystem\u0027\n\t\tsystem.perspective.openPopup(\u0027insertArch\u0027, view, title\u003d\u0027Insert Architecture\u0027, params\u003d{\u0027load\u0027: False})\n\t\t\n\telif event.label in [\u0027Save...\u0027,\u0027Save As...\u0027]and (not self.session.custom.admin.savingDisabled):\n\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tif self.session.custom.saveToMongo:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/SaveArchitectureToMongo\u0027\n\t\telse:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/SaveArchitectureToFileSystem\u0027\n\t\tsystem.perspective.openPopup(\u0027saveArchitecture\u0027, view, params\u003d{\u0027lastLoad\u0027: self.view.params.lastLoad}, title\u003d\"Save Architecture\")\t\t\n\n\telif event.label\u003d\u003d\u0027Manage Files\u0027 and (not self.session.custom.admin.deletingDisabled):\n\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tif self.session.custom.saveToMongo:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/FileManagerMongo\u0027\n\t\telse:\n\t\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/FileManagerFileSystem\u0027\n\t\tsystem.perspective.openPopup(\u0027manageFiles\u0027, view, title\u003d\u0027Manage Files\u0027, params\u003d{\u0027load\u0027: True})\n\t\t\n\telif event.label\u003d\u003d\u0027Print\u0027:\n\t\tsystem.perspective.sendMessage(\u0027Print\u0027, True, scope\u003d\u0027session\u0027)\n\n\telif event.label\u003d\u003d\u0027Export\u0027:\n\t\t#system.perspective.sendMessage(\u0027downloadLayout\u0027, True, scope\u003d\u0027session\u0027)\n\t\tsystem.perspective.openPopup(\"Export\", \"Exchange/ArchitectureBuilder/BOM/Popups/Export\", title\u003d\"Download\", )\n\t\t\n\telif event.label\u003d\u003d\u0027Import\u0027:\n\t\tsystem.perspective.sendMessage(\u0027cancelConfigs\u0027, True, scope\u003d\u0027session\u0027)\n\t\tview\u003d\u0027Exchange/ArchitectureBuilder/EmbeddedViewsMain/UploadArchitecture\u0027\n\t\tsystem.perspective.openPopup(\u0027uploadArch\u0027, view, title\u003d\u0027Upload Architecture\u0027)\n\t\t\n\t#----BOM Menu Items------------------------------------------------------------\n\telif event.label\u003d\u003d\u0027Clear\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").custom.newArch.nodes\u003d{}\n\t\tself.getSibling(\"ArchitectureBuilder\").custom.newArch.edges\u003d{}\n\t\t\n\telif event.label\u003d\u003d\u0027Decrease Snap (-5)\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.snapPixels-\u003d5\n\n\telif event.label\u003d\u003d\u0027Increase Snap (+5)\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.snapPixels+\u003d5\n\n\telif event.label\u003d\u003d\u0027Disable Snap\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.snapEnabled\u003dFalse\n\t\t\n\telif event.label\u003d\u003d\u0027Enable Snap\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.snapEnabled\u003dTrue\n\n\telif event.label\u003d\u003d\u0027Hide Handles\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.hideHandles\u003dTrue\n\n\telif event.label\u003d\u003d\u0027Show Handles\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.hideHandles\u003dFalse\n\n\telif event.label\u003d\u003d\u0027Disable Interaction\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.enabled\u003dFalse\n\t\t\n\telif event.label\u003d\u003d\u0027Enable Interaction\u0027:\n\t\tself.getSibling(\"ArchitectureBuilder\").props.enabled\u003dTrue\n\t\t\n\t#----BOM Menu Items------------------------------------------------------------\n\telif event.label\u003d\u003d\u0027Open BOM\u0027:\n\t\tsystem.perspective.navigate(\u0027/BOM\u0027,newTab\u003dTrue)\n\telif event.label\u003d\u003d\u0027Map\u0027:\n\t\tsystem.perspective.navigate(\u0027/Map\u0027,newTab\u003dTrue)\n\telif event.label\u003d\u003d\u0027JSON Structure\u0027:\n\t\tsystem.perspective.openDock(\"structure\")\n#\t\tsystem.perspective.openPopup(\u0027JSON\u0027, \u0027Exchange/ArchitectureBuilder/StructureViewPrettyPrint\u0027, title\u003d\u0027JSON Structure\u0027, resizable \u003d True, modal\u003dTrue, viewportBound\u003dTrue, position \u003d {\u0027height\u0027: \u0027auto\u0027, \u0027width\u0027: \u0027300px\u0027} )\n\telif event.label\u003d\u003d\u0027JSON Configs\u0027:\n\t\tsystem.perspective.openPopup(\u0027JSON\u0027, \u0027Exchange/ArchitectureBuilder/ConfigViewPrettyPrint\u0027, title\u003d\u0027JSON Configs\u0027, resizable \u003d True, modal\u003dTrue, viewportBound\u003dTrue, position \u003d {\u0027height\u0027: \u002750%\u0027, \u0027width\u0027: \u0027300px\u0027} )\n\t\t\n"
               },
               "scope": "G",
               "type": "script"
@@ -6038,18 +6038,6 @@
                 "targetHandle": "top-2",
                 "waypoints": []
               },
-              "I92c394d6": {
-                "arrow": false,
-                "connectionType": "db",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": true,
-                "source": "Ie0d58f48",
-                "sourceHandle": "bottom-2",
-                "target": "I7cf3de56",
-                "targetHandle": "top-1",
-                "waypoints": []
-              },
               "I995f2bc2": {
                 "arrow": false,
                 "connectionType": "mqtt",
@@ -6508,18 +6496,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I1663a0ab",
-                  "I8388d8ef"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I14067906",
-                  "Ife2e763f",
-                  "I8ae90272"
-                ],
                 "inactive": false,
                 "label": "Frontend n+1",
                 "paletteId": "cloud",
@@ -6579,17 +6557,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I36fb449d",
-                  "I3b3a271c",
-                  "Ic9d84d93"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I0e637e4a"
-                ],
                 "inactive": false,
                 "label": "Additional Engine Gateways If needed",
                 "paletteId": "standard",
@@ -6624,14 +6593,8 @@
                   "quantity": 1,
                   "tagCount": 0
                 },
-                "connections": [
-                  "I0bdec72f"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "I232c59ff"
-                ],
                 "inactive": false,
                 "label": "Device",
                 "paletteId": "DeviceBlue",
@@ -6651,17 +6614,16 @@
                 "configs": {
                   "backColor": "#008080",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 930,
                 "hideHandles": true,
-                "hierarchy": [
-                  "Ic314cfc1"
-                ],
                 "inactive": false,
                 "label": "Availability Zone A",
                 "paletteId": "container",
@@ -6680,17 +6642,16 @@
                 "configs": {
                   "backColor": "#FF8C00",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 930,
                 "hideHandles": true,
-                "hierarchy": [
-                  "Ic314cfc1"
-                ],
                 "inactive": false,
                 "label": "Availability Zone B (Backups)",
                 "paletteId": "container",
@@ -6714,15 +6675,8 @@
                     "I1663a0ab"
                   ]
                 },
-                "connections": [
-                  "I1663a0ab",
-                  "I9268a4e0",
-                  "Id35ed210",
-                  "Ie8e1ec7e"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [],
                 "inactive": false,
                 "label": "Load Balancer",
                 "paletteId": "load-balancer",
@@ -6756,19 +6710,8 @@
                   ],
                   "image": "MQTT-Server"
                 },
-                "connections": [
-                  "I21973d99",
-                  "I26922a08",
-                  "I40c2abf7",
-                  "Ic57d9226",
-                  "Ie28c0820"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I14067906"
-                ],
                 "inactive": false,
                 "label": "IIoT",
                 "paletteId": "Broker",
@@ -6828,18 +6771,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I0d880b55",
-                  "Ib8318a86",
-                  "Ibfeb447f",
-                  "Iffee88fb"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I0e637e4a"
-                ],
                 "inactive": false,
                 "label": "Engine Gateway 1",
                 "paletteId": "standard",
@@ -6893,17 +6826,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I1b3b9de6",
-                  "I6c29a5eb",
-                  "Ibe39b67c",
-                  "If78aed59"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ie8acb364"
-                ],
                 "inactive": false,
                 "label": "Edge IIoT",
                 "paletteId": "edge-panel",
@@ -6927,15 +6851,16 @@
                 "configs": {
                   "backColor": "#808080",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 450,
                 "hideHandles": true,
-                "hierarchy": [],
                 "inactive": false,
                 "label": "High Tag No Local Visibility",
                 "paletteId": "container",
@@ -6958,14 +6883,8 @@
                   "image": "ClientKeyboardBlue-Left",
                   "quantity": 1
                 },
-                "connections": [
-                  "If78aed59"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ie8acb364"
-                ],
                 "inactive": false,
                 "label": "Client",
                 "paletteId": "KBBlueLeft",
@@ -7011,18 +6930,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I21eb39f3",
-                  "I350e51b0",
-                  "I8b3f0dcd",
-                  "Ic57d9226",
-                  "Id1557bc4"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ie8acb364"
-                ],
                 "inactive": false,
                 "label": "Edge IIoT",
                 "paletteId": "edge-panel",
@@ -7081,18 +6990,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I25f67833",
-                  "I26922a08",
-                  "I437183a5",
-                  "Ic9daecdd"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I14067906"
-                ],
                 "inactive": false,
                 "label": "Additional Engine Gateways If needed",
                 "paletteId": "standard",
@@ -7119,15 +7018,16 @@
                 "configs": {
                   "backColor": "#808080",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 450,
                 "hideHandles": true,
-                "hierarchy": [],
                 "inactive": false,
                 "label": "Local Long-term Storage/ Expandable",
                 "paletteId": "container",
@@ -7146,13 +7046,8 @@
                 "configs": {
                   "fontSize": 12
                 },
-                "connections": [],
                 "height": 150,
                 "hideHandles": true,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I0e637e4a"
-                ],
                 "inactive": false,
                 "label": "Note",
                 "paletteId": "Note",
@@ -7238,18 +7133,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I2549931d",
-                  "Id35ed210",
-                  "If2434137"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "Ife2e763f",
-                  "I8ae90272"
-                ],
                 "inactive": false,
                 "label": "Frontend n+1",
                 "paletteId": "cloud",
@@ -7309,19 +7194,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I437183a5",
-                  "I9268a4e0",
-                  "Ic50799ce",
-                  "Iffee88fb"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I0e637e4a",
-                  "Ife2e763f"
-                ],
                 "inactive": false,
                 "label": "Frontend 1",
                 "paletteId": "standard",
@@ -7360,24 +7234,8 @@
                   ],
                   "image": "MQTT-Server"
                 },
-                "connections": [
-                  "I1b3b9de6",
-                  "I36fb449d",
-                  "I484450da",
-                  "I4b4fde39",
-                  "I896c8204",
-                  "I995f2bc2",
-                  "Ibe9162e5",
-                  "Ibfeb447f",
-                  "Id1557bc4",
-                  "Ie6e69de9"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I0e637e4a"
-                ],
                 "inactive": false,
                 "label": "IIoT",
                 "paletteId": "Broker",
@@ -7402,14 +7260,8 @@
                   "quantity": 1,
                   "tagCount": 0
                 },
-                "connections": [
-                  "I2e099cbe"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "I2d840343"
-                ],
                 "inactive": false,
                 "label": "Device",
                 "paletteId": "DeviceBlue",
@@ -7437,14 +7289,8 @@
                   "quantity": 1,
                   "tagCount": 0
                 },
-                "connections": [
-                  "Ic57e4581"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic663a3df"
-                ],
                 "inactive": false,
                 "label": "Device",
                 "paletteId": "DeviceBlue",
@@ -7508,16 +7354,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I07751459",
-                  "I8f5d3fe0",
-                  "Ie6e69de9"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "I232c59ff"
-                ],
                 "inactive": false,
                 "label": "Edge IIoT",
                 "paletteId": "edge-iiot",
@@ -7575,19 +7413,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I46587ceb",
-                  "Ia08c55ba",
-                  "Ic9daecdd",
-                  "Icf498c04",
-                  "Ie536493d"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I14067906"
-                ],
                 "inactive": false,
                 "label": "Task Gateway",
                 "paletteId": "standard",
@@ -7612,18 +7439,13 @@
               },
               "I780e8c50": {
                 "configs": {
+                  "DBType": null,
                   "connections": [
                     "I3f142a8a"
                   ]
                 },
-                "connections": [
-                  "I3f142a8a"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "I2d840343"
-                ],
                 "inactive": false,
                 "label": "Database",
                 "paletteId": "SQLDB",
@@ -7682,17 +7504,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I21973d99",
-                  "I9ec9ca5f",
-                  "Ie536493d"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I14067906"
-                ],
                 "inactive": false,
                 "label": "Engine Gateway 1",
                 "paletteId": "standard",
@@ -7752,17 +7565,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I0ad29a9a",
-                  "I9c194bf6",
-                  "Ie8e1ec7e"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "Ife2e763f"
-                ],
                 "inactive": false,
                 "label": "Frontend 2",
                 "paletteId": "standard",
@@ -7830,26 +7634,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I07751459",
-                  "I350e51b0",
-                  "I388b2a1b",
-                  "I5d26fb40",
-                  "I92c394d6",
-                  "Iac87e900",
-                  "Ib8318a86",
-                  "Ibe39b67c",
-                  "Ic9d84d93",
-                  "Ica170835",
-                  "Iebdd743d",
-                  "Iec7ccc20"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I0e637e4a"
-                ],
                 "inactive": false,
                 "label": "Task Gateway",
                 "paletteId": "standard",
@@ -7876,18 +7662,16 @@
                 "configs": {
                   "backColor": "#808080",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 240,
                 "hideHandles": true,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "Ife2e763f"
-                ],
                 "inactive": false,
                 "label": "AutoScaling Optional",
                 "paletteId": "container",
@@ -7948,20 +7732,8 @@
                   "trial": false,
                   "version": "8.3.x"
                 },
-                "connections": [
-                  "I2e099cbe",
-                  "I3f142a8a",
-                  "I46587ceb",
-                  "I5d26fb40",
-                  "I896c8204",
-                  "Ib1354594",
-                  "Icf64c41e"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "I2d840343"
-                ],
                 "inactive": false,
                 "label": "Standard",
                 "paletteId": "standard",
@@ -8032,16 +7804,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I0bdec72f",
-                  "I484450da",
-                  "Iebdd743d"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "I232c59ff"
-                ],
                 "inactive": false,
                 "label": "Edge IIoT",
                 "paletteId": "edge-iiot",
@@ -8072,14 +7836,8 @@
                   "quantity": 1,
                   "tagCount": 0
                 },
-                "connections": [
-                  "I6c29a5eb"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ie8acb364"
-                ],
                 "inactive": false,
                 "label": "Device",
                 "paletteId": "DeviceBlue",
@@ -8103,14 +7861,8 @@
                   "image": "ClientKeyboardBlue-Left",
                   "quantity": 1
                 },
-                "connections": [
-                  "I8b3f0dcd"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ie8acb364"
-                ],
                 "inactive": false,
                 "label": "Client",
                 "paletteId": "KBBlueLeft",
@@ -8173,20 +7925,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I0ad29a9a",
-                  "I2549931d",
-                  "I8388d8ef",
-                  "Ia08c55ba",
-                  "Icf774a55",
-                  "Ie28c0820"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I14067906"
-                ],
                 "inactive": false,
                 "label": "Engine Gateway 2",
                 "paletteId": "standard",
@@ -8213,15 +7953,16 @@
                 "configs": {
                   "backColor": "#808080",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 450,
                 "hideHandles": true,
-                "hierarchy": [],
                 "inactive": false,
                 "label": "Edge Collector",
                 "paletteId": "container",
@@ -8240,10 +7981,8 @@
                 "configs": {
                   "fontSize": 12
                 },
-                "connections": [],
                 "height": 150,
                 "hideHandles": true,
-                "hierarchy": [],
                 "inactive": false,
                 "label": "Note",
                 "paletteId": "Note",
@@ -8263,15 +8002,16 @@
                 "configs": {
                   "backColor": "#808080",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 1050,
                 "hideHandles": true,
-                "hierarchy": [],
                 "inactive": false,
                 "label": "AWS Texas Region OR Azure South Central US",
                 "paletteId": "container",
@@ -8294,14 +8034,8 @@
                   "image": "ClientKeyboardWhite-Left",
                   "quantity": 1
                 },
-                "connections": [
-                  "Ib1354594"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "I2d840343"
-                ],
                 "inactive": false,
                 "label": "Client",
                 "paletteId": "KBWhiteLeft",
@@ -8320,15 +8054,16 @@
                 "configs": {
                   "backColor": "#808080",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 450,
                 "hideHandles": true,
-                "hierarchy": [],
                 "inactive": false,
                 "label": "Local Visibility",
                 "paletteId": "container",
@@ -8355,14 +8090,8 @@
                   "quantity": 1,
                   "tagCount": 0
                 },
-                "connections": [
-                  "Ic00e4354"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Iaaf1c133"
-                ],
                 "inactive": false,
                 "label": "Device",
                 "paletteId": "DeviceBlue",
@@ -8386,14 +8115,8 @@
                   "image": "ClientKeyboardBlue-Left",
                   "quantity": 1
                 },
-                "connections": [
-                  "I8b37de5f"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic663a3df"
-                ],
                 "inactive": false,
                 "label": "Client",
                 "paletteId": "KBBlueLeft",
@@ -8438,17 +8161,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I388b2a1b",
-                  "I4b4fde39",
-                  "I8b37de5f",
-                  "Ic57e4581"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic663a3df"
-                ],
                 "inactive": false,
                 "label": "Edge IIoT",
                 "paletteId": "edge-panel",
@@ -8467,34 +8181,6 @@
                 "width": 150,
                 "x": 1740,
                 "y": 1470
-              },
-              "Icd5cf9b6": {
-                "configs": {},
-                "connections": [],
-                "hideHandles": true,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I0e637e4a"
-                ],
-                "inactive": false,
-                "label": "Label",
-                "labelStyle": {
-                  "classes": ""
-                },
-                "paletteId": "Label",
-                "style": {
-                  "classes": ""
-                },
-                "supportedConnections": [
-                  "rest",
-                  "db",
-                  "standard"
-                ],
-                "tooltip": "Manufacturing Execution System",
-                "typeId": "Label",
-                "useOverrideImage": false,
-                "x": 480,
-                "y": 210
               },
               "Id87db9d0": {
                 "configs": {
@@ -8546,21 +8232,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "I40c2abf7",
-                  "I995f2bc2",
-                  "I9c194bf6",
-                  "Ic0b25058",
-                  "Ic50799ce",
-                  "Ica170835",
-                  "If2434137"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I0e637e4a"
-                ],
                 "inactive": false,
                 "label": "Engine Gateway 2",
                 "paletteId": "standard",
@@ -8583,36 +8256,6 @@
                 "x": 720,
                 "y": 600
               },
-              "Ie0d58f48": {
-                "configs": {},
-                "connections": [
-                  "I92c394d6"
-                ],
-                "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1",
-                  "I0e637e4a"
-                ],
-                "inactive": false,
-                "label": "Server",
-                "labelStyle": {
-                  "classes": ""
-                },
-                "paletteId": "server",
-                "style": {
-                  "classes": ""
-                },
-                "supportedConnections": [
-                  "rest",
-                  "db",
-                  "standard"
-                ],
-                "tooltip": "",
-                "typeId": "server",
-                "useOverrideImage": false,
-                "x": 225,
-                "y": 210
-              },
               "Ie24353b3": {
                 "configs": {
                   "PLCType": "",
@@ -8625,14 +8268,8 @@
                   "quantity": 1,
                   "tagCount": 0
                 },
-                "connections": [
-                  "I21eb39f3"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ie8acb364"
-                ],
                 "inactive": false,
                 "label": "Device",
                 "paletteId": "DeviceBlue",
@@ -8656,14 +8293,8 @@
                   "image": "ClientLaptopWhite-Left",
                   "quantity": 1
                 },
-                "connections": [
-                  "Icf64c41e"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "I2d840343"
-                ],
                 "inactive": false,
                 "label": "Client",
                 "paletteId": "LTWhiteLeft",
@@ -8681,15 +8312,16 @@
                 "configs": {
                   "backColor": "#808080",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 450,
                 "hideHandles": true,
-                "hierarchy": [],
                 "inactive": false,
                 "label": "High Tag Local Visibility",
                 "paletteId": "container",
@@ -8706,6 +8338,7 @@
               },
               "If5beafb1": {
                 "configs": {
+                  "DBType": null,
                   "connections": [
                     "I9ec9ca5f",
                     "Icf774a55",
@@ -8717,21 +8350,8 @@
                     "Iac87e900"
                   ]
                 },
-                "connections": [
-                  "I0d880b55",
-                  "I25f67833",
-                  "I3b3a271c",
-                  "I9ec9ca5f",
-                  "Iac87e900",
-                  "Ic0b25058",
-                  "Icf498c04",
-                  "Icf774a55"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Ic314cfc1"
-                ],
                 "inactive": false,
                 "label": "DB Cluster",
                 "paletteId": "SQLDB",
@@ -8792,16 +8412,8 @@
                   "trial": false,
                   "version": "8.3.0"
                 },
-                "connections": [
-                  "Ibe9162e5",
-                  "Ic00e4354",
-                  "Iec7ccc20"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "Iaaf1c133"
-                ],
                 "inactive": false,
                 "label": "Edge IIoT",
                 "paletteId": "edge-iiot",
@@ -8832,14 +8444,8 @@
                   "quantity": 1,
                   "tagCount": 0
                 },
-                "connections": [
-                  "I8f5d3fe0"
-                ],
                 "height": 150,
                 "hideHandles": false,
-                "hierarchy": [
-                  "I232c59ff"
-                ],
                 "inactive": false,
                 "label": "Device",
                 "paletteId": "DeviceBlue",
@@ -8859,17 +8465,16 @@
                 "configs": {
                   "backColor": "#008000",
                   "labelColor": "#000000",
-                  "location": {},
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
                   "quantity": 1,
                   "transparency": 255,
                   "vendor": false
                 },
-                "connections": [],
                 "height": 300,
                 "hideHandles": true,
-                "hierarchy": [
-                  "Ic314cfc1"
-                ],
                 "inactive": false,
                 "label": "Frontend Target Group",
                 "paletteId": "container",
@@ -8919,42 +8524,42 @@
           "component": {
             "onCanvasError": {
               "config": {
-                "script": "\tself.view.custom.onclick\u003devent.message\n\tlogger\u003dsystem.util.getLogger(\"React.Errors\")\n\tlogger.error(event.message)"
+                "script": "\tself.getSibling(\"jsonEditor\").props.data\u003devent.message\n\tlogger\u003dsystem.util.getLogger(\"React.Errors\")\n\tlogger.error(event.message)"
               },
               "scope": "G",
               "type": "script"
             },
             "onContextMenuAction": {
               "config": {
-                "script": "\tself.view.custom.onclick\u003devent"
+                "script": "\tself.getSibling(\"jsonEditor\").props.datak\u003devent"
               },
               "scope": "G",
               "type": "script"
             },
             "onEdgeClick": {
               "config": {
-                "script": "\tself.view.custom.onclick\u003devent"
+                "script": "\tself.getSibling(\"jsonEditor\").props.data\u003devent"
               },
               "scope": "G",
               "type": "script"
             },
             "onGearClick": {
               "config": {
-                "script": "\tself.view.custom.onclick\u003devent"
+                "script": "\tself.getSibling(\"jsonEditor\").props.data\u003devent"
               },
               "scope": "G",
               "type": "script"
             },
             "onNodeClick": {
               "config": {
-                "script": "\tself.view.custom.onclick\u003devent"
+                "script": "\tself.getSibling(\"jsonEditor\").props.data\u003devent"
               },
               "scope": "G",
               "type": "script"
             },
             "onPaletteItemClick": {
               "config": {
-                "script": "\tself.paletteItem(event)\n\tself.view.custom.onclick\u003devent"
+                "script": "\tself.getSibling(\"jsonEditor\").props.data\u003devent"
               },
               "enabled": false,
               "scope": "G",
@@ -8962,7 +8567,7 @@
             },
             "onPaneClick": {
               "config": {
-                "script": "\tself.view.custom.onclick\u003devent"
+                "script": "\tself.getSibling(\"jsonEditor\").props.data\u003devent"
               },
               "scope": "G",
               "type": "script"

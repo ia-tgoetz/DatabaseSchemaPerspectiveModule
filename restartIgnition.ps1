@@ -1,3 +1,7 @@
+param(
+    [switch]$designer
+)
+
 # --- Configuration ---
 $ComposeDir = "igntion_test_env"
 $ServiceName = "module-dev-ignition"
@@ -38,11 +42,14 @@ if (Test-Path $TargetPath) {
             $Stopwatch.Stop()
             $StartupTimeMs = [math]::Round($Stopwatch.Elapsed.TotalMilliseconds)
             
-            Write-Host "`n--- Gateway is UP! Startup took $StartupTimeMs ms. Launching Designer ---" -ForegroundColor Green
+            Write-Host "`n--- Gateway is UP! Startup took $StartupTimeMs ms. ---" -ForegroundColor Green
             
-            # 3. 8.3 Deep Link Syntax
-            # Format: designer://GatewayAddress/projectName?insecure=true
-            Start-Process "designer://${GatewayUrl}/${ProjectName}?insecure=true"
+            if ($designer) {
+                Write-Host "--- Launching Designer ---" -ForegroundColor Cyan
+                # 3. 8.3 Deep Link Syntax
+                # Format: designer://GatewayAddress/projectName?insecure=true
+                Start-Process "designer://${GatewayUrl}/${ProjectName}?insecure=true"
+            }
         } else {
             # Be sure to stop the stopwatch even if it fails, just for good measure
             $Stopwatch.Stop()
