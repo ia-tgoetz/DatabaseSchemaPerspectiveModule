@@ -1,6 +1,6 @@
 import React from 'react';
 // @ts-ignore
-import { Handle, Position, NodeProps, useViewport } from 'reactflow';
+import { Handle, Position, NodeProps, useViewport, NodeResizer } from 'reactflow';
 import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
 
 export interface ArchitectureNodeData {
@@ -20,6 +20,7 @@ export interface ArchitectureNodeData {
     highlightedHandles?: string[];
     onGearClick?: (id: string, event: React.MouseEvent) => void;
     onTextChange?: (id: string, text: string) => void;
+    onResizeEnd?: (id: string, x: number, y: number, width: number, height: number) => void;
 }
 
 const TEXT_PALETTE_IDS = new Set(['Note', 'Label']);
@@ -61,16 +62,14 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
         border: '1px solid var(--neutral-50)',
         color: 'var(--neutral-90)',
         display: 'flex',
-
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '150px',
-        height: '150px',
+        width: '100%',
+        height: '100%',
         boxSizing: 'border-box',
         position: 'relative',
         ...restStyle,
-        filter: data.inactive ? 'grayscale(100%)' : (restStyle.filter || undefined),
         boxShadow: selected ? '0 0 0 2px rgba(0, 123, 255, 0.25)' : (restStyle.boxShadow || '0 2px 4px rgba(0,0,0,0.1)')
     };
 
@@ -91,14 +90,18 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
         zIndex: 20, // Ensure handles are above node content and labels
         '--hit-size': `${hitSize}px`
     };
-    
+
     const handleCount = Math.max(1, Math.min(8, Number(data.handleCount) || 5));
     const positions = Array.from({ length: handleCount }, (_, i) => `${((i + 0.5) / handleCount) * 100}%`);
     const highlighted = new Set(data.highlightedHandles || []);
     const handleClass = (id: string) => highlighted.has(id) ? 'arch-node-handle arch-node-handle--connected' : 'arch-node-handle';
 
+    // Calculate dynamic resizer handle size based on zoom
+    const resizerSize = Math.max(10, Math.round(16 / zoom));
+
     return (
         <div style={combinedStyle} title={data.tooltip}>
+
             {positions.map((pos, i) => <Handle className={handleClass(`top-${i}`)} key={`top-${i}`} type="source" position={Position.Top} id={`top-${i}`} style={{ ...handleStyle, left: pos, top: '0px', transform: 'translate(-50%, -50%)' }} />)}
             {positions.map((pos, i) => <Handle className={handleClass(`right-${i}`)} key={`right-${i}`} type="source" position={Position.Right} id={`right-${i}`} style={{ ...handleStyle, top: pos, left: '100%', transform: 'translate(-50%, -50%)' }} />)}
             {positions.map((pos, i) => <Handle className={handleClass(`bottom-${i}`)} key={`bottom-${i}`} type="source" position={Position.Bottom} id={`bottom-${i}`} style={{ ...handleStyle, left: pos, top: '100%', transform: 'translate(-50%, -50%)' }} />)}
@@ -137,7 +140,11 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
             {data.image && (
                 <div
                     className="arch-node-svg-wrapper"
-                    style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', minHeight: 0, zIndex: 1, backgroundColor: imageBg || undefined }}
+                    style={{ 
+                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                        width: '100%', minHeight: 0, zIndex: 1, backgroundColor: imageBg || undefined,
+                        filter: data.inactive ? 'grayscale(100%) blur(2px)' : undefined 
+                    }}
                 >
                     <NodeImage src={data.image} />
                 </div>

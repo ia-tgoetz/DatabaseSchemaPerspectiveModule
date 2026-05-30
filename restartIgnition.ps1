@@ -1,7 +1,7 @@
 # --- Configuration ---
 $ComposeDir = "igntion_test_env"
 $ServiceName = "module-dev-ignition"
-$ProjectName = "BrowseEditFileSystem" # Change this to your actual project name
+$ProjectName = "ArchBuilder" # Change this to your actual project name
 $GatewayUrl = "module-dev-ignition.localtest.me:80" # Update if using a different port/hostname
 
 # 1. Setup Paths

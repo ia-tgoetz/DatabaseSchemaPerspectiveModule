@@ -1,5 +1,8 @@
 
 ### Java
+.claude
+.playwright-mcp
+.gemini
 *.class
 .vscode
 *convert_arch.py

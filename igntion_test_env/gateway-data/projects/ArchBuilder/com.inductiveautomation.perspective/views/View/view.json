@@ -1,0 +1,95 @@
+{
+  "custom": {},
+  "params": {},
+  "props": {},
+  "root": {
+    "children": [
+      {
+        "meta": {
+          "name": "ArchitectureBuilder"
+        },
+        "position": {
+          "height": 600,
+          "width": 800,
+          "x": 267,
+          "y": 231
+        },
+        "props": {
+          "hierarchy": {
+            "areas": [],
+            "nodes": [
+              {
+                "id": "I768c89e7",
+                "label": "Note",
+                "typeId": "Note"
+              },
+              {
+                "id": "I006d77fe",
+                "label": "Label",
+                "typeId": "Label"
+              }
+            ]
+          },
+          "nodes": {
+            "I006d77fe": {
+              "configs": {},
+              "connections": [],
+              "hideHandles": true,
+              "hierarchy": [],
+              "inactive": false,
+              "label": "Label",
+              "labelStyle": {
+                "classes": ""
+              },
+              "paletteId": "Label",
+              "style": {
+                "classes": ""
+              },
+              "supportedConnections": [
+                "rest",
+                "db",
+                "standard"
+              ],
+              "tooltip": "Manufacturing Execution System",
+              "typeId": "Label",
+              "useOverrideImage": false,
+              "x": 120,
+              "y": 405
+            },
+            "I768c89e7": {
+              "configs": {},
+              "connections": [],
+              "hideHandles": true,
+              "hierarchy": [],
+              "inactive": false,
+              "label": "Note",
+              "labelStyle": {
+                "classes": ""
+              },
+              "paletteId": "Note",
+              "style": {
+                "classes": ""
+              },
+              "supportedConnections": [
+                "rest",
+                "db",
+                "standard"
+              ],
+              "text": "asdfNote",
+              "tooltip": "",
+              "typeId": "Note",
+              "useOverrideImage": false,
+              "x": 225,
+              "y": 120
+            }
+          }
+        },
+        "type": "com.wargoetz.reactflow.architecturebuilder"
+      }
+    ],
+    "meta": {
+      "name": "root"
+    },
+    "type": "ia.container.coord"
+  }
+}

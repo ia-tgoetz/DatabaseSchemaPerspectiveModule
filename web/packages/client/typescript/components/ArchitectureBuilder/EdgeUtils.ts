@@ -99,6 +99,7 @@ export const computeAutoWaypoints = (
 
 export const mapIgnitionToReactFlowEdges = (
     ignitionEdges: any,
+    ignitionNodes: any,
     connectionTypes: any,
     selectedId: string | null,
     onWaypointsChange?: (id: string, wps: { x: number; y: number }[]) => void,
@@ -113,7 +114,19 @@ export const mapIgnitionToReactFlowEdges = (
         .map(([id, edgeData]: any) => {
             const typeConfig = connectionTypes[edgeData.connectionType] || {};
             const isSelected = id === selectedId;
-            const isAnimated = (edgeData.animation || 'none') !== 'none';
+
+            // Tie data flow animation to node status.
+            // If either the source or target node is marked as inactive, we force animation to 'none'.
+            const sourceNode = ignitionNodes?.[edgeData.source];
+            const targetNode = ignitionNodes?.[edgeData.target];
+            const isSourceInactive = sourceNode?.inactive === true;
+            const isTargetInactive = targetNode?.inactive === true;
+            
+            const effectiveAnimation = (isSourceInactive || isTargetInactive) 
+                ? 'none' 
+                : (edgeData.animation || 'none');
+
+            const isAnimated = effectiveAnimation !== 'none';
             const zIndex = isAnimated ? 1000 : (isSelected ? 10 : 0);
 
             const strokeStyle: any = { stroke: typeConfig.color || '#888', strokeWidth: isSelected ? baseWidth + 2 : baseWidth };
@@ -130,7 +143,7 @@ export const mapIgnitionToReactFlowEdges = (
                     waypoints: edgeData.waypoints || [],
                     showLabel: edgeData.showLabel === true,
                     isSelected,
-                    animation: edgeData.animation || 'none',
+                    animation: effectiveAnimation,
                     snapEnabled: snapEnabled ?? true,
                     snapPixels: snapPixels ?? 15,
                     onWaypointsChange: onWaypointsChange
