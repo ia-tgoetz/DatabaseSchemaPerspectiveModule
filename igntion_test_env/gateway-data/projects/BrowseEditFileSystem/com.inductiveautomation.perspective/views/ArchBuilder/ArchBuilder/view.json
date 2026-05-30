@@ -84,8 +84,8 @@
               "tooltip": "Edge IIOT Gateway",
               "typeId": "standard",
               "useOverrideImage": true,
-              "x": 15,
-              "y": 30
+              "x": 300,
+              "y": 15
             },
             "Ied7e1bab": {
               "configs": {},
@@ -114,7 +114,7 @@
               ],
               "tooltip": "Edge IIOT Gateway",
               "typeId": "edge-iiot",
-              "useOverrideImage": false,
+              "useOverrideImage": true,
               "x": 180,
               "y": 420
             }

@@ -1,6 +1,7 @@
 
 ### Java
 .claude
+.playwright-mcp
 .gemini
 *.class
 .vscode
