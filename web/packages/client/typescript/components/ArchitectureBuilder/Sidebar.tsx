@@ -71,13 +71,17 @@ export const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, 
         const imgSrc = toSafeDataUri(item.image);
         if (imgSrc) {
             const ghost = document.createElement('div');
-            ghost.style.cssText = 'position:fixed;top:-200px;left:-200px;width:150px;height:150px;pointer-events:none;';
+            // Scale based on canvas zoom (approximated)
+            const zoom = parseFloat(document.querySelector('.react-flow__viewport')?.getAttribute('style')?.match(/scale\(([^)]+)\)/)?.[1] || '1');
+            const size = Math.round(150 * zoom);
+            ghost.style.cssText = `position:fixed;top:-200px;left:-200px;width:${size}px;height:${size}px;pointer-events:none;`;
+            
             const img = document.createElement('img');
             img.src = imgSrc;
-            img.style.cssText = 'width:150px;height:150px;object-fit:contain;display:block;';
+            img.style.cssText = `width:${size}px;height:${size}px;object-fit:contain;display:block;`;
             ghost.appendChild(img);
             document.body.appendChild(ghost);
-            event.dataTransfer.setDragImage(ghost, 75, 75);
+            event.dataTransfer.setDragImage(ghost, size / 2, size / 2);
             setTimeout(() => { if (document.body.contains(ghost)) document.body.removeChild(ghost); }, 0);
         }
     };

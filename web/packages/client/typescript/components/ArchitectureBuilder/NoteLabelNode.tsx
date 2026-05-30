@@ -18,6 +18,9 @@ export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeDat
     const { zoom } = useViewport();
     const [isEditing, setIsEditing] = React.useState(false);
     const [text, setText] = React.useState(data.text || data.label || '');
+    const [isOverflowing, setIsOverflowing] = React.useState(false);
+    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+    const contentRef = React.useRef<HTMLDivElement>(null);
 
     // Sync with incoming data changes
     React.useEffect(() => {
@@ -31,8 +34,27 @@ export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeDat
         }
     }, [data.isEditing]);
 
+    // Auto-resize textarea to keep it centered vertically
+    React.useEffect(() => {
+        if (isEditing && textareaRef.current) {
+            textareaRef.current.style.height = '0px'; // Reset to get correct scrollHeight
+            const scrollHeight = textareaRef.current.scrollHeight;
+            textareaRef.current.style.height = scrollHeight + 'px';
+        }
+    }, [isEditing, text]);
+
+    // Detect overflow
+    React.useEffect(() => {
+        if (contentRef.current) {
+            const hasOverflow = contentRef.current.scrollHeight > contentRef.current.offsetHeight || 
+                                contentRef.current.scrollWidth > contentRef.current.offsetWidth;
+            setIsOverflowing(hasOverflow);
+        }
+    }, [text, isEditing]);
+
     const handleDoubleClick = (e: React.MouseEvent) => {
         if (data.isEditable !== false) {
+            e.preventDefault();
             e.stopPropagation();
             setIsEditing(true);
         }
@@ -63,6 +85,7 @@ export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeDat
         pointerEvents: 'auto',
         overflow: 'hidden',
         boxSizing: 'border-box',
+        position: 'relative',
         ...data.style
     };
 
@@ -92,41 +115,71 @@ export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeDat
                 minWidth={40}
                 minHeight={20}
                 handleStyle={{ width: `${resizerSize}px`, height: `${resizerSize}px`, borderRadius: '4px' }}
+                onResize={(e, params) => {
+                    if (contentRef.current) {
+                        const hasOverflow = contentRef.current.scrollHeight > params.height || 
+                                            contentRef.current.scrollWidth > params.width;
+                        setIsOverflowing(hasOverflow);
+                    }
+                }}
                 onResizeEnd={(e, params) => {
                     if (data.onResizeEnd) data.onResizeEnd(id, params.x, params.y, params.width, params.height);
                 }}
             />
             {isEditing ? (
-                <textarea
-                    className="nodrag nopan"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    onBlur={handleBlur}
-                    autoFocus
-                    onKeyDown={(e) => {
-                        // For Labels, we still treat Enter as "done" unless Shift is held.
-                        // Notes allow free-form Enter.
-                        if (!isNote && e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleBlur();
-                        }
-                    }}
-                    style={{ 
-                        ...textStyle,
-                        border: 'none', 
-                        background: 'rgba(255,255,255,0.1)', 
-                        outline: 'none',
-                        resize: 'none',
-                        width: '100%',
-                        height: '100%',
-                        padding: '4px',
-                        boxSizing: 'border-box',
-                        overflow: 'hidden'
-                    }}
-                />
+                <div style={{ height: '100%', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <textarea
+                        ref={textareaRef}
+                        className="nodrag nopan"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        onBlur={handleBlur}
+                        autoFocus
+                        onKeyDown={(e) => {
+                            // Ctrl+Enter submits for all.
+                            // Enter inserts new line for Notes; submits for Labels.
+                            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                                e.preventDefault();
+                                handleBlur();
+                            } else if (!isNote && e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleBlur();
+                            }
+                        }}
+                        style={{ 
+                            ...textStyle,
+                            border: 'none', 
+                            background: 'transparent', 
+                            outline: 'none',
+                            resize: 'none',
+                            width: '100%',
+                            height: 'auto',
+                            padding: '0',
+                            boxSizing: 'border-box',
+                            overflow: 'hidden'
+                        }}
+                    />
+                </div>
             ) : (
-                <div style={{ ...textStyle, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <div ref={contentRef} style={{ ...textStyle, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {text || (isNote ? 'Double-click to add note' : 'Label')}
+                </div>
+            )}
+
+            {isOverflowing && !isEditing && (
+                <div 
+                    title="Text is overflowing"
+                    style={{ 
+                        position: 'absolute', 
+                        bottom: '2px', 
+                        right: '2px', 
+                        color: '#ff9800', 
+                        fontSize: '12px',
+                        pointerEvents: 'none',
+                        zIndex: 5
+                    }}
+                >
+                    ⚠️
                 </div>
             )}
         </div>

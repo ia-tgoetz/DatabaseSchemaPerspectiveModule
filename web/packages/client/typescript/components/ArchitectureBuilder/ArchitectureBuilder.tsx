@@ -241,11 +241,11 @@ const mapIgnitionToReactFlowNodes = (
                 id, type, selected: id === selectedId,
                 position: { x: nodeData.x || 0, y: nodeData.y || 0 },
                 zIndex: isContainer ? (nodeData.zIndex ?? -1) : 1000,
-                style: (isContainer || isTextNode) ? { 
-                    width: nodeData.width || (isContainer ? 300 : 150), 
-                    height: nodeData.height || (isContainer ? 300 : 80),
+                style: { 
+                    width: nodeData.width || (isContainer ? 300 : (isTextNode ? 150 : 150)), 
+                    height: nodeData.height || (isContainer ? 300 : (isTextNode ? 80 : 150)),
                     pointerEvents: (isContainer && !isUnlocked) ? 'none' : 'auto'
-                } : { pointerEvents: 'auto' },
+                },
                 dragHandle: (isContainer && !isUnlocked) ? '.custom-drag-handle' : undefined,
                 data: {
                     label: nodeData.label || 'Unknown', image: paletteImage || nodeData.image || '', text: nodeData.text || '', tooltip: nodeData.tooltip || '', configs: nodeData.configs || {},
@@ -255,7 +255,7 @@ const mapIgnitionToReactFlowNodes = (
                     highlightedHandles: highlightedHandlesMap[id] || [],
                     isEditable,
                     unlockMovement: isUnlocked,
-                    enableResize: isUnlocked,
+                    enableResize: isContainer || isTextNode,
                     onGearClick: handleGearClick, onTextChange: handleTextChange,
                     onResizeEnd: (isContainer || isTextNode) ? handleResizeEnd : undefined,
                 },
@@ -719,6 +719,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                 zoomOnScroll={true}
                                 panOnDrag={true}
                                 selectionOnDrag={false}
+                                deleteKeyCode={['Delete', 'Backspace']}
                             >
                                 <Background gap={snapPixels} />
                                 <Controls showInteractive={false} />
