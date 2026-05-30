@@ -6,6 +6,7 @@
 *.class
 trace*
 .vscode
+.skills/
 *convert_arch.py
 *OldArchFormat/*
 # Package Files #
