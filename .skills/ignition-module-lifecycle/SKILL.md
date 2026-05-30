@@ -41,7 +41,6 @@ When preparing for a release or testing on a production-like gateway:
 ## Operational Patterns
 
 ### Gradle Commands
-- `installModule`: Installs the module to a local Ignition installation.
 - `deepClean`: Removes `node_modules` and Gradle caches (use sparingly).
 
 ### Docker Management

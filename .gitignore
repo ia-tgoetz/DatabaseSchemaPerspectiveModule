@@ -1,5 +1,7 @@
 
 ### Java
+.claude
+.gemini
 *.class
 .vscode
 *convert_arch.py
