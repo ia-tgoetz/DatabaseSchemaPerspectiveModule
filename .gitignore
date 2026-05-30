@@ -4,6 +4,7 @@
 .playwright-mcp
 .gemini
 *.class
+trace*
 .vscode
 *convert_arch.py
 *OldArchFormat/*
