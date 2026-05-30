@@ -56,6 +56,10 @@ export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeDat
         if (data.isEditable !== false) {
             e.preventDefault();
             e.stopPropagation();
+            // Ensure any existing focus is handled before entering edit mode
+            if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+            }
             setIsEditing(true);
         }
     };
@@ -164,6 +168,19 @@ export const NoteLabelNode = ({ id, data, selected }: NodeProps<NoteLabelNodeDat
                 <div ref={contentRef} style={{ ...textStyle, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {text || (isNote ? 'Double-click to add note' : 'Label')}
                 </div>
+            )}
+
+            {isNote && (
+                <div 
+                    style={{
+                        position: 'absolute', top: 0, right: 0,
+                        width: '0px', height: '0px',
+                        borderTop: '15px solid #ffeb3b', // Note yellow color
+                        borderLeft: '15px solid transparent',
+                        borderBottomLeftRadius: '2px',
+                        zIndex: 4
+                    }}
+                />
             )}
 
             {isOverflowing && !isEditing && (
