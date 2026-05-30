@@ -121,6 +121,14 @@ export const useArchitectureFlowHandlers = ({
             if (nextEdges[edgeId]) {
                 nextEdges[edgeId] = { ...nextEdges[edgeId], waypoints };
                 store.props.write('edges', nextEdges);
+                
+                // Optimistic local update
+                setLocalEdges(edges => edges.map(e => {
+                    if (e.id === edgeId) {
+                        return { ...e, data: { ...e.data, waypoints } };
+                    }
+                    return e;
+                }));
             }
         } catch (error: any) {
             console.error("Error in handleWaypointsChange:", error);
@@ -128,7 +136,7 @@ export const useArchitectureFlowHandlers = ({
                 componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleWaypointsChange'));
             }
         }
-    }, [store, rawEdgesDict, componentEvents]);
+    }, [store, rawEdgesDict, componentEvents, setLocalEdges]);
 
     const onConnect = React.useCallback((connectionParams: any) => {
         try {
@@ -463,10 +471,10 @@ export const useArchitectureFlowHandlers = ({
                 }
 
                 dragStartPos.current = null;
-                setIsDraggingNode(false);
+                setTimeout(() => setIsDraggingNode(false), 250);
             }
         } catch (error: any) {
-            setIsDraggingNode(false);
+            setTimeout(() => setIsDraggingNode(false), 250);
             console.error("Error in onNodeDragStop:", error);
             if (componentEvents?.fireComponentEvent) {
                 componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodeDragStop'));

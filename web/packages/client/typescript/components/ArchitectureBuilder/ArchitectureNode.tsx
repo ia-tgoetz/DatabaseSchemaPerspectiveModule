@@ -16,6 +16,7 @@ export interface ArchitectureNodeData {
     inactive?: boolean;
     hideHandles?: boolean;
     globalHideHandles?: boolean;
+    isEditable?: boolean;
     handleCount?: number;
     highlightedHandles?: string[];
     onGearClick?: (id: string, event: React.MouseEvent) => void;
@@ -43,7 +44,7 @@ const NodeImage = ({ src }: { src: string }) => {
 
 export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureNodeData>) => {
     const { zoom } = useViewport();
-    const showHandles = !data.globalHideHandles && !data.hideHandles;
+    const showHandles = !data.globalHideHandles && !data.hideHandles && data.isEditable !== false;
     const isTextNode = TEXT_PALETTE_IDS.has(data.paletteId);
 
     const [localText, setLocalText] = React.useState(data.text || '');
@@ -54,6 +55,11 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
     const finalGearColor = data.labelStyle?.fill || finalLabelColor; 
 
     const { backgroundColor: imageBg, ...restStyle } = data.style || {};
+
+    const dummyTargetStyle: React.CSSProperties = {
+        position: 'absolute', width: '1px', height: '1px', background: 'transparent',
+        border: 'none', opacity: 0, pointerEvents: 'none', zIndex: -1
+    };
 
     const combinedStyle: React.CSSProperties = {
         padding: '0px',
@@ -102,10 +108,33 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
     return (
         <div style={combinedStyle} title={data.tooltip}>
 
-            {positions.map((pos, i) => <Handle className={handleClass(`top-${i}`)} key={`top-${i}`} type="source" position={Position.Top} id={`top-${i}`} style={{ ...handleStyle, left: pos, top: '0px', transform: 'translate(-50%, -50%)' }} />)}
-            {positions.map((pos, i) => <Handle className={handleClass(`right-${i}`)} key={`right-${i}`} type="source" position={Position.Right} id={`right-${i}`} style={{ ...handleStyle, top: pos, left: '100%', transform: 'translate(-50%, -50%)' }} />)}
-            {positions.map((pos, i) => <Handle className={handleClass(`bottom-${i}`)} key={`bottom-${i}`} type="source" position={Position.Bottom} id={`bottom-${i}`} style={{ ...handleStyle, left: pos, top: '100%', transform: 'translate(-50%, -50%)' }} />)}
-            {positions.map((pos, i) => <Handle className={handleClass(`left-${i}`)} key={`left-${i}`} type="source" position={Position.Left} id={`left-${i}`} style={{ ...handleStyle, top: pos, left: '0px', transform: 'translate(-50%, -50%)' }} />)}
+            {positions.map((pos, i) => (
+                <React.Fragment key={`top-${i}`}>
+                    <Handle className={handleClass(`top-${i}`)} type="source" position={Position.Top} id={`top-${i}`} style={{ ...handleStyle, left: pos, top: '0px', transform: 'translate(-50%, -50%)' }} />
+                    <Handle type="target" position={Position.Top} id={`top-${i}`} style={{ ...dummyTargetStyle, left: pos, top: '0px', transform: 'translate(-50%, -50%)' }} />
+                </React.Fragment>
+            ))}
+            
+            {positions.map((pos, i) => (
+                <React.Fragment key={`right-${i}`}>
+                    <Handle className={handleClass(`right-${i}`)} type="source" position={Position.Right} id={`right-${i}`} style={{ ...handleStyle, top: pos, left: '100%', transform: 'translate(-50%, -50%)' }} />
+                    <Handle type="target" position={Position.Right} id={`right-${i}`} style={{ ...dummyTargetStyle, top: pos, left: '100%', transform: 'translate(-50%, -50%)' }} />
+                </React.Fragment>
+            ))}
+            
+            {positions.map((pos, i) => (
+                <React.Fragment key={`bottom-${i}`}>
+                    <Handle className={handleClass(`bottom-${i}`)} type="source" position={Position.Bottom} id={`bottom-${i}`} style={{ ...handleStyle, left: pos, top: '100%', transform: 'translate(-50%, -50%)' }} />
+                    <Handle type="target" position={Position.Bottom} id={`bottom-${i}`} style={{ ...dummyTargetStyle, left: pos, top: '100%', transform: 'translate(-50%, -50%)' }} />
+                </React.Fragment>
+            ))}
+            
+            {positions.map((pos, i) => (
+                <React.Fragment key={`left-${i}`}>
+                    <Handle className={handleClass(`left-${i}`)} type="source" position={Position.Left} id={`left-${i}`} style={{ ...handleStyle, top: pos, left: '0px', transform: 'translate(-50%, -50%)' }} />
+                    <Handle type="target" position={Position.Left} id={`left-${i}`} style={{ ...dummyTargetStyle, top: pos, left: '0px', transform: 'translate(-50%, -50%)' }} />
+                </React.Fragment>
+            ))}
 
             <div
                 style={{

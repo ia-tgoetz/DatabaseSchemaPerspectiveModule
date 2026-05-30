@@ -3,6 +3,7 @@ This directory contains modular skills that enhance the capabilities of AI agent
 
 ## Active Skills
 - [Skill Developer](./skill-developer/SKILL.md) - Expert agent for creating, refining, and managing modular skills.
+- [Ignition Test Runner](./ignition-test-runner/SKILL.md) - Orchestrates build, deploy, restart, and automated analysis cycles.
 - [Ignition Module Lifecycle](./ignition-module-lifecycle/SKILL.md) - Automates build, deploy, and restart cycles for Ignition modules.
 - [Ignition Component Generator](./ignition-component-generator/SKILL.md) - Scaffolds new Perspective components across all layers.
 - [ReactFlow Routing Validator](./reactflow-routing-validator/SKILL.md) - Audits and maintains orthogonal edge routing logic.
