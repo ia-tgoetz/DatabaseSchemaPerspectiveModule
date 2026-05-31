@@ -2,11 +2,13 @@
 ### Java
 .claude
 .playwright-mcp
-.gemini
+.gemini/*
 *.class
 trace*
 .vscode
-.skills/
+*.skills*
+*.skill
+project-vulnerability-scanner.skill
 *convert_arch.py
 *OldArchFormat/*
 # Package Files #
