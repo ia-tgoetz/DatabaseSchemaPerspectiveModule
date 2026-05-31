@@ -25,8 +25,9 @@ Desktop.ini
 
 # Project-specific ignores
 .claude/
+.skills/
 .playwright-mcp/
-.gemini/
+.gemini/g
 *.skill
 trace*
 *.class
@@ -37,4 +38,6 @@ local.properties
 sign.props
 /private/
 Ignition-Build/
-
+claude.md
+GEMINI.md
+ignition-module-primer.md
