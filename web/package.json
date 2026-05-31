@@ -18,5 +18,10 @@
         "lerna": "3.22.1",
         "typescript": "^4.9.5",
         "webpack": "^5.x.x"
+    },
+    "resolutions": {
+        "lodash": ">=4.17.21",
+        "parse-url": ">=8.1.0",
+        "form-data": ">=2.5.4"
     }
 }
