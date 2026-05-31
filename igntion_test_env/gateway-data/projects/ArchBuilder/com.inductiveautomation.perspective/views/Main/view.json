@@ -5677,11 +5677,2819 @@
         "custom": {
           "newArch": {
             "edgeWidth": 6,
-            "edges": {},
+            "edges": {
+              "I07751459": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I6f7166ed",
+                "sourceHandle": "top-1",
+                "target": "I7cf3de56",
+                "targetHandle": "bottom-1",
+                "waypoints": []
+              },
+              "I0ad29a9a": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I7c8b6dd6",
+                "sourceHandle": "bottom-2",
+                "target": "I9efc1e39",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I0bdec72f": {
+                "arrow": false,
+                "connectionType": "device-driver",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I0a9c51bb",
+                "sourceHandle": "top-2",
+                "target": "I8c5711b2",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I0d880b55": {
+                "arrow": false,
+                "connectionType": "db",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I1cb6d0f0",
+                "sourceHandle": "bottom-3",
+                "target": "If5beafb1",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I1663a0ab": {
+                "arrow": false,
+                "connectionType": "client",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I006658a4",
+                "sourceHandle": "top-2",
+                "target": "I17d797b6",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I1b3b9de6": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I54b23b9f",
+                "sourceHandle": "bottom-2",
+                "target": "I22d98cfe",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I21973d99": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I7b930f5a",
+                "sourceHandle": "bottom-2",
+                "target": "I1ab81a37",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I21eb39f3": {
+                "arrow": false,
+                "connectionType": "device-driver",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "Ie24353b3",
+                "sourceHandle": "top-2",
+                "target": "I2c1bb43c",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I2549931d": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I48746532",
+                "sourceHandle": "bottom-2",
+                "target": "I9efc1e39",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I25f67833": {
+                "arrow": false,
+                "connectionType": "db",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I2ced0084",
+                "sourceHandle": "bottom-1",
+                "target": "If5beafb1",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I26922a08": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I1ab81a37",
+                "sourceHandle": "top-2",
+                "target": "I2ced0084",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I2e099cbe": {
+                "arrow": false,
+                "connectionType": "device-driver",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I6162a86c",
+                "sourceHandle": "top-2",
+                "target": "I8b418f0f",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I350e51b0": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I2c1bb43c",
+                "sourceHandle": "top-1",
+                "target": "I7cf3de56",
+                "targetHandle": "bottom-1",
+                "waypoints": []
+              },
+              "I36fb449d": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I54b23b9f",
+                "sourceHandle": "top-2",
+                "target": "I04add830",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I388b2a1b": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "Icc4331bd",
+                "sourceHandle": "top-1",
+                "target": "I7cf3de56",
+                "targetHandle": "bottom-1",
+                "waypoints": []
+              },
+              "I3b3a271c": {
+                "arrow": false,
+                "connectionType": "db",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "If5beafb1",
+                "sourceHandle": "bottom-2",
+                "target": "I04add830",
+                "targetHandle": "bottom-3",
+                "waypoints": []
+              },
+              "I3f142a8a": {
+                "arrow": false,
+                "connectionType": "db",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I8b418f0f",
+                "sourceHandle": "right-3",
+                "target": "I780e8c50",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I40c2abf7": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I1ab81a37",
+                "sourceHandle": "top-2",
+                "target": "Id87db9d0",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I437183a5": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I2ced0084",
+                "sourceHandle": "top-2",
+                "target": "I487777bb",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I46587ceb": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I76484f75",
+                "sourceHandle": "bottom-1",
+                "target": "I8b418f0f",
+                "targetHandle": "top-1",
+                "waypoints": []
+              },
+              "I484450da": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I54b23b9f",
+                "sourceHandle": "bottom-2",
+                "target": "I8c5711b2",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I4b4fde39": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "Icc4331bd",
+                "sourceHandle": "top-2",
+                "target": "I54b23b9f",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I5d26fb40": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I8b418f0f",
+                "sourceHandle": "top-1",
+                "target": "I7cf3de56",
+                "targetHandle": "bottom-1",
+                "waypoints": []
+              },
+              "I6c29a5eb": {
+                "arrow": false,
+                "connectionType": "device-driver",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I9886b433",
+                "sourceHandle": "top-2",
+                "target": "I22d98cfe",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I8388d8ef": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I006658a4",
+                "sourceHandle": "bottom-2",
+                "target": "I9efc1e39",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I896c8204": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I8b418f0f",
+                "sourceHandle": "top-2",
+                "target": "I54b23b9f",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I8b37de5f": {
+                "arrow": false,
+                "connectionType": "client",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "Icc4331bd",
+                "sourceHandle": "right-2",
+                "target": "Icac69c5e",
+                "targetHandle": "left-2",
+                "waypoints": []
+              },
+              "I8b3f0dcd": {
+                "arrow": false,
+                "connectionType": "client",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I2c1bb43c",
+                "sourceHandle": "left-2",
+                "target": "I99c88086",
+                "targetHandle": "right-2",
+                "waypoints": []
+              },
+              "I8f5d3fe0": {
+                "arrow": false,
+                "connectionType": "device-driver",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I6f7166ed",
+                "sourceHandle": "bottom-2",
+                "target": "Ife18f906",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I9268a4e0": {
+                "arrow": false,
+                "connectionType": "client",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I17d797b6",
+                "sourceHandle": "bottom-2",
+                "target": "I487777bb",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I995f2bc2": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I54b23b9f",
+                "sourceHandle": "top-2",
+                "target": "Id87db9d0",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "I9c194bf6": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I7c8b6dd6",
+                "sourceHandle": "bottom-2",
+                "target": "Id87db9d0",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "I9ec9ca5f": {
+                "arrow": false,
+                "connectionType": "db",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I7b930f5a",
+                "sourceHandle": "bottom-3",
+                "target": "If5beafb1",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "Ia08c55ba": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I76484f75",
+                "sourceHandle": "top-2",
+                "target": "I9efc1e39",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Iac87e900": {
+                "arrow": false,
+                "connectionType": "db",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "If5beafb1",
+                "sourceHandle": "bottom-2",
+                "target": "I7cf3de56",
+                "targetHandle": "bottom-3",
+                "waypoints": []
+              },
+              "Ib1354594": {
+                "arrow": false,
+                "connectionType": "client",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I8b418f0f",
+                "sourceHandle": "right-2",
+                "target": "Ic323e976",
+                "targetHandle": "left-2",
+                "waypoints": []
+              },
+              "Ib8318a86": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I1cb6d0f0",
+                "sourceHandle": "top-2",
+                "target": "I7cf3de56",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Ibe39b67c": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I22d98cfe",
+                "sourceHandle": "top-1",
+                "target": "I7cf3de56",
+                "targetHandle": "bottom-1",
+                "waypoints": []
+              },
+              "Ibe9162e5": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I54b23b9f",
+                "sourceHandle": "bottom-2",
+                "target": "Ifc2246d7",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Ibfeb447f": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I1cb6d0f0",
+                "sourceHandle": "bottom-2",
+                "target": "I54b23b9f",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Ic00e4354": {
+                "arrow": false,
+                "connectionType": "device-driver",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "Ic84e59be",
+                "sourceHandle": "top-2",
+                "target": "Ifc2246d7",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "Ic0b25058": {
+                "arrow": false,
+                "connectionType": "db",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "Id87db9d0",
+                "sourceHandle": "bottom-3",
+                "target": "If5beafb1",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "Ic50799ce": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "Id87db9d0",
+                "sourceHandle": "top-2",
+                "target": "I487777bb",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "Ic57d9226": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I1ab81a37",
+                "sourceHandle": "bottom-2",
+                "target": "I2c1bb43c",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Ic57e4581": {
+                "arrow": false,
+                "connectionType": "device-driver",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I646528ab",
+                "sourceHandle": "top-2",
+                "target": "Icc4331bd",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "Ic9d84d93": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I04add830",
+                "sourceHandle": "top-2",
+                "target": "I7cf3de56",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Ic9daecdd": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I76484f75",
+                "sourceHandle": "top-2",
+                "target": "I2ced0084",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Ica170835": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "Id87db9d0",
+                "sourceHandle": "top-2",
+                "target": "I7cf3de56",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Icf498c04": {
+                "arrow": false,
+                "connectionType": "db",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I76484f75",
+                "sourceHandle": "bottom-2",
+                "target": "If5beafb1",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "Icf64c41e": {
+                "arrow": false,
+                "connectionType": "client",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I8b418f0f",
+                "sourceHandle": "right-2",
+                "target": "Ie62f42c2",
+                "targetHandle": "left-2",
+                "waypoints": []
+              },
+              "Icf774a55": {
+                "arrow": false,
+                "connectionType": "db",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "If5beafb1",
+                "sourceHandle": "bottom-2",
+                "target": "I9efc1e39",
+                "targetHandle": "bottom-1",
+                "waypoints": []
+              },
+              "Id1557bc4": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I54b23b9f",
+                "sourceHandle": "bottom-2",
+                "target": "I2c1bb43c",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Id35ed210": {
+                "arrow": false,
+                "connectionType": "client",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I48746532",
+                "sourceHandle": "top-2",
+                "target": "I17d797b6",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "Ie28c0820": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I1ab81a37",
+                "sourceHandle": "top-2",
+                "target": "I9efc1e39",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "Ie536493d": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I7b930f5a",
+                "sourceHandle": "top-2",
+                "target": "I76484f75",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Ie6e69de9": {
+                "arrow": false,
+                "connectionType": "mqtt",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I54b23b9f",
+                "sourceHandle": "bottom-2",
+                "target": "I6f7166ed",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "Ie8e1ec7e": {
+                "arrow": false,
+                "connectionType": "client",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I7c8b6dd6",
+                "sourceHandle": "top-2",
+                "target": "I17d797b6",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              },
+              "Iebdd743d": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I8c5711b2",
+                "sourceHandle": "top-1",
+                "target": "I7cf3de56",
+                "targetHandle": "bottom-1",
+                "waypoints": []
+              },
+              "Iec7ccc20": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "Ifc2246d7",
+                "sourceHandle": "top-1",
+                "target": "I7cf3de56",
+                "targetHandle": "bottom-1",
+                "waypoints": []
+              },
+              "If2434137": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I48746532",
+                "sourceHandle": "bottom-2",
+                "target": "Id87db9d0",
+                "targetHandle": "top-2",
+                "waypoints": []
+              },
+              "If78aed59": {
+                "arrow": false,
+                "connectionType": "client",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I271bb8a8",
+                "sourceHandle": "left-2",
+                "target": "I22d98cfe",
+                "targetHandle": "right-2",
+                "waypoints": []
+              },
+              "Iffee88fb": {
+                "arrow": false,
+                "connectionType": "gateway-network",
+                "dashed": false,
+                "lineType": "smoothstep",
+                "showLabel": false,
+                "source": "I1cb6d0f0",
+                "sourceHandle": "top-2",
+                "target": "I487777bb",
+                "targetHandle": "bottom-2",
+                "waypoints": []
+              }
+            },
             "enableOnClickEvents": true,
             "enabled": true,
             "handleCount": 5,
-            "nodes": {},
+            "nodes": {
+              "I006658a4": {
+                "configs": {
+                  "connections": [
+                    "I1663a0ab",
+                    "I8388d8ef"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Engine"
+                      },
+                      {
+                        "name": "MQTT Distributor",
+                        "selection": "Distributor (50 clients)"
+                      },
+                      {
+                        "name": "MQTT Transmission"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "Alarm Notification"
+                      },
+                      {
+                        "name": "Twilio Notification"
+                      },
+                      {
+                        "name": "EAM"
+                      },
+                      {
+                        "name": "MongoDB"
+                      },
+                      {
+                        "name": "Perspective",
+                        "selection": "Unlimited"
+                      },
+                      {
+                        "name": "Reporting"
+                      },
+                      {
+                        "name": "SQL Bridge"
+                      },
+                      {
+                        "name": "Tag Historian",
+                        "selection": "Full"
+                      },
+                      {
+                        "name": "Web Development"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Frontend n+1",
+                "paletteId": "cloud",
+                "supportedConnections": [
+                  "gateway-network",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "cloud",
+                "width": 150,
+                "x": 1500,
+                "y": 210
+              },
+              "I04add830": {
+                "configs": {
+                  "connections": [
+                    "I36fb449d",
+                    "Ic9d84d93",
+                    "I3b3a271c"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Engine",
+                        "selection": "None"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Additional Engine Gateways If needed",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 930,
+                "y": 600
+              },
+              "I0a9c51bb": {
+                "configs": {
+                  "PLCType": "",
+                  "connections": [
+                    "I0bdec72f"
+                  ],
+                  "image": "PLCBlue-Left",
+                  "ips": [],
+                  "model": "",
+                  "quantity": 1,
+                  "tagCount": 0
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Device",
+                "paletteId": "DeviceBlue",
+                "supportedConnections": [
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "opc-com"
+                ],
+                "tooltip": "",
+                "typeId": "Device",
+                "width": 150,
+                "x": 2370,
+                "y": 1680
+              },
+              "I0e637e4a": {
+                "configs": {
+                  "backColor": "#008080",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 930,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "Availability Zone A",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#008080"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 990,
+                "x": 150,
+                "y": 90,
+                "zIndex": -9
+              },
+              "I14067906": {
+                "configs": {
+                  "backColor": "#FF8C00",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 930,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "Availability Zone B (Backups)",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#FF8C00"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 990,
+                "x": 1410,
+                "y": 90,
+                "zIndex": -3
+              },
+              "I17d797b6": {
+                "configs": {
+                  "connections": [
+                    "I9268a4e0",
+                    "Ie8e1ec7e",
+                    "Id35ed210",
+                    "I1663a0ab"
+                  ]
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Load Balancer",
+                "paletteId": "load-balancer",
+                "supportedConnections": [
+                  "standard",
+                  "rest",
+                  "gateway-network",
+                  "opc-ua",
+                  "mqtt",
+                  "kafka",
+                  "client",
+                  "opc-com",
+                  "mongodb",
+                  "device-driver",
+                  "db"
+                ],
+                "tooltip": "",
+                "typeId": "network-component",
+                "width": 150,
+                "x": 1200,
+                "y": 0
+              },
+              "I1ab81a37": {
+                "configs": {
+                  "connections": [
+                    "I21973d99",
+                    "Ie28c0820",
+                    "I26922a08",
+                    "Ic57d9226",
+                    "I40c2abf7"
+                  ],
+                  "image": "MQTT-Server"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "IIoT",
+                "paletteId": "Broker",
+                "supportedConnections": [
+                  "mqtt"
+                ],
+                "tooltip": "",
+                "typeId": "Broker",
+                "width": 150,
+                "x": 1830,
+                "y": 840
+              },
+              "I1cb6d0f0": {
+                "configs": {
+                  "connections": [
+                    "Ib8318a86",
+                    "Iffee88fb",
+                    "I0d880b55",
+                    "Ibfeb447f"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Engine",
+                        "selection": "None"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM",
+                        "selection": "1 Controller or Agent"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "Alarm Notification",
+                        "selection": "None"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Engine Gateway 1",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 360,
+                "y": 600
+              },
+              "I22d98cfe": {
+                "configs": {
+                  "connections": [
+                    "I6c29a5eb",
+                    "If78aed59",
+                    "I1b3b9de6",
+                    "Ibe39b67c"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [],
+                    "IA": [
+                      {
+                        "major": "8.1",
+                        "minor": 0,
+                        "name": "Perspective",
+                        "selection": "2 Sessions"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": true,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Edge IIoT",
+                "paletteId": "edge-panel",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "edge-panel",
+                "width": 150,
+                "x": 930,
+                "y": 1470
+              },
+              "I232c59ff": {
+                "configs": {
+                  "backColor": "#808080",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 450,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "High Tag No Local Visibility",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#808080"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 420,
+                "x": 2130,
+                "y": 1440,
+                "zIndex": -4
+              },
+              "I271bb8a8": {
+                "configs": {
+                  "connections": [
+                    "If78aed59"
+                  ],
+                  "image": "ClientKeyboardBlue-Left",
+                  "quantity": 1
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Client",
+                "paletteId": "KBBlueLeft",
+                "supportedConnections": [
+                  "client",
+                  "rest"
+                ],
+                "tooltip": "",
+                "typeId": "Client",
+                "width": 150,
+                "x": 1110,
+                "y": 1470
+              },
+              "I2c1bb43c": {
+                "configs": {
+                  "connections": [
+                    "I21eb39f3",
+                    "I8b3f0dcd",
+                    "Id1557bc4",
+                    "I350e51b0",
+                    "Ic57d9226"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [],
+                    "IA": [
+                      {
+                        "major": "8.1",
+                        "minor": 0,
+                        "name": "Perspective",
+                        "selection": "2 Sessions"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": true,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Edge IIoT",
+                "paletteId": "edge-panel",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "edge-panel",
+                "width": 150,
+                "x": 1470,
+                "y": 1470
+              },
+              "I2ced0084": {
+                "configs": {
+                  "connections": [
+                    "I26922a08",
+                    "I25f67833",
+                    "Ic9daecdd",
+                    "I437183a5"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Engine",
+                        "selection": "None"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Additional Engine Gateways If needed",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 2190,
+                "y": 600
+              },
+              "I2d840343": {
+                "configs": {
+                  "backColor": "#808080",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 450,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "Local Long-term Storage/ Expandable",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#808080"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 660,
+                "x": -30,
+                "y": 1440,
+                "zIndex": -8
+              },
+              "I33be4465": {
+                "configs": {
+                  "fontSize": 12
+                },
+                "height": 150,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "Note",
+                "paletteId": "Note",
+                "supportedConnections": [
+                  "rest",
+                  "db",
+                  "standard"
+                ],
+                "text": "6 Million Tags (Live and Calculated)",
+                "tooltip": "6 Million Tags (Live and Calculated)",
+                "typeId": "Note",
+                "width": 150,
+                "x": 720,
+                "y": 810
+              },
+              "I48746532": {
+                "configs": {
+                  "connections": [
+                    "Id35ed210",
+                    "I2549931d",
+                    "If2434137"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Engine"
+                      },
+                      {
+                        "name": "MQTT Distributor",
+                        "selection": "Distributor (50 clients)"
+                      },
+                      {
+                        "name": "MQTT Transmission"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "Alarm Notification"
+                      },
+                      {
+                        "name": "Twilio Notification"
+                      },
+                      {
+                        "name": "EAM"
+                      },
+                      {
+                        "name": "MongoDB"
+                      },
+                      {
+                        "name": "Perspective",
+                        "selection": "Unlimited"
+                      },
+                      {
+                        "name": "Reporting"
+                      },
+                      {
+                        "name": "SQL Bridge"
+                      },
+                      {
+                        "name": "Tag Historian",
+                        "selection": "Full"
+                      },
+                      {
+                        "name": "Web Development"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Frontend n+1",
+                "paletteId": "cloud",
+                "supportedConnections": [
+                  "gateway-network",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "cloud",
+                "width": 150,
+                "x": 1320,
+                "y": 210
+              },
+              "I487777bb": {
+                "configs": {
+                  "connections": [
+                    "Iffee88fb",
+                    "Ic50799ce",
+                    "I9268a4e0",
+                    "I437183a5"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM",
+                        "selection": "1 Controller or Agent"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Frontend 1",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 900,
+                "y": 210
+              },
+              "I54b23b9f": {
+                "configs": {
+                  "connections": [
+                    "I995f2bc2",
+                    "I36fb449d",
+                    "I896c8204",
+                    "Ibe9162e5",
+                    "I1b3b9de6",
+                    "Id1557bc4",
+                    "I4b4fde39",
+                    "Ie6e69de9",
+                    "I484450da",
+                    "Ibfeb447f"
+                  ],
+                  "image": "MQTT-Server"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "IIoT",
+                "paletteId": "Broker",
+                "supportedConnections": [
+                  "mqtt"
+                ],
+                "tooltip": "",
+                "typeId": "Broker",
+                "width": 150,
+                "x": 540,
+                "y": 840
+              },
+              "I6162a86c": {
+                "configs": {
+                  "PLCType": "",
+                  "connections": [
+                    "I2e099cbe"
+                  ],
+                  "image": "PLCBlue-Left",
+                  "ips": [],
+                  "model": "",
+                  "quantity": 1,
+                  "tagCount": 0
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Device",
+                "paletteId": "DeviceBlue",
+                "supportedConnections": [
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "opc-com"
+                ],
+                "tooltip": "",
+                "typeId": "Device",
+                "width": 150,
+                "x": 0,
+                "y": 1680
+              },
+              "I646528ab": {
+                "configs": {
+                  "PLCType": "",
+                  "connections": [
+                    "Ic57e4581"
+                  ],
+                  "image": "PLCBlue-Left",
+                  "ips": [],
+                  "model": "",
+                  "quantity": 1,
+                  "tagCount": 0
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Device",
+                "paletteId": "DeviceBlue",
+                "supportedConnections": [
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "opc-com"
+                ],
+                "tooltip": "",
+                "typeId": "Device",
+                "width": 150,
+                "x": 1740,
+                "y": 1680
+              },
+              "I6f7166ed": {
+                "configs": {
+                  "connections": [
+                    "I8f5d3fe0",
+                    "Ie6e69de9",
+                    "I07751459"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Transmission"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM"
+                      },
+                      {
+                        "name": "Web Development"
+                      },
+                      {
+                        "name": "Alarm Notification",
+                        "selection": "1-Way Email"
+                      },
+                      {
+                        "name": "Tag Historian",
+                        "selection": "Edge"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": true,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Edge IIoT",
+                "paletteId": "edge-iiot",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "edge-iiot",
+                "width": 150,
+                "x": 2160,
+                "y": 1470
+              },
+              "I76484f75": {
+                "configs": {
+                  "connections": [
+                    "Icf498c04",
+                    "Ie536493d",
+                    "Ia08c55ba",
+                    "Ic9daecdd",
+                    "I46587ceb"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM",
+                        "selection": "1 Controller or Agent"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Task Gateway",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 1440,
+                "y": 600
+              },
+              "I780e8c50": {
+                "configs": {
+                  "DBType": null,
+                  "connections": [
+                    "I3f142a8a"
+                  ]
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Database",
+                "paletteId": "SQLDB",
+                "supportedConnections": [
+                  "db"
+                ],
+                "tooltip": "",
+                "typeId": "Database",
+                "width": 150,
+                "x": 180,
+                "y": 1680
+              },
+              "I7b930f5a": {
+                "configs": {
+                  "connections": [
+                    "I21973d99",
+                    "I9ec9ca5f",
+                    "Ie536493d"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Engine",
+                        "selection": "None"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM",
+                        "selection": "1 Controller or Agent"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "Alarm Notification",
+                        "selection": "None"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Engine Gateway 1",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 1620,
+                "y": 600
+              },
+              "I7c8b6dd6": {
+                "configs": {
+                  "connections": [
+                    "I9c194bf6",
+                    "Ie8e1ec7e",
+                    "I0ad29a9a"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM",
+                        "selection": "1 Controller or Agent"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Frontend 2",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 1080,
+                "y": 210
+              },
+              "I7cf3de56": {
+                "configs": {
+                  "connections": [
+                    "Ib8318a86",
+                    "Ica170835",
+                    "Ic9d84d93",
+                    "I5d26fb40",
+                    "Iec7ccc20",
+                    "Ibe39b67c",
+                    "I350e51b0",
+                    "I388b2a1b",
+                    "I07751459",
+                    "Iebdd743d",
+                    "Iac87e900"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM",
+                        "selection": "1 Controller or Agent"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Task Gateway",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 180,
+                "y": 600
+              },
+              "I8ae90272": {
+                "configs": {
+                  "backColor": "#808080",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 240,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "AutoScaling Optional",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#808080"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 390,
+                "x": 1290,
+                "y": 180,
+                "zIndex": -1
+              },
+              "I8b418f0f": {
+                "configs": {
+                  "connections": [
+                    "I2e099cbe",
+                    "Ib1354594",
+                    "Icf64c41e",
+                    "I3f142a8a",
+                    "I896c8204",
+                    "I5d26fb40",
+                    "I46587ceb"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Transmission",
+                        "selection": "None"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "Perspective",
+                        "selection": "Unlimited"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": true,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.x"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Standard",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 0,
+                "y": 1470
+              },
+              "I8c5711b2": {
+                "configs": {
+                  "connections": [
+                    "I0bdec72f",
+                    "I484450da",
+                    "Iebdd743d"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Transmission"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM"
+                      },
+                      {
+                        "name": "Web Development"
+                      },
+                      {
+                        "name": "Alarm Notification",
+                        "selection": "1-Way Email"
+                      },
+                      {
+                        "name": "Tag Historian",
+                        "selection": "Edge"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": true,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Edge IIoT",
+                "paletteId": "edge-iiot",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "edge-iiot",
+                "width": 150,
+                "x": 2370,
+                "y": 1470
+              },
+              "I9886b433": {
+                "configs": {
+                  "PLCType": "",
+                  "connections": [
+                    "I6c29a5eb"
+                  ],
+                  "image": "PLCBlue-Left",
+                  "ips": [],
+                  "model": "",
+                  "quantity": 1,
+                  "tagCount": 0
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Device",
+                "paletteId": "DeviceBlue",
+                "supportedConnections": [
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "opc-com"
+                ],
+                "tooltip": "",
+                "typeId": "Device",
+                "width": 150,
+                "x": 930,
+                "y": 1680
+              },
+              "I99c88086": {
+                "configs": {
+                  "connections": [
+                    "I8b3f0dcd"
+                  ],
+                  "image": "ClientKeyboardBlue-Left",
+                  "quantity": 1
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Client",
+                "paletteId": "KBBlueLeft",
+                "supportedConnections": [
+                  "client",
+                  "rest"
+                ],
+                "tooltip": "",
+                "typeId": "Client",
+                "width": 150,
+                "x": 1290,
+                "y": 1470
+              },
+              "I9efc1e39": {
+                "configs": {
+                  "connections": [
+                    "Ie28c0820",
+                    "Icf774a55",
+                    "Ia08c55ba",
+                    "I0ad29a9a",
+                    "I2549931d",
+                    "I8388d8ef"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Engine",
+                        "selection": "None"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM",
+                        "selection": "1 Controller or Agent"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "Alarm Notification",
+                        "selection": "None"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Engine Gateway 2",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 2010,
+                "y": 600
+              },
+              "Iaaf1c133": {
+                "configs": {
+                  "backColor": "#808080",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 450,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "Edge Collector",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#808080"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 210,
+                "x": 660,
+                "y": 1440,
+                "zIndex": -7
+              },
+              "Ibc469513": {
+                "configs": {
+                  "fontSize": 12
+                },
+                "height": 150,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "Note",
+                "paletteId": "Note",
+                "supportedConnections": [
+                  "rest",
+                  "db",
+                  "standard"
+                ],
+                "text": "25-30 sites total",
+                "tooltip": "25-30 sites total",
+                "typeId": "Note",
+                "width": 150,
+                "x": 270,
+                "y": 1260
+              },
+              "Ic314cfc1": {
+                "configs": {
+                  "backColor": "#808080",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 1050,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "AWS Texas Region OR Azure South Central US",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#808080"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 2370,
+                "x": 90,
+                "y": 30,
+                "zIndex": -10
+              },
+              "Ic323e976": {
+                "configs": {
+                  "connections": [
+                    "Ib1354594"
+                  ],
+                  "image": "ClientKeyboardWhite-Left",
+                  "quantity": 1
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Client",
+                "paletteId": "KBWhiteLeft",
+                "supportedConnections": [
+                  "client",
+                  "rest",
+                  "mqtt"
+                ],
+                "tooltip": "",
+                "typeId": "Client",
+                "width": 150,
+                "x": 420,
+                "y": 1470
+              },
+              "Ic663a3df": {
+                "configs": {
+                  "backColor": "#808080",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 450,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "Local Visibility",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#808080"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 390,
+                "x": 1710,
+                "y": 1440,
+                "zIndex": -5
+              },
+              "Ic84e59be": {
+                "configs": {
+                  "PLCType": "",
+                  "connections": [
+                    "Ic00e4354"
+                  ],
+                  "image": "PLCBlue-Left",
+                  "ips": [],
+                  "model": "",
+                  "quantity": 1,
+                  "tagCount": 0
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Device",
+                "paletteId": "DeviceBlue",
+                "supportedConnections": [
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "opc-com"
+                ],
+                "tooltip": "",
+                "typeId": "Device",
+                "width": 150,
+                "x": 690,
+                "y": 1680
+              },
+              "Icac69c5e": {
+                "configs": {
+                  "connections": [
+                    "I8b37de5f"
+                  ],
+                  "image": "ClientKeyboardBlue-Left",
+                  "quantity": 1
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Client",
+                "paletteId": "KBBlueLeft",
+                "supportedConnections": [
+                  "client",
+                  "rest"
+                ],
+                "tooltip": "",
+                "typeId": "Client",
+                "width": 150,
+                "x": 1920,
+                "y": 1470
+              },
+              "Icc4331bd": {
+                "configs": {
+                  "connections": [
+                    "Ic57e4581",
+                    "I8b37de5f",
+                    "I4b4fde39",
+                    "I388b2a1b"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [],
+                    "IA": [
+                      {
+                        "major": "8.1",
+                        "minor": 0,
+                        "name": "Perspective",
+                        "selection": "2 Sessions"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": true,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Edge IIoT",
+                "paletteId": "edge-panel",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "edge-panel",
+                "width": 150,
+                "x": 1740,
+                "y": 1470
+              },
+              "Id87db9d0": {
+                "configs": {
+                  "connections": [
+                    "I995f2bc2",
+                    "Ica170835",
+                    "Ic50799ce",
+                    "I9c194bf6",
+                    "Ic0b25058",
+                    "I40c2abf7",
+                    "If2434137"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Engine",
+                        "selection": "None"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM",
+                        "selection": "1 Controller or Agent"
+                      },
+                      {
+                        "name": "Serial"
+                      },
+                      {
+                        "name": "Alarm Notification",
+                        "selection": "None"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": false,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Engine Gateway 2",
+                "paletteId": "standard",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "client",
+                  "db",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "mongodb",
+                  "kafka",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "standard",
+                "width": 150,
+                "x": 720,
+                "y": 600
+              },
+              "Ie24353b3": {
+                "configs": {
+                  "PLCType": "",
+                  "connections": [
+                    "I21eb39f3"
+                  ],
+                  "image": "PLCBlue-Left",
+                  "ips": [],
+                  "model": "",
+                  "quantity": 1,
+                  "tagCount": 0
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Device",
+                "paletteId": "DeviceBlue",
+                "supportedConnections": [
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "opc-com"
+                ],
+                "tooltip": "",
+                "typeId": "Device",
+                "width": 150,
+                "x": 1470,
+                "y": 1680
+              },
+              "Ie62f42c2": {
+                "configs": {
+                  "connections": [
+                    "Icf64c41e"
+                  ],
+                  "image": "ClientLaptopWhite-Left",
+                  "quantity": 1
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Client",
+                "paletteId": "LTWhiteLeft",
+                "supportedConnections": [
+                  "client",
+                  "rest"
+                ],
+                "tooltip": "",
+                "typeId": "Client",
+                "width": 150,
+                "x": 420,
+                "y": 1650
+              },
+              "Ie8acb364": {
+                "configs": {
+                  "backColor": "#808080",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 450,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "High Tag Local Visibility",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#808080"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 780,
+                "x": 900,
+                "y": 1440,
+                "zIndex": -6
+              },
+              "If5beafb1": {
+                "configs": {
+                  "DBType": null,
+                  "connections": [
+                    "I9ec9ca5f",
+                    "Icf774a55",
+                    "I25f67833",
+                    "Icf498c04",
+                    "I3b3a271c",
+                    "Ic0b25058",
+                    "I0d880b55",
+                    "Iac87e900"
+                  ]
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "DB Cluster",
+                "paletteId": "SQLDB",
+                "supportedConnections": [
+                  "db"
+                ],
+                "tooltip": "",
+                "typeId": "Database",
+                "width": 150,
+                "x": 1200,
+                "y": 600
+              },
+              "Ifc2246d7": {
+                "configs": {
+                  "connections": [
+                    "Ic00e4354",
+                    "Ibe9162e5",
+                    "Iec7ccc20"
+                  ],
+                  "development": false,
+                  "displayModules": true,
+                  "licenseKey": "",
+                  "licenseKeyRedun": "",
+                  "modules": {
+                    "CL": [
+                      {
+                        "name": "MQTT Transmission"
+                      }
+                    ],
+                    "IA": [
+                      {
+                        "name": "Platform"
+                      },
+                      {
+                        "name": "EAM"
+                      },
+                      {
+                        "name": "Web Development"
+                      },
+                      {
+                        "name": "Alarm Notification",
+                        "selection": "1-Way Email"
+                      },
+                      {
+                        "name": "Tag Historian",
+                        "selection": "Edge"
+                      },
+                      {
+                        "name": "OPC UA"
+                      }
+                    ],
+                    "SS": [],
+                    "TPM": []
+                  },
+                  "redundant": true,
+                  "sepasoft": false,
+                  "supportPlan": "Total",
+                  "trial": false,
+                  "version": "8.3.0"
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Edge IIoT",
+                "paletteId": "edge-iiot",
+                "supportedConnections": [
+                  "gateway-network",
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "rest",
+                  "opc-com",
+                  "standard"
+                ],
+                "tooltip": "",
+                "typeId": "edge-iiot",
+                "width": 150,
+                "x": 690,
+                "y": 1470
+              },
+              "Ife18f906": {
+                "configs": {
+                  "PLCType": "",
+                  "connections": [
+                    "I8f5d3fe0"
+                  ],
+                  "image": "PLCBlue-Left",
+                  "ips": [],
+                  "model": "",
+                  "quantity": 1,
+                  "tagCount": 0
+                },
+                "height": 150,
+                "hideHandles": false,
+                "inactive": false,
+                "label": "Device",
+                "paletteId": "DeviceBlue",
+                "supportedConnections": [
+                  "device-driver",
+                  "opc-ua",
+                  "mqtt",
+                  "opc-com"
+                ],
+                "tooltip": "",
+                "typeId": "Device",
+                "width": 150,
+                "x": 2160,
+                "y": 1680
+              },
+              "Ife2e763f": {
+                "configs": {
+                  "backColor": "#008000",
+                  "labelColor": "#000000",
+                  "location": {
+                    "lat": null,
+                    "lng": null
+                  },
+                  "quantity": 1,
+                  "transparency": 255,
+                  "vendor": false
+                },
+                "height": 300,
+                "hideHandles": true,
+                "inactive": false,
+                "label": "Frontend Target Group",
+                "paletteId": "container",
+                "style": {
+                  "backgroundColor": "#008000"
+                },
+                "supportedConnections": [],
+                "tooltip": "",
+                "typeId": "container",
+                "width": 1020,
+                "x": 780,
+                "y": 150,
+                "zIndex": -2
+              }
+            },
             "oldEdgeTypes": [
               "MQTT",
               "Gateway Network",
@@ -5830,282 +8638,8 @@
         },
         "props": {
           "hierarchy": {
-            "areas": [
-              {
-                "areas": [],
-                "id": "Iaaf1c133",
-                "label": "Edge Collector",
-                "nodes": [
-                  {
-                    "id": "Ic84e59be",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "Ifc2246d7",
-                    "label": "Edge IIoT",
-                    "typeId": "edge-iiot"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [],
-                "id": "I2d840343",
-                "label": "Local Long-term Storage/ Expandable",
-                "nodes": [
-                  {
-                    "id": "I6162a86c",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "Ic323e976",
-                    "label": "Client",
-                    "typeId": "Client"
-                  },
-                  {
-                    "id": "I8b418f0f",
-                    "label": "Standard",
-                    "typeId": "standard"
-                  },
-                  {
-                    "id": "Ie62f42c2",
-                    "label": "Client",
-                    "typeId": "Client"
-                  },
-                  {
-                    "id": "I780e8c50",
-                    "label": "Database",
-                    "typeId": "Database"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [],
-                "id": "Ic663a3df",
-                "label": "Local Visibility",
-                "nodes": [
-                  {
-                    "id": "I646528ab",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "Icc4331bd",
-                    "label": "Edge IIoT",
-                    "typeId": "edge-panel"
-                  },
-                  {
-                    "id": "Icac69c5e",
-                    "label": "Client",
-                    "typeId": "Client"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [],
-                "id": "I232c59ff",
-                "label": "High Tag No Local Visibility",
-                "nodes": [
-                  {
-                    "id": "I6f7166ed",
-                    "label": "Edge IIoT",
-                    "typeId": "edge-iiot"
-                  },
-                  {
-                    "id": "I8c5711b2",
-                    "label": "Edge IIoT",
-                    "typeId": "edge-iiot"
-                  },
-                  {
-                    "id": "I0a9c51bb",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "Ife18f906",
-                    "label": "Device",
-                    "typeId": "Device"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [],
-                "id": "Ie8acb364",
-                "label": "High Tag Local Visibility",
-                "nodes": [
-                  {
-                    "id": "I271bb8a8",
-                    "label": "Client",
-                    "typeId": "Client"
-                  },
-                  {
-                    "id": "I22d98cfe",
-                    "label": "Edge IIoT",
-                    "typeId": "edge-panel"
-                  },
-                  {
-                    "id": "Ie24353b3",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "I2c1bb43c",
-                    "label": "Edge IIoT",
-                    "typeId": "edge-panel"
-                  },
-                  {
-                    "id": "I99c88086",
-                    "label": "Client",
-                    "typeId": "Client"
-                  },
-                  {
-                    "id": "I9886b433",
-                    "label": "Device",
-                    "typeId": "Device"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [
-                  {
-                    "areas": [],
-                    "id": "I14067906",
-                    "label": "Availability Zone B (Backups)",
-                    "nodes": [
-                      {
-                        "id": "I7b930f5a",
-                        "label": "Engine Gateway 1",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "I9efc1e39",
-                        "label": "Engine Gateway 2",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "I1ab81a37",
-                        "label": "IIoT",
-                        "typeId": "Broker"
-                      },
-                      {
-                        "id": "I76484f75",
-                        "label": "Task Gateway",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "I2ced0084",
-                        "label": "Additional Engine Gateways If needed",
-                        "typeId": "standard"
-                      }
-                    ],
-                    "typeId": "container"
-                  },
-                  {
-                    "areas": [],
-                    "id": "I0e637e4a",
-                    "label": "Availability Zone A",
-                    "nodes": [
-                      {
-                        "id": "I33be4465",
-                        "label": "Note",
-                        "typeId": "Note"
-                      },
-                      {
-                        "id": "I1cb6d0f0",
-                        "label": "Engine Gateway 1",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "Id87db9d0",
-                        "label": "Engine Gateway 2",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "I04add830",
-                        "label": "Additional Engine Gateways If needed",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "I54b23b9f",
-                        "label": "IIoT",
-                        "typeId": "Broker"
-                      },
-                      {
-                        "id": "I7cf3de56",
-                        "label": "Task Gateway",
-                        "typeId": "standard"
-                      }
-                    ],
-                    "typeId": "container"
-                  },
-                  {
-                    "areas": [
-                      {
-                        "areas": [],
-                        "id": "I8ae90272",
-                        "label": "AutoScaling Optional",
-                        "nodes": [
-                          {
-                            "id": "I006658a4",
-                            "label": "Frontend n+1",
-                            "typeId": "cloud"
-                          },
-                          {
-                            "id": "I48746532",
-                            "label": "Frontend n+1",
-                            "typeId": "cloud"
-                          }
-                        ],
-                        "typeId": "container"
-                      }
-                    ],
-                    "id": "Ife2e763f",
-                    "label": "Frontend Target Group",
-                    "nodes": [
-                      {
-                        "id": "I7c8b6dd6",
-                        "label": "Frontend 2",
-                        "typeId": "standard"
-                      },
-                      {
-                        "id": "I487777bb",
-                        "label": "Frontend 1",
-                        "typeId": "standard"
-                      }
-                    ],
-                    "typeId": "container"
-                  }
-                ],
-                "id": "Ic314cfc1",
-                "label": "AWS Texas Region OR Azure South Central US",
-                "nodes": [
-                  {
-                    "id": "If5beafb1",
-                    "label": "DB Cluster",
-                    "typeId": "Database"
-                  }
-                ],
-                "typeId": "container"
-              }
-            ],
-            "nodes": [
-              {
-                "id": "Ibc469513",
-                "label": "Note",
-                "typeId": "Note"
-              },
-              {
-                "id": "I17d797b6",
-                "label": "Load Balancer",
-                "typeId": "network-component"
-              }
-            ]
+            "areas": [],
+            "nodes": []
           },
           "paletteItems": [
             {
@@ -7710,11 +10244,6 @@
       {
         "meta": {
           "name": "jsonEditor"
-        },
-        "props": {
-          "data": {
-            "type": "pane"
-          }
         },
         "type": "com.wargoetz.reactflow.jsoneditor"
       }
