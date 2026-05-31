@@ -25,6 +25,8 @@ Desktop.ini
 
 # Project-specific ignores
 .claude/
+.gemini
+.gemini/*
 .skills/
 .claudeignore
 .playwright-mcp/
