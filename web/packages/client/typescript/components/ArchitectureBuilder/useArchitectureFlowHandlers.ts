@@ -2,6 +2,12 @@ import * as React from 'react';
 // @ts-ignore
 import { Edge, Connection, NodeChange, applyNodeChanges } from 'reactflow';
 import { getHandlePixelPos, computeAutoWaypoints } from './EdgeUtils';
+import { ContextMenuState } from './types';
+
+interface DragStartState {
+    nodes: Record<string, { x: number; y: number }>;
+    edges: Record<string, { x: number; y: number }[]>;
+}
 
 const generateShortId = () => 'I' + Math.random().toString(16).substring(2, 10);
 
@@ -42,8 +48,8 @@ export interface UseArchitectureFlowHandlersParams {
     setSelectedId: React.Dispatch<React.SetStateAction<string | null>>;
     setLocalNodes: React.Dispatch<React.SetStateAction<any[]>>;
     setLocalEdges: React.Dispatch<React.SetStateAction<any[]>>;
-    contextMenu: any;
-    setContextMenu: React.Dispatch<React.SetStateAction<any>>;
+    contextMenu: ContextMenuState | null;
+    setContextMenu: React.Dispatch<React.SetStateAction<ContextMenuState | null>>;
     setActiveSubMenu: React.Dispatch<React.SetStateAction<any>>;
     setStyleEditorNodeId: React.Dispatch<React.SetStateAction<string | null>>;
     clipboardRef: React.MutableRefObject<any>;
@@ -78,7 +84,7 @@ export const useArchitectureFlowHandlers = ({
     const [isDraggingNode, setIsDraggingNode] = React.useState(false);
     const [isConnecting, setIsConnecting] = React.useState(false);
     const updatingEdgeRef = React.useRef<string | null>(null);
-    const dragStartPos = React.useRef<any>(null);
+    const dragStartPos = React.useRef<DragStartState | null>(null);
 
     const closeContextMenu = React.useCallback(() => {
         setContextMenu(null);
