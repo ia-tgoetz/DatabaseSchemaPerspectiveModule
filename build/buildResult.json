@@ -4,11 +4,11 @@
     "moduleDescription": "A Group of React Flow Based Perspective Components For Visualizing",
     "version": "1.0.7",
     "checksum": {
-        "checksum": "0f68a7a6f1b8a360072d3e8075f3ee1c37f357214e56f41a2d749e0c3bc0d372",
+        "checksum": "0a364fda2675612846141c4f687708397d15000b2f382f11eef8d1404077eade",
         "algorithm": "SHA256"
     },
     "fileName": "ReactFlow.modl",
-    "fileSize": 920635,
+    "fileSize": 921177,
     "artifacts": {
         ":common": {
             "projectPath": ":common",
