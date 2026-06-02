@@ -1,0 +1,100 @@
+{
+  "custom": {},
+  "events": {
+    "system": {
+      "onStartup": {
+        "config": {
+          "script": "\tif not self.params.readonly:\n\t\tHMITarget\u003dself.getChild(\"root\").getChild(\"Label\").custom.targetTagPathParam\n\t\tpath\u003d\u0027[default]{}User\u0027.format(HMITarget)\n\t\tif system.tag.exists(path):\n\t\t\tvalue\u003dself.session.props.auth.user.userName\n\t\t\tsystem.tag.writeBlocking([path], [value])"
+        },
+        "scope": "G",
+        "type": "script"
+      }
+    }
+  },
+  "params": {
+    "readonly": false
+  },
+  "propConfig": {
+    "params.readonly": {
+      "paramDirection": "input",
+      "persistent": true
+    }
+  },
+  "props": {},
+  "root": {
+    "children": [
+      {
+        "custom": {
+          "SessionIP": "192.168.1.4"
+        },
+        "meta": {
+          "name": "Label"
+        },
+        "position": {
+          "basis": "32px"
+        },
+        "propConfig": {
+          "custom.SessionIP": {
+            "binding": {
+              "config": {
+                "path": "session.props.address"
+              },
+              "enabled": false,
+              "type": "property"
+            }
+          },
+          "custom.map": {
+            "binding": {
+              "config": {
+                "bidirectional": true,
+                "fallbackDelay": 2.5,
+                "mode": "direct",
+                "tagPath": "[default]IPMap"
+              },
+              "type": "tag"
+            }
+          },
+          "custom.targetTagPathParam": {
+            "binding": {
+              "config": {
+                "struct": {
+                  "map": "{this.custom.map}",
+                  "sessionIP": "{this.custom.SessionIP}"
+                },
+                "waitOnAll": true
+              },
+              "transforms": [
+                {
+                  "code": "\tmapList\u003dvalue.map\n\tsessionIP\u003dvalue.sessionIP\n\n\tfor key in mapList.keys():\n\t\tipMapList\u003dmapList[key]\n\t\tif sessionIP in ipMapList:\n\t\t\treturn key\n\t\n\t\n\treturn None",
+                  "type": "script"
+                }
+              ],
+              "type": "expr-struct"
+            }
+          },
+          "props.text": {
+            "binding": {
+              "config": {
+                "fallbackDelay": 2.5,
+                "mode": "indirect",
+                "references": {
+                  "targetTagPathParam": "{this.custom.targetTagPathParam}"
+                },
+                "tagPath": "[default]{targetTagPathParam}"
+              },
+              "type": "tag"
+            }
+          }
+        },
+        "type": "ia.display.label"
+      }
+    ],
+    "meta": {
+      "name": "root"
+    },
+    "props": {
+      "direction": "column"
+    },
+    "type": "ia.container.flex"
+  }
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "valueSource": "memory",
+    "dataType": "Document",
+    "name": "IPMap",
+    "tagType": "AtomicTag"
+  },
+  {
+    "valueSource": "memory",
+    "dataType": "String",
+    "name": "HMI2",
+    "defaultValue": "",
+    "tagType": "AtomicTag"
+  },
+  {
+    "valueSource": "memory",
+    "dataType": "String",
+    "name": "HMI1",
+    "defaultValue": "",
+    "tagType": "AtomicTag"
+  },
+  {
+    "valueSource": "memory",
+    "dataType": "String",
+    "name": "HMI2User",
+    "defaultValue": null,
+    "tagType": "AtomicTag"
+  },
+  {
+    "valueSource": "memory",
+    "dataType": "String",
+    "name": "HMI1User",
+    "tagType": "AtomicTag"
+  }
+]
