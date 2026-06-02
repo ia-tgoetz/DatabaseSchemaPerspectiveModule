@@ -15503,211 +15503,10 @@ const NoteLabelNode_1 = __webpack_require__(/*! ./NoteLabelNode */ "./typescript
 const CustomEdge_1 = __webpack_require__(/*! ./CustomEdge */ "./typescript/components/ArchitectureBuilder/CustomEdge.tsx");
 const EdgeUtils_1 = __webpack_require__(/*! ./EdgeUtils */ "./typescript/components/ArchitectureBuilder/EdgeUtils.ts");
 const useArchitectureFlowHandlers_1 = __webpack_require__(/*! ./useArchitectureFlowHandlers */ "./typescript/components/ArchitectureBuilder/useArchitectureFlowHandlers.ts");
-const svgSanitize_1 = __webpack_require__(/*! ./svgSanitize */ "./typescript/components/ArchitectureBuilder/svgSanitize.ts");
 const ComponentErrorBoundary_1 = __webpack_require__(/*! ../common/ComponentErrorBoundary */ "./typescript/components/common/ComponentErrorBoundary.tsx");
 const constants_1 = __webpack_require__(/*! ./constants */ "./typescript/components/ArchitectureBuilder/constants.ts");
-const SwapIcon = ({ image, label }) => {
-    const scopeId = React.useMemo(() => svgSanitize_1.nextSvgScopeId(), []);
-    const svgHtml = React.useMemo(() => svgSanitize_1.extractSvgMarkup(image, scopeId), [image, scopeId]);
-    if (svgHtml)
-        return React.createElement("div", { id: scopeId, style: { width: '100%', height: '100%', overflow: 'hidden' }, dangerouslySetInnerHTML: { __html: svgHtml }, title: label });
-    const dataUri = svgSanitize_1.toSafeDataUri(image);
-    return dataUri ? React.createElement("img", { src: dataUri, alt: label, style: { width: '100%', height: '100%', objectFit: 'contain' } }) : null;
-};
-// ─── Shared UI primitives ─────────────────────────────────────────────────────
-const sharedInputStyle = {
-    width: '100%', padding: '6px 8px', backgroundColor: 'var(--neutral-00)', border: '1px solid var(--neutral-40)',
-    color: 'var(--neutral-90)', borderRadius: '4px', boxSizing: 'border-box', fontSize: '12px'
-};
-const labelRowStyle = { marginBottom: '10px', display: 'flex', flexDirection: 'column' };
-const sectionTitleStyle = { fontSize: '14px', fontWeight: 'bold', color: 'var(--callToAction)', borderBottom: '1px solid var(--neutral-40)', paddingBottom: '4px', marginBottom: '10px' };
-const MENU_ITEM_STYLE = { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' };
-const MENU_ITEM_FLEX_STYLE = { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' };
-const MENU_DIVIDER_STYLE = { borderTop: '1px solid var(--neutral-40)', margin: '4px 0' };
-const FLYOUT_PANEL_STYLE = { backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px' };
-const CONTEXT_MENU_CONTAINER_STYLE = { position: 'absolute', zIndex: 10, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px', fontSize: '12px' };
-const ColorInput = ({ value, onChange, placeholder }) => {
-    const [pickerOpen, setPickerOpen] = React.useState(false);
-    const [activeTab, setActiveTab] = React.useState('palette');
-    let currentHex = '#000000';
-    let currentAlpha = 1;
-    if (value.startsWith('#')) {
-        if (value.length === 7)
-            currentHex = value;
-        else if (value.length === 9) {
-            currentHex = value.substring(0, 7);
-            currentAlpha = Math.round((parseInt(value.substring(7, 9), 16) / 255) * 100) / 100;
-        }
-        else if (value.length === 4) {
-            currentHex = '#' + value[1] + value[1] + value[2] + value[2] + value[3] + value[3];
-        }
-    }
-    else if (value.startsWith('rgba')) {
-        const parts = value.match(/[\d.]+/g);
-        if (parts && parts.length >= 4) {
-            const r = parseInt(parts[0], 10), g = parseInt(parts[1], 10), b = parseInt(parts[2], 10);
-            currentAlpha = parseFloat(parts[3]);
-            currentHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-        }
-    }
-    else if (value.startsWith('rgb')) {
-        const parts = value.match(/[\d.]+/g);
-        if (parts && parts.length >= 3) {
-            const r = parseInt(parts[0], 10), g = parseInt(parts[1], 10), b = parseInt(parts[2], 10);
-            currentHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-        }
-    }
-    const handleColorChange = (newHex) => {
-        const r = parseInt(newHex.slice(1, 3), 16), g = parseInt(newHex.slice(3, 5), 16), b = parseInt(newHex.slice(5, 7), 16);
-        onChange(currentAlpha < 1 ? `rgba(${r}, ${g}, ${b}, ${currentAlpha})` : newHex);
-    };
-    const handleAlphaChange = (newAlpha) => {
-        const r = parseInt(currentHex.slice(1, 3), 16), g = parseInt(currentHex.slice(3, 5), 16), b = parseInt(currentHex.slice(5, 7), 16);
-        onChange(newAlpha === 1 ? currentHex : `rgba(${r}, ${g}, ${b}, ${newAlpha})`);
-    };
-    return (React.createElement("div", { style: { position: 'relative', display: 'flex', gap: '6px', marginTop: '4px' } },
-        React.createElement("input", { type: "text", value: value, onChange: e => onChange(e.target.value), placeholder: placeholder, style: Object.assign(Object.assign({}, sharedInputStyle), { marginTop: 0, flex: 1 }) }),
-        React.createElement("div", { onClick: () => setPickerOpen(!pickerOpen), style: { width: '28px', height: '28px', borderRadius: '4px', border: '1px solid var(--neutral-40)', backgroundColor: value || '#000000', cursor: 'pointer', flexShrink: 0 }, title: "Open color picker" }),
-        pickerOpen && (React.createElement(React.Fragment, null,
-            React.createElement("div", { onClick: () => setPickerOpen(false), style: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1001 } }),
-            React.createElement("div", { style: { position: 'absolute', top: '100%', right: 0, marginTop: '8px', zIndex: 1002, backgroundColor: 'var(--neutral-10)', border: '1px solid var(--neutral-50)', borderRadius: '6px', padding: '12px', width: '220px', boxShadow: '0 8px 16px rgba(0,0,0,0.5)' } },
-                React.createElement("div", { style: { display: 'flex', borderBottom: '1px solid var(--neutral-40)', marginBottom: '10px' } },
-                    React.createElement("div", { onClick: () => setActiveTab('palette'), style: { padding: '4px 10px', fontSize: '11px', cursor: 'pointer', borderBottom: activeTab === 'palette' ? '2px solid var(--callToAction)' : '2px solid transparent', color: activeTab === 'palette' ? 'var(--neutral-90)' : 'var(--neutral-60)', fontWeight: activeTab === 'palette' ? 'bold' : 'normal' } }, "Palette"),
-                    React.createElement("div", { onClick: () => setActiveTab('custom'), style: { padding: '4px 10px', fontSize: '11px', cursor: 'pointer', borderBottom: activeTab === 'custom' ? '2px solid var(--callToAction)' : '2px solid transparent', color: activeTab === 'custom' ? 'var(--neutral-90)' : 'var(--neutral-60)', fontWeight: activeTab === 'custom' ? 'bold' : 'normal' } }, "Custom")),
-                activeTab === 'palette' && (React.createElement("div", { style: { display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' } }, constants_1.STANDARD_PALETTE.map(swatch => (React.createElement("div", { key: `popover-palette-${swatch}`, onClick: () => { onChange(swatch); setPickerOpen(false); }, style: { width: '18px', height: '18px', backgroundColor: swatch, border: '1px solid rgba(0,0,0,0.2)', borderRadius: '2px', cursor: 'pointer' }, title: swatch }))))),
-                activeTab === 'custom' && (React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '15px', padding: '5px 0' } },
-                    React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
-                        React.createElement("span", { style: { fontSize: '11px', color: 'var(--neutral-80)' } }, "Base Color:"),
-                        React.createElement("div", { style: { width: '100%', maxWidth: '100px', height: '24px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--neutral-40)', position: 'relative' } },
-                            React.createElement("input", { type: "color", value: currentHex, onChange: e => handleColorChange(e.target.value), style: { position: 'absolute', top: '-10px', left: '-10px', width: '150px', height: '50px', padding: 0, border: 'none', cursor: 'pointer' } }))),
-                    React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
-                        React.createElement("span", { style: { fontSize: '11px', color: 'var(--neutral-80)', width: '40px' } }, "Alpha:"),
-                        React.createElement("input", { type: "range", min: "0", max: "1", step: "0.01", value: currentAlpha, onChange: e => handleAlphaChange(parseFloat(e.target.value)), style: { flex: 1, cursor: 'pointer', height: '4px' } }),
-                        React.createElement("span", { style: { fontSize: '11px', color: 'var(--neutral-80)', width: '30px', textAlign: 'right' } },
-                            Math.round(currentAlpha * 100),
-                            "%")))))))));
-};
-// ─── Style editor modal ───────────────────────────────────────────────────────
-const StyleEditorModal = ({ node, onSave, onCancel }) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
-    const isTextNode = constants_1.TEXT_NODE_PALETTE_IDS.has(node.paletteId);
-    const [compBg, setCompBg] = React.useState(((_a = node.style) === null || _a === void 0 ? void 0 : _a.backgroundColor) || ((_b = node.style) === null || _b === void 0 ? void 0 : _b.fill) || '');
-    const [borderWidth, setBorderWidth] = React.useState(((_c = node.style) === null || _c === void 0 ? void 0 : _c.borderWidth) || '');
-    const [borderStyle, setBorderStyle] = React.useState(((_d = node.style) === null || _d === void 0 ? void 0 : _d.borderStyle) || '');
-    const [borderColor, setBorderColor] = React.useState(((_e = node.style) === null || _e === void 0 ? void 0 : _e.borderColor) || '');
-    const [borderRadius, setBorderRadius] = React.useState(((_f = node.style) === null || _f === void 0 ? void 0 : _f.borderRadius) || '');
-    const [labelBg, setLabelBg] = React.useState(((_g = node.labelStyle) === null || _g === void 0 ? void 0 : _g.backgroundColor) || '');
-    const [labelColor, setLabelColor] = React.useState(((_h = node.labelStyle) === null || _h === void 0 ? void 0 : _h.color) || '');
-    const [labelFontSize, setLabelFontSize] = React.useState(((_j = node.labelStyle) === null || _j === void 0 ? void 0 : _j.fontSize) || '');
-    const [iconColor, setIconColor] = React.useState(((_k = node.labelStyle) === null || _k === void 0 ? void 0 : _k.fill) || '');
-    const [textColor, setTextColor] = React.useState(((_l = node.textStyle) === null || _l === void 0 ? void 0 : _l.color) || '');
-    const [textFontSize, setTextFontSize] = React.useState(((_m = node.textStyle) === null || _m === void 0 ? void 0 : _m.fontSize) || '');
-    const handleSave = () => {
-        const newStyle = Object.assign({}, node.style);
-        if (compBg)
-            newStyle.backgroundColor = compBg;
-        else
-            delete newStyle.backgroundColor;
-        if (borderWidth || borderStyle || borderColor)
-            delete newStyle.border;
-        if (borderWidth)
-            newStyle.borderWidth = borderWidth;
-        else
-            delete newStyle.borderWidth;
-        if (borderStyle)
-            newStyle.borderStyle = borderStyle;
-        else
-            delete newStyle.borderStyle;
-        if (borderColor)
-            newStyle.borderColor = borderColor;
-        else
-            delete newStyle.borderColor;
-        if (borderRadius)
-            newStyle.borderRadius = borderRadius;
-        else
-            delete newStyle.borderRadius;
-        const newLabelStyle = Object.assign({}, node.labelStyle);
-        if (labelBg)
-            newLabelStyle.backgroundColor = labelBg;
-        else
-            delete newLabelStyle.backgroundColor;
-        if (labelColor)
-            newLabelStyle.color = labelColor;
-        else
-            delete newLabelStyle.color;
-        if (labelFontSize)
-            newLabelStyle.fontSize = labelFontSize;
-        else
-            delete newLabelStyle.fontSize;
-        if (iconColor)
-            newLabelStyle.fill = iconColor;
-        else
-            delete newLabelStyle.fill;
-        const newTextStyle = Object.assign({}, node.textStyle);
-        if (textColor)
-            newTextStyle.color = textColor;
-        else
-            delete newTextStyle.color;
-        if (textFontSize)
-            newTextStyle.fontSize = textFontSize;
-        else
-            delete newTextStyle.fontSize;
-        onSave(newStyle, newLabelStyle, newTextStyle);
-    };
-    return (React.createElement("div", { style: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' } },
-        React.createElement("div", { style: { backgroundColor: 'var(--neutral-20)', padding: '24px', borderRadius: '8px', width: '650px', border: '1px solid var(--neutral-50)', boxShadow: '0 8px 16px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: '20px' }, onClick: (e) => e.stopPropagation() },
-            React.createElement("h3", { style: { margin: 0, color: 'var(--neutral-90)' } },
-                "Edit Styles: ",
-                node.label),
-            React.createElement("div", { style: { display: 'flex', gap: '30px' } },
-                React.createElement("div", { style: { flex: 1 } },
-                    React.createElement("div", { style: sectionTitleStyle }, "Component"),
-                    React.createElement("div", { style: labelRowStyle },
-                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Background Color"),
-                        React.createElement(ColorInput, { value: compBg, onChange: setCompBg, placeholder: "e.g. #333 or rgba()" })),
-                    React.createElement("div", { style: labelRowStyle },
-                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Border Color"),
-                        React.createElement(ColorInput, { value: borderColor, onChange: setBorderColor, placeholder: "e.g. #ff0000" })),
-                    React.createElement("div", { style: { display: 'flex', gap: '10px' } },
-                        React.createElement("div", { style: Object.assign(Object.assign({}, labelRowStyle), { flex: 1 }) },
-                            React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Border Width"),
-                            React.createElement("input", { type: "text", value: borderWidth, onChange: e => setBorderWidth(e.target.value), placeholder: "e.g. 2px", style: Object.assign(Object.assign({}, sharedInputStyle), { marginTop: '4px' }) })),
-                        React.createElement("div", { style: Object.assign(Object.assign({}, labelRowStyle), { flex: 1 }) },
-                            React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Border Style"),
-                            React.createElement("select", { value: borderStyle, onChange: e => setBorderStyle(e.target.value), style: Object.assign(Object.assign({}, sharedInputStyle), { marginTop: '4px' }) },
-                                React.createElement("option", { value: "", style: { backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)' } }, "Default"),
-                                React.createElement("option", { value: "solid", style: { backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)' } }, "Solid"),
-                                React.createElement("option", { value: "dashed", style: { backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)' } }, "Dashed"),
-                                React.createElement("option", { value: "dotted", style: { backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)' } }, "Dotted")))),
-                    React.createElement("div", { style: labelRowStyle },
-                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Border Radius"),
-                        React.createElement("input", { type: "text", value: borderRadius, onChange: e => setBorderRadius(e.target.value), placeholder: "e.g. 8px", style: Object.assign(Object.assign({}, sharedInputStyle), { marginTop: '4px' }) }))),
-                React.createElement("div", { style: { flex: 1 } },
-                    React.createElement("div", { style: sectionTitleStyle }, "Label Tab"),
-                    React.createElement("div", { style: labelRowStyle },
-                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Background Color"),
-                        React.createElement(ColorInput, { value: labelBg, onChange: setLabelBg, placeholder: "e.g. var(--neutral-30)" })),
-                    React.createElement("div", { style: labelRowStyle },
-                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Text Color"),
-                        React.createElement(ColorInput, { value: labelColor, onChange: setLabelColor, placeholder: "e.g. #ffffff" })),
-                    React.createElement("div", { style: labelRowStyle },
-                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Icon / Gear Color"),
-                        React.createElement(ColorInput, { value: iconColor, onChange: setIconColor, placeholder: "e.g. var(--callToAction)" })),
-                    React.createElement("div", { style: labelRowStyle },
-                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Text Size"),
-                        React.createElement("input", { type: "text", value: labelFontSize, onChange: e => setLabelFontSize(e.target.value), placeholder: "e.g. 14px", style: Object.assign(Object.assign({}, sharedInputStyle), { marginTop: '4px' }) }))),
-                isTextNode && (React.createElement("div", { style: { flex: 1 } },
-                    React.createElement("div", { style: sectionTitleStyle }, "Text Content"),
-                    React.createElement("div", { style: labelRowStyle },
-                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Text Color"),
-                        React.createElement(ColorInput, { value: textColor, onChange: setTextColor, placeholder: "e.g. #ffffff" })),
-                    React.createElement("div", { style: labelRowStyle },
-                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Text Size"),
-                        React.createElement("input", { type: "text", value: textFontSize, onChange: e => setTextFontSize(e.target.value), placeholder: "e.g. 14px", style: Object.assign(Object.assign({}, sharedInputStyle), { marginTop: '4px' }) }))))),
-            React.createElement("div", { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' } },
-                React.createElement("button", { onClick: onCancel, style: { padding: '6px 12px', backgroundColor: 'var(--neutral-40)', border: 'none', borderRadius: '4px', color: 'var(--neutral-90)', cursor: 'pointer' } }, "Cancel"),
-                React.createElement("button", { onClick: handleSave, style: { padding: '6px 12px', backgroundColor: 'var(--callToAction)', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer', fontWeight: 'bold' } }, "Save Changes")))));
-};
+const StyleEditorModal_1 = __webpack_require__(/*! ./StyleEditorModal */ "./typescript/components/ArchitectureBuilder/StyleEditorModal.tsx");
+const ContextMenu_1 = __webpack_require__(/*! ./ContextMenu */ "./typescript/components/ArchitectureBuilder/ContextMenu.tsx");
 // ─── Node types registration ──────────────────────────────────────────────────
 const nodeTypes = { architecture: ArchitectureNode_1.ArchitectureNode, container: ContainerNode_1.ContainerNode, Note: NoteLabelNode_1.NoteLabelNode, Label: NoteLabelNode_1.NoteLabelNode };
 // ─── Utility functions (used only by ArchitectureBuilder) ─────────────────────
@@ -15819,7 +15618,7 @@ const computeHierarchyData = (nodesDict, edgesDict) => {
     return { nodeEnrichments, rootHierarchy };
 };
 exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
+    var _a, _b, _c, _d;
     const reactFlowWrapper = React.useRef(null);
     const clipboardRef = React.useRef(null);
     const draggedItemRef = React.useRef(null);
@@ -15843,7 +15642,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         };
         const handleOnError = (msg) => {
             if (typeof msg === 'string' && (msg.includes('ResizeObserver loop') || msg.includes('ResizeObserver loop limit exceeded'))) {
-                return true; // Tells the browser/Ignition to ignore the error
+                return true;
             }
             return false;
         };
@@ -15853,6 +15652,23 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         return () => {
             window.removeEventListener('error', suppressResizeObserverError, true);
             window.onerror = oldOnError;
+        };
+    }, []);
+    // Set document title and html[lang] for accessibility (WCAG 2.4.2, 3.1.1).
+    // Both are restored on unmount so other Ignition views are not affected.
+    React.useEffect(() => {
+        const prevTitle = document.title;
+        document.title = 'Architecture Builder';
+        return () => { document.title = prevTitle; };
+    }, []);
+    React.useEffect(() => {
+        const prevLang = document.documentElement.getAttribute('lang');
+        document.documentElement.setAttribute('lang', 'en');
+        return () => {
+            if (prevLang === null)
+                document.documentElement.removeAttribute('lang');
+            else
+                document.documentElement.setAttribute('lang', prevLang);
         };
     }, []);
     // ─── Prop extraction ───────────────────────────────────────────────────
@@ -15892,9 +15708,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         if (!((_a = props.store) === null || _a === void 0 ? void 0 : _a.props) || !rawNodesDict || !rawEdgesDict)
             return;
         const { nodeEnrichments, rootHierarchy } = computeHierarchyData(rawNodesDict, rawEdgesDict);
-        // Always sync hierarchy
         props.store.props.write('hierarchy', rootHierarchy);
-        // Always update node enrichment
         const enrichedNodes = {};
         Object.keys(rawNodesDict).forEach(id => {
             if (!rawNodesDict[id])
@@ -15902,7 +15716,6 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
             const _a = rawNodesDict[id], { image: _image } = _a, nodeWithoutImage = __rest(_a, ["image"]);
             enrichedNodes[id] = Object.assign(Object.assign({}, nodeWithoutImage), nodeEnrichments[id]);
         });
-        // Only write back if it's different to prevent infinite cycles
         const serialized = JSON.stringify(enrichedNodes);
         if (serialized !== hierarchyWriteRef.current) {
             hierarchyWriteRef.current = serialized;
@@ -15971,7 +15784,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
             if (isHovered)
                 zIndex = Math.max(zIndex, 500);
             if (isAnimated)
-                zIndex = 1000; // Always top priority
+                zIndex = 1000;
             const strokeWidth = (isHovered || isSelected) ? globalEdgeWidth + 2 : globalEdgeWidth;
             const waypoints = (_d = (_c = local === null || local === void 0 ? void 0 : local.data) === null || _c === void 0 ? void 0 : _c.waypoints) !== null && _d !== void 0 ? _d : (_e = fresh.data) === null || _e === void 0 ? void 0 : _e.waypoints;
             return Object.assign(Object.assign({}, fresh), { updatable: isEnabled, zIndex, style: Object.assign(Object.assign({}, fresh.style), { strokeWidth }), data: Object.assign(Object.assign({}, fresh.data), { waypoints, isEditable: isEnabled }) });
@@ -16007,31 +15820,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isEnabled, selectedId, rawNodesDict, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
-    // ─── Context menu derived state ────────────────────────────────────────
-    let availableConnections = [], currentLineType = 'smoothstep', currentConnectionType = '';
-    let validSwapItems = [];
-    if (contextMenu && contextMenu.type === 'edge') {
-        const edge = rawEdgesDict[contextMenu.id];
-        if (edge) {
-            currentLineType = edge.lineType || 'smoothstep';
-            currentConnectionType = edge.connectionType;
-            availableConnections = getValidIntersection(edge.source, edge.target, contextMenu.id);
-            if (!availableConnections.includes(currentConnectionType))
-                availableConnections.push(currentConnectionType);
-        }
-    }
-    if (contextMenu && contextMenu.type === 'node') {
-        const node = rawNodesDict[contextMenu.id];
-        if (node) {
-            const currentPaletteItem = paletteItems.find((p) => p.id === node.paletteId);
-            if (currentPaletteItem === null || currentPaletteItem === void 0 ? void 0 : currentPaletteItem.swappableWith)
-                validSwapItems = paletteItems.filter((p) => currentPaletteItem.swappableWith.includes(p.id));
-        }
-    }
-    const flyoutStyle = (reactFlowWrapper.current && contextMenu && contextMenu.left + 310 > reactFlowWrapper.current.clientWidth)
-        ? { position: 'absolute', top: '-0px', right: '100%', marginRight: '0px' }
-        : { position: 'absolute', top: '-0px', left: '100%', marginLeft: '0px' };
-    const _t = props.props.style || {}, { classes } = _t, ignitionStyles = __rest(_t, ["classes"]);
+    const _e = props.props.style || {}, { classes } = _e, ignitionStyles = __rest(_e, ["classes"]);
     const containerStyle = Object.assign({ display: 'flex', width: '100%', height: '100%', backgroundColor: 'var(--neutral-00)' }, ignitionStyles);
     // ─── Render ────────────────────────────────────────────────────────────
     return (React.createElement(ComponentErrorBoundary_1.ComponentErrorBoundary, { componentEvents: props.componentEvents },
@@ -16052,12 +15841,12 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                 /* Animation keyframes: distance must match (dash + gap) for seamless loops */
                 @keyframes arch-flow-forward { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
                 @keyframes arch-flow-reverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 100; } }
-                
+
                 /* Base handle is a transparent anchor — React Flow's translate(-50%,-50%) is forced via !important */
-                .arch-node-handle { 
-                    background: transparent !important; 
-                    border-color: transparent !important; 
-                    transform: translate(-50%, -50%) !important; 
+                .arch-node-handle {
+                    background: transparent !important;
+                    border-color: transparent !important;
+                    transform: translate(-50%, -50%) !important;
                 }
 
                 /* ::before provides the large, zoom-aware hit area (interaction zone).
@@ -16072,29 +15861,29 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                     height: var(--hit-size, 24px);
                     background: transparent;
                 }
-                
+
                 /* ::after renders the visible dot and owns all visual transitions.
                    By default, it is invisible (opacity: 0) to maintain a zero-footprint aesthetic when idle. */
-                .arch-node-handle::after { 
-                    content: ''; 
-                    position: absolute; 
-                    top: 50%; 
-                    left: 50%; 
-                    transform: translate(-50%, -50%); 
-                    width: 6px; 
-                    height: 6px; 
-                    border-radius: 50%; 
-                    background: var(--neutral-90); 
-                    border: 1px solid var(--neutral-90); 
-                    pointer-events: none; 
+                .arch-node-handle::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: var(--neutral-90);
+                    border: 1px solid var(--neutral-90);
+                    pointer-events: none;
                     opacity: 0;
-                    transition: transform 0.15s ease-in-out, background 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out; 
+                    transition: transform 0.15s ease-in-out, background 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
                 }
 
-                /* Show handles when: 
+                /* Show handles when:
                    1. The specific handle is hovered.
                    2. The parent node is hovered or selected.
-                   3. The user is actively creating or moving an edge on the canvas. 
+                   3. The user is actively creating or moving an edge on the canvas.
                 */
                 .arch-node-handle:hover::after,
                 .react-flow__node:hover .arch-node-handle::after,
@@ -16105,21 +15894,21 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                 }
 
                 /* Handle Hover State: Provide clear feedback and scale the dot. */
-                .arch-node-handle:hover::after { 
-                    background: var(--callToAction) !important; 
-                    border-color: var(--callToAction) !important; 
-                    transform: translate(-50%, -50%) scale(2.0); 
+                .arch-node-handle:hover::after {
+                    background: var(--callToAction) !important;
+                    border-color: var(--callToAction) !important;
+                    transform: translate(-50%, -50%) scale(2.0);
                     opacity: 1 !important;
                 }
 
                 /* Connected handle: Always visible and emphasized when the edge/node is selected. */
-                .arch-node-handle--connected::after { 
+                .arch-node-handle--connected::after {
                     opacity: 1 !important;
-                    background: var(--callToAction) !important; 
-                    border-color: var(--callToAction) !important; 
-                    width: 10px !important; 
-                    height: 10px !important; 
-                    box-shadow: 0 0 8px var(--callToAction); 
+                    background: var(--callToAction) !important;
+                    border-color: var(--callToAction) !important;
+                    width: 10px !important;
+                    height: 10px !important;
+                    box-shadow: 0 0 8px var(--callToAction);
                 }
                 /* React Flow connection states: base stays transparent, ::after carries the color */
                 .react-flow__handle.connecting { background: transparent !important; border-color: transparent !important; }
@@ -16133,15 +15922,16 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                 .arch-moving-edge   .arch-node-handle.connecting:not(.valid):hover { cursor: not-allowed !important; }
                 .arch-creating-edge .arch-node-handle.connecting:not(.valid):hover::after,
                 .arch-moving-edge   .arch-node-handle.connecting:not(.valid):hover::after { background: #ef4444 !important; border-color: #dc2626 !important; }
+                .react-flow__attribution a { min-height: 24px; min-width: 24px; display: inline-flex; align-items: center; padding: 0 6px; }
                 `),
             React.createElement("div", { className: "arch-theme-wrapper" },
                 isEnabled && React.createElement(Sidebar_1.Sidebar, { paletteItems: paletteItems, isOpen: isSidebarOpen, toggleSidebar: () => setIsSidebarOpen(!isSidebarOpen), onDragStartItem: (item) => { draggedItemRef.current = item; }, onItemClick: handlePaletteItemClick }),
-                React.createElement("div", { style: { flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }, ref: reactFlowWrapper, className: isConnecting ? 'arch-creating-edge' : isUpdatingEdge ? 'arch-moving-edge' : '' },
+                React.createElement("div", { role: "main", "aria-label": "Architecture Builder Canvas", style: { flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }, ref: reactFlowWrapper, className: isConnecting ? 'arch-creating-edge' : isUpdatingEdge ? 'arch-moving-edge' : '' },
                     React.createElement(reactflow_1.ReactFlowProvider, null,
                         React.createElement(reactflow_1.default, { nodes: localNodes, edges: displayEdges, nodeTypes: nodeTypes, edgeTypes: CustomEdge_1.edgeTypes, isValidConnection: isValidConnection, onInit: setReactFlowInstance, onDrop: isEnabled ? onDrop : undefined, onDragOver: isEnabled ? onDragOver : undefined, onConnect: isEnabled ? onConnect : undefined, onEdgeUpdate: isEnabled ? onEdgeUpdate : undefined, onEdgeUpdateStart: isEnabled ? onEdgeUpdateStart : undefined, onEdgeUpdateEnd: isEnabled ? onEdgeUpdateEnd : undefined, onConnectStart: isEnabled ? onConnectStart : undefined, onConnectEnd: isEnabled ? onConnectEnd : undefined, onNodeDragStart: isEnabled ? onNodeDragStart : undefined, onNodeDrag: isEnabled ? onNodeDrag : undefined, onNodeDragStop: isEnabled ? onNodeDragStop : undefined, onNodesChange: onNodesChange, onNodeClick: onNodeClick, onEdgeClick: onEdgeClick, onNodesDelete: isEnabled ? onNodesDelete : undefined, onEdgesDelete: isEnabled ? onEdgesDelete : undefined, onNodeContextMenu: isEnabled ? onNodeContextMenu : undefined, onEdgeContextMenu: isEnabled ? onEdgeContextMenu : undefined, onEdgeMouseEnter: (_evt, edge) => setHoveredEdgeId(edge.id), onEdgeMouseLeave: () => setHoveredEdgeId(null), onPaneClick: onPaneClick, onPaneContextMenu: isEnabled ? onPaneContextMenu : undefined, nodesDraggable: isEnabled, nodesConnectable: isEnabled, elementsSelectable: isEnabled, connectionMode: reactflow_1.ConnectionMode.Loose, snapToGrid: snapEnabled, snapGrid: snapGrid, connectionLineStyle: { stroke: '#cccccc', strokeWidth: 6 }, elevateNodesOnSelect: false, minZoom: 0.05, panOnScroll: false, zoomOnScroll: true, panOnDrag: true, selectionOnDrag: false, deleteKeyCode: ['Delete', 'Backspace'] },
                             React.createElement(reactflow_1.Background, { gap: snapPixels }),
                             React.createElement(reactflow_1.Controls, { showInteractive: false }))),
-                    styleEditorNodeId && rawNodesDict[styleEditorNodeId] && (React.createElement(StyleEditorModal, { node: rawNodesDict[styleEditorNodeId], onSave: (newStyle, newLabelStyle, newTextStyle) => {
+                    styleEditorNodeId && rawNodesDict[styleEditorNodeId] && (React.createElement(StyleEditorModal_1.StyleEditorModal, { node: rawNodesDict[styleEditorNodeId], onSave: (newStyle, newLabelStyle, newTextStyle) => {
                             var _a;
                             if ((_a = props.store) === null || _a === void 0 ? void 0 : _a.props) {
                                 const nextNodes = Object.assign({}, rawNodesDict);
@@ -16152,112 +15942,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                             }
                             setStyleEditorNodeId(null);
                         }, onCancel: () => setStyleEditorNodeId(null) })),
-                    contextMenu && (React.createElement("div", { style: Object.assign(Object.assign({}, CONTEXT_MENU_CONTAINER_STYLE), { top: contextMenu.top, left: contextMenu.left }) },
-                        contextMenu.type === 'pane' && (React.createElement("div", { style: { padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }, onClick: () => { if (clipboardRef.current)
-                                handleContextMenuAction('paste'); } }, "\uD83D\uDCCB Paste")),
-                        contextMenu.type !== 'pane' && (React.createElement(React.Fragment, null,
-                            React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('config') }, "\u2699\uFE0F Config"),
-                            contextMenu.type === 'node' && (React.createElement(React.Fragment, null,
-                                React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--callToAction)' }, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('editStyle') }, "\uD83C\uDFA8 Edit Style"),
-                                constants_1.TEXT_NODE_PALETTE_IDS.has((_e = rawNodesDict[contextMenu.id]) === null || _e === void 0 ? void 0 : _e.paletteId) && (React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('editContent') }, "\uD83D\uDCDD Edit Content")),
-                                contextMenu.isContainer && (React.createElement(React.Fragment, null,
-                                    React.createElement("div", { style: MENU_DIVIDER_STYLE }),
-                                    React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleUnlocked') }, ((_g = (_f = rawNodesDict[contextMenu.id]) === null || _f === void 0 ? void 0 : _f.configs) === null || _g === void 0 ? void 0 : _g.unlocked) ? (React.createElement(React.Fragment, null,
-                                        React.createElement("span", null, "\uD83D\uDD12 Lock Interaction"),
-                                        React.createElement("span", null, "\u2713"))) : (React.createElement(React.Fragment, null,
-                                        React.createElement("span", null, "\uD83D\uDD13 Unlock Interaction"),
-                                        React.createElement("span", null)))),
-                                    React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleLink') },
-                                        React.createElement("span", null, "\uD83D\uDD17 Link Contents"),
-                                        React.createElement("span", null, !((_j = (_h = rawNodesDict[contextMenu.id]) === null || _h === void 0 ? void 0 : _h.configs) === null || _j === void 0 ? void 0 : _j.unlinked) ? '✓' : '')))),
-                                !contextMenu.isContainer && !constants_1.TEXT_NODE_PALETTE_IDS.has((_k = rawNodesDict[contextMenu.id]) === null || _k === void 0 ? void 0 : _k.paletteId) && (React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleGrayscale') },
-                                    React.createElement("span", null, "\u2B1C Toggle Inactive"),
-                                    React.createElement("span", null, ((_l = rawNodesDict[contextMenu.id]) === null || _l === void 0 ? void 0 : _l.inactive) ? '✓' : ''))),
-                                React.createElement("div", { style: MENU_DIVIDER_STYLE }),
-                                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('copy') }, "\uD83D\uDCCB Copy"),
-                                contextMenu.isContainer && (React.createElement("div", { style: { padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }, onClick: () => { if (clipboardRef.current)
-                                        handleContextMenuAction('paste'); } }, "\uD83D\uDCCB Paste")),
-                                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('order') },
-                                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'order' ? 'var(--neutral-30)' : 'transparent' } },
-                                        React.createElement("span", null, "\uD83D\uDCD1 Order"),
-                                        React.createElement("span", null, "\u25B6")),
-                                    activeSubMenu === 'order' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '150px' }) },
-                                        React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('bringToFront') }, "\u23EB Bring to Front"),
-                                        React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('bringForward') }, "\uD83D\uDD3C Bring Forward"),
-                                        React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('sendBackward') }, "\uD83D\uDD3D Send Backward"),
-                                        React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('sendToBack') }, "\u23EC Send to Back")))),
-                                validSwapItems.length > 0 && (React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('swapNode') },
-                                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'swapNode' ? 'var(--neutral-30)' : 'transparent' } },
-                                        React.createElement("span", null, "\uD83D\uDD04 Swap Node"),
-                                        React.createElement("span", null, "\u25B6")),
-                                    activeSubMenu === 'swapNode' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '150px' }) }, validSwapItems.map(targetItem => (React.createElement("div", { key: targetItem.id, style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center' }, onClick: () => handleNodeSwap(targetItem.id) },
-                                        React.createElement("div", { style: { width: '16px', height: '16px', marginRight: '6px', display: 'flex', alignItems: 'center' } }, targetItem.image && React.createElement(SwapIcon, { image: targetItem.image, label: targetItem.label })),
-                                        React.createElement("span", null, targetItem.label)))))))))),
-                            contextMenu.type === 'edge' && (React.createElement(React.Fragment, null,
-                                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('reverseEdge') }, "\uD83D\uDD04 Reverse Direction"),
-                                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleArrow') }, ((_m = rawEdgesDict[contextMenu.id]) === null || _m === void 0 ? void 0 : _m.arrow) !== false ? '❌ Remove Arrow' : '➡️ Add Arrow'),
-                                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleLabel') }, ((_o = rawEdgesDict[contextMenu.id]) === null || _o === void 0 ? void 0 : _o.showLabel) === true ? '👁️ Hide Label' : '👁️ Show Label'),
-                                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleDashed') }, ((_p = rawEdgesDict[contextMenu.id]) === null || _p === void 0 ? void 0 : _p.dashed) ? '─── Solid Line' : '- - - Dashed Line'),
-                                (() => {
-                                    var _a;
-                                    const e = rawEdgesDict[contextMenu.id];
-                                    const lt = e === null || e === void 0 ? void 0 : e.lineType;
-                                    const canClear = (!lt || lt === 'smoothstep' || lt === 'step') && ((_a = e === null || e === void 0 ? void 0 : e.waypoints) === null || _a === void 0 ? void 0 : _a.length) > 0;
-                                    return canClear ? (React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('clearWaypoints') },
-                                        "\u2299 Clear Path (",
-                                        e.waypoints.length,
-                                        " pt",
-                                        e.waypoints.length !== 1 ? 's' : '',
-                                        ")")) : null;
-                                })(),
-                                React.createElement("div", { style: MENU_DIVIDER_STYLE }),
-                                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('lineType') },
-                                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'lineType' ? 'var(--neutral-30)' : 'transparent' } },
-                                        React.createElement("span", null, "\u3030\uFE0F Line Type"),
-                                        React.createElement("span", null, "\u25B6")),
-                                    activeSubMenu === 'lineType' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '120px' }) },
-                                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('smoothstep') },
-                                            React.createElement("span", null, "\u3030\uFE0F Smooth"),
-                                            React.createElement("span", null, currentLineType === 'smoothstep' ? '✓' : '')),
-                                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('step') },
-                                            React.createElement("span", null, "\uD83D\uDD32 Stepped"),
-                                            React.createElement("span", null, currentLineType === 'step' ? '✓' : '')),
-                                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('straight') },
-                                            React.createElement("span", null, "\uD83D\uDCCF Straight"),
-                                            React.createElement("span", null, currentLineType === 'straight' ? '✓' : '')),
-                                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('default') },
-                                            React.createElement("span", null, "\u27B0 Bezier"),
-                                            React.createElement("span", null, currentLineType === 'default' ? '✓' : ''))))),
-                                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('animation') },
-                                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'animation' ? 'var(--neutral-30)' : 'transparent' } },
-                                        React.createElement("span", null, "\u2728 Animation"),
-                                        React.createElement("span", null, "\u25B6")),
-                                    activeSubMenu === 'animation' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '140px' }) },
-                                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleAnimationChange('none') },
-                                            React.createElement("span", null, "\uD83D\uDEAB None"),
-                                            React.createElement("span", null, (((_q = rawEdgesDict[contextMenu.id]) === null || _q === void 0 ? void 0 : _q.animation) || 'none') === 'none' ? '✓' : '')),
-                                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleAnimationChange('forward') },
-                                            React.createElement("span", null, "\u27A1\uFE0F Forward"),
-                                            React.createElement("span", null, ((_r = rawEdgesDict[contextMenu.id]) === null || _r === void 0 ? void 0 : _r.animation) === 'forward' ? '✓' : '')),
-                                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleAnimationChange('bidirectional') },
-                                            React.createElement("span", null, "\u2194\uFE0F Bidirectional"),
-                                            React.createElement("span", null, ((_s = rawEdgesDict[contextMenu.id]) === null || _s === void 0 ? void 0 : _s.animation) === 'bidirectional' ? '✓' : ''))))),
-                                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('connectionType') },
-                                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'connectionType' ? 'var(--neutral-30)' : 'transparent' } },
-                                        React.createElement("span", null, "\uD83D\uDD17 Connection"),
-                                        React.createElement("span", null, "\u25B6")),
-                                    activeSubMenu === 'connectionType' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '140px' }) }, availableConnections.length === 0
-                                        ? React.createElement("div", { style: { padding: '5px 8px', color: 'var(--neutral-60)' } }, "No valid connections")
-                                        : availableConnections.map(c => {
-                                            var _a, _b;
-                                            return (React.createElement("div", { key: c, style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }, onClick: () => handleConnectionTypeChange(c) },
-                                                React.createElement("span", null,
-                                                    React.createElement("span", { style: { color: ((_a = connectionTypes[c]) === null || _a === void 0 ? void 0 : _a.color) || 'var(--neutral-90)', marginRight: '4px' } }, "\u25CF"),
-                                                    ((_b = connectionTypes[c]) === null || _b === void 0 ? void 0 : _b.label) || c),
-                                                React.createElement("span", null, currentConnectionType === c ? '✓' : '')));
-                                        })))))),
-                            contextMenu.isContainer && (React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: '1px solid var(--neutral-40)' }, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('deleteWithContents') }, "\uD83D\uDDD1\uFE0F Delete Area & Contents")),
-                            React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: contextMenu.isContainer ? 'none' : '1px solid var(--neutral-40)' }, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('delete') }, contextMenu.isContainer ? '🗑️ Delete Area Only' : '🗑️ Delete'))))))))));
+                    contextMenu && (React.createElement(ContextMenu_1.ContextMenu, { contextMenu: contextMenu, activeSubMenu: activeSubMenu, setActiveSubMenu: setActiveSubMenu, rawNodesDict: rawNodesDict, rawEdgesDict: rawEdgesDict, paletteItems: paletteItems, connectionTypes: connectionTypes, clipboardRef: clipboardRef, wrapperRef: reactFlowWrapper, getValidIntersection: getValidIntersection, handleContextMenuAction: handleContextMenuAction, handleNodeSwap: handleNodeSwap, handleLineTypeChange: handleLineTypeChange, handleConnectionTypeChange: handleConnectionTypeChange, handleAnimationChange: handleAnimationChange })))))));
 });
 
 
@@ -16299,7 +15984,7 @@ const NodeImage = ({ src, label }) => {
         return (react_1.default.createElement("div", { id: scopeId, style: { padding: '4px', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }, dangerouslySetInnerHTML: { __html: svgHtml }, title: label }));
     }
     const dataUri = svgSanitize_1.toSafeDataUri(src);
-    return dataUri ? react_1.default.createElement("img", { src: dataUri, alt: label, style: { padding: '4px', width: '100%', height: '100%', objectFit: 'contain' } }) : null;
+    return dataUri ? react_1.default.createElement("img", { src: dataUri, alt: "", style: { padding: '4px', width: '100%', height: '100%', objectFit: 'contain' } }) : null;
 };
 const ArchitectureNode = ({ id, data, selected }) => {
     var _a, _b, _c;
@@ -16373,6 +16058,103 @@ exports.ArchitectureNode = ArchitectureNode;
 
 /***/ }),
 
+/***/ "./typescript/components/ArchitectureBuilder/ColorPicker.tsx":
+/*!*******************************************************************!*\
+  !*** ./typescript/components/ArchitectureBuilder/ColorPicker.tsx ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ColorInput = void 0;
+const React = __importStar(__webpack_require__(/*! react */ "react"));
+const constants_1 = __webpack_require__(/*! ./constants */ "./typescript/components/ArchitectureBuilder/constants.ts");
+const ColorInput = ({ value, onChange, placeholder }) => {
+    const [pickerOpen, setPickerOpen] = React.useState(false);
+    const [activeTab, setActiveTab] = React.useState('palette');
+    let currentHex = '#000000';
+    let currentAlpha = 1;
+    if (value.startsWith('#')) {
+        if (value.length === 7)
+            currentHex = value;
+        else if (value.length === 9) {
+            currentHex = value.substring(0, 7);
+            currentAlpha = Math.round((parseInt(value.substring(7, 9), 16) / 255) * 100) / 100;
+        }
+        else if (value.length === 4) {
+            currentHex = '#' + value[1] + value[1] + value[2] + value[2] + value[3] + value[3];
+        }
+    }
+    else if (value.startsWith('rgba')) {
+        const parts = value.match(/[\d.]+/g);
+        if (parts && parts.length >= 4) {
+            const r = parseInt(parts[0], 10), g = parseInt(parts[1], 10), b = parseInt(parts[2], 10);
+            currentAlpha = parseFloat(parts[3]);
+            currentHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+    }
+    else if (value.startsWith('rgb')) {
+        const parts = value.match(/[\d.]+/g);
+        if (parts && parts.length >= 3) {
+            const r = parseInt(parts[0], 10), g = parseInt(parts[1], 10), b = parseInt(parts[2], 10);
+            currentHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+    }
+    const handleColorChange = (newHex) => {
+        const r = parseInt(newHex.slice(1, 3), 16), g = parseInt(newHex.slice(3, 5), 16), b = parseInt(newHex.slice(5, 7), 16);
+        onChange(currentAlpha < 1 ? `rgba(${r}, ${g}, ${b}, ${currentAlpha})` : newHex);
+    };
+    const handleAlphaChange = (newAlpha) => {
+        const r = parseInt(currentHex.slice(1, 3), 16), g = parseInt(currentHex.slice(3, 5), 16), b = parseInt(currentHex.slice(5, 7), 16);
+        onChange(newAlpha === 1 ? currentHex : `rgba(${r}, ${g}, ${b}, ${newAlpha})`);
+    };
+    return (React.createElement("div", { style: { position: 'relative', display: 'flex', gap: '6px', marginTop: '4px' } },
+        React.createElement("input", { type: "text", value: value, onChange: e => onChange(e.target.value), placeholder: placeholder, style: Object.assign(Object.assign({}, constants_1.sharedInputStyle), { marginTop: 0, flex: 1 }) }),
+        React.createElement("div", { onClick: () => setPickerOpen(!pickerOpen), style: { width: '28px', height: '28px', borderRadius: '4px', border: '1px solid var(--neutral-40)', backgroundColor: value || '#000000', cursor: 'pointer', flexShrink: 0 }, title: "Open color picker" }),
+        pickerOpen && (React.createElement(React.Fragment, null,
+            React.createElement("div", { onClick: () => setPickerOpen(false), style: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1001 } }),
+            React.createElement("div", { style: { position: 'absolute', top: '100%', right: 0, marginTop: '8px', zIndex: 1002, backgroundColor: 'var(--neutral-10)', border: '1px solid var(--neutral-50)', borderRadius: '6px', padding: '12px', width: '220px', boxShadow: '0 8px 16px rgba(0,0,0,0.5)' } },
+                React.createElement("div", { style: { display: 'flex', borderBottom: '1px solid var(--neutral-40)', marginBottom: '10px' } },
+                    React.createElement("div", { onClick: () => setActiveTab('palette'), style: { padding: '4px 10px', fontSize: '11px', cursor: 'pointer', borderBottom: activeTab === 'palette' ? '2px solid var(--callToAction)' : '2px solid transparent', color: activeTab === 'palette' ? 'var(--neutral-90)' : 'var(--neutral-60)', fontWeight: activeTab === 'palette' ? 'bold' : 'normal' } }, "Palette"),
+                    React.createElement("div", { onClick: () => setActiveTab('custom'), style: { padding: '4px 10px', fontSize: '11px', cursor: 'pointer', borderBottom: activeTab === 'custom' ? '2px solid var(--callToAction)' : '2px solid transparent', color: activeTab === 'custom' ? 'var(--neutral-90)' : 'var(--neutral-60)', fontWeight: activeTab === 'custom' ? 'bold' : 'normal' } }, "Custom")),
+                activeTab === 'palette' && (React.createElement("div", { style: { display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' } }, constants_1.STANDARD_PALETTE.map(swatch => (React.createElement("div", { key: `popover-palette-${swatch}`, onClick: () => { onChange(swatch); setPickerOpen(false); }, style: { width: '18px', height: '18px', backgroundColor: swatch, border: '1px solid rgba(0,0,0,0.2)', borderRadius: '2px', cursor: 'pointer' }, title: swatch }))))),
+                activeTab === 'custom' && (React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '15px', padding: '5px 0' } },
+                    React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+                        React.createElement("span", { style: { fontSize: '11px', color: 'var(--neutral-80)' } }, "Base Color:"),
+                        React.createElement("div", { style: { width: '100%', maxWidth: '100px', height: '24px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--neutral-40)', position: 'relative' } },
+                            React.createElement("input", { type: "color", value: currentHex, onChange: e => handleColorChange(e.target.value), style: { position: 'absolute', top: '-10px', left: '-10px', width: '150px', height: '50px', padding: 0, border: 'none', cursor: 'pointer' } }))),
+                    React.createElement("div", { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+                        React.createElement("span", { style: { fontSize: '11px', color: 'var(--neutral-80)', width: '40px' } }, "Alpha:"),
+                        React.createElement("input", { type: "range", min: "0", max: "1", step: "0.01", value: currentAlpha, onChange: e => handleAlphaChange(parseFloat(e.target.value)), style: { flex: 1, cursor: 'pointer', height: '4px' } }),
+                        React.createElement("span", { style: { fontSize: '11px', color: 'var(--neutral-80)', width: '30px', textAlign: 'right' } },
+                            Math.round(currentAlpha * 100),
+                            "%")))))))));
+};
+exports.ColorInput = ColorInput;
+
+
+/***/ }),
+
 /***/ "./typescript/components/ArchitectureBuilder/ContainerNode.tsx":
 /*!*********************************************************************!*\
   !*** ./typescript/components/ArchitectureBuilder/ContainerNode.tsx ***!
@@ -16442,6 +16224,195 @@ const ContainerNode = ({ id, data, selected }) => {
                 react_1.default.createElement("span", { style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 } }, data.label)))));
 };
 exports.ContainerNode = ContainerNode;
+
+
+/***/ }),
+
+/***/ "./typescript/components/ArchitectureBuilder/ContextMenu.tsx":
+/*!*******************************************************************!*\
+  !*** ./typescript/components/ArchitectureBuilder/ContextMenu.tsx ***!
+  \*******************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ContextMenu = void 0;
+const React = __importStar(__webpack_require__(/*! react */ "react"));
+const svgSanitize_1 = __webpack_require__(/*! ./svgSanitize */ "./typescript/components/ArchitectureBuilder/svgSanitize.ts");
+const constants_1 = __webpack_require__(/*! ./constants */ "./typescript/components/ArchitectureBuilder/constants.ts");
+// ─── Style constants (menu-local) ─────────────────────────────────────────────
+const MENU_ITEM_STYLE = { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' };
+const MENU_ITEM_FLEX_STYLE = { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' };
+const MENU_DIVIDER_STYLE = { borderTop: '1px solid var(--neutral-40)', margin: '4px 0' };
+const FLYOUT_PANEL_STYLE = { backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px' };
+const CONTAINER_STYLE = { position: 'absolute', zIndex: 10, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px', fontSize: '12px' };
+// ─── SwapIcon ─────────────────────────────────────────────────────────────────
+const SwapIcon = ({ image, label }) => {
+    const scopeId = React.useMemo(() => svgSanitize_1.nextSvgScopeId(), []);
+    const svgHtml = React.useMemo(() => svgSanitize_1.extractSvgMarkup(image, scopeId), [image, scopeId]);
+    if (svgHtml)
+        return React.createElement("div", { id: scopeId, style: { width: '100%', height: '100%', overflow: 'hidden' }, dangerouslySetInnerHTML: { __html: svgHtml }, title: label });
+    const dataUri = svgSanitize_1.toSafeDataUri(image);
+    return dataUri ? React.createElement("img", { src: dataUri, alt: label, style: { width: '100%', height: '100%', objectFit: 'contain' } }) : null;
+};
+exports.ContextMenu = React.memo(({ contextMenu, activeSubMenu, setActiveSubMenu, rawNodesDict, rawEdgesDict, paletteItems, connectionTypes, clipboardRef, wrapperRef, getValidIntersection, handleContextMenuAction, handleNodeSwap, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, }) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+    // Memoize derived edge state — avoids recomputing getValidIntersection on every render
+    const availableConnections = React.useMemo(() => {
+        if (contextMenu.type !== 'edge')
+            return [];
+        const edge = rawEdgesDict[contextMenu.id];
+        if (!edge)
+            return [];
+        const intersection = getValidIntersection(edge.source, edge.target, contextMenu.id);
+        const result = [...intersection];
+        if (edge.connectionType && !result.includes(edge.connectionType))
+            result.push(edge.connectionType);
+        return result;
+    }, [contextMenu, rawEdgesDict, getValidIntersection]);
+    const currentLineType = contextMenu.type === 'edge' ? (((_a = rawEdgesDict[contextMenu.id]) === null || _a === void 0 ? void 0 : _a.lineType) || 'smoothstep') : 'smoothstep';
+    const currentConnectionType = contextMenu.type === 'edge' ? (((_b = rawEdgesDict[contextMenu.id]) === null || _b === void 0 ? void 0 : _b.connectionType) || '') : '';
+    const validSwapItems = React.useMemo(() => {
+        if (contextMenu.type !== 'node')
+            return [];
+        const node = rawNodesDict[contextMenu.id];
+        if (!node)
+            return [];
+        const currentPaletteItem = paletteItems.find((p) => p.id === node.paletteId);
+        if (!(currentPaletteItem === null || currentPaletteItem === void 0 ? void 0 : currentPaletteItem.swappableWith))
+            return [];
+        return paletteItems.filter((p) => currentPaletteItem.swappableWith.includes(p.id));
+    }, [contextMenu, rawNodesDict, paletteItems]);
+    const flyoutStyle = (wrapperRef.current && contextMenu.left + 310 > wrapperRef.current.clientWidth)
+        ? { position: 'absolute', top: '-0px', right: '100%', marginRight: '0px' }
+        : { position: 'absolute', top: '-0px', left: '100%', marginLeft: '0px' };
+    return (React.createElement("div", { style: Object.assign(Object.assign({}, CONTAINER_STYLE), { top: contextMenu.top, left: contextMenu.left }) },
+        contextMenu.type === 'pane' && (React.createElement("div", { style: { padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }, onClick: () => { if (clipboardRef.current)
+                handleContextMenuAction('paste'); } }, "\uD83D\uDCCB Paste")),
+        contextMenu.type !== 'pane' && (React.createElement(React.Fragment, null,
+            React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('config') }, "\u2699\uFE0F Config"),
+            contextMenu.type === 'node' && (React.createElement(React.Fragment, null,
+                React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--callToAction)' }, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('editStyle') }, "\uD83C\uDFA8 Edit Style"),
+                constants_1.TEXT_NODE_PALETTE_IDS.has((_c = rawNodesDict[contextMenu.id]) === null || _c === void 0 ? void 0 : _c.paletteId) && (React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('editContent') }, "\uD83D\uDCDD Edit Content")),
+                contextMenu.isContainer && (React.createElement(React.Fragment, null,
+                    React.createElement("div", { style: MENU_DIVIDER_STYLE }),
+                    React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleUnlocked') }, ((_e = (_d = rawNodesDict[contextMenu.id]) === null || _d === void 0 ? void 0 : _d.configs) === null || _e === void 0 ? void 0 : _e.unlocked) ? (React.createElement(React.Fragment, null,
+                        React.createElement("span", null, "\uD83D\uDD12 Lock Interaction"),
+                        React.createElement("span", null, "\u2713"))) : (React.createElement(React.Fragment, null,
+                        React.createElement("span", null, "\uD83D\uDD13 Unlock Interaction"),
+                        React.createElement("span", null)))),
+                    React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleLink') },
+                        React.createElement("span", null, "\uD83D\uDD17 Link Contents"),
+                        React.createElement("span", null, !((_g = (_f = rawNodesDict[contextMenu.id]) === null || _f === void 0 ? void 0 : _f.configs) === null || _g === void 0 ? void 0 : _g.unlinked) ? '✓' : '')))),
+                !contextMenu.isContainer && !constants_1.TEXT_NODE_PALETTE_IDS.has((_h = rawNodesDict[contextMenu.id]) === null || _h === void 0 ? void 0 : _h.paletteId) && (React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleGrayscale') },
+                    React.createElement("span", null, "\u2B1C Toggle Inactive"),
+                    React.createElement("span", null, ((_j = rawNodesDict[contextMenu.id]) === null || _j === void 0 ? void 0 : _j.inactive) ? '✓' : ''))),
+                React.createElement("div", { style: MENU_DIVIDER_STYLE }),
+                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('copy') }, "\uD83D\uDCCB Copy"),
+                contextMenu.isContainer && (React.createElement("div", { style: { padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }, onClick: () => { if (clipboardRef.current)
+                        handleContextMenuAction('paste'); } }, "\uD83D\uDCCB Paste")),
+                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('order') },
+                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'order' ? 'var(--neutral-30)' : 'transparent' } },
+                        React.createElement("span", null, "\uD83D\uDCD1 Order"),
+                        React.createElement("span", null, "\u25B6")),
+                    activeSubMenu === 'order' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '150px' }) },
+                        React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('bringToFront') }, "\u23EB Bring to Front"),
+                        React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('bringForward') }, "\uD83D\uDD3C Bring Forward"),
+                        React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('sendBackward') }, "\uD83D\uDD3D Send Backward"),
+                        React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('sendToBack') }, "\u23EC Send to Back")))),
+                validSwapItems.length > 0 && (React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('swapNode') },
+                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'swapNode' ? 'var(--neutral-30)' : 'transparent' } },
+                        React.createElement("span", null, "\uD83D\uDD04 Swap Node"),
+                        React.createElement("span", null, "\u25B6")),
+                    activeSubMenu === 'swapNode' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '150px' }) }, validSwapItems.map((targetItem) => (React.createElement("div", { key: targetItem.id, style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center' }, onClick: () => handleNodeSwap(targetItem.id) },
+                        React.createElement("div", { style: { width: '16px', height: '16px', marginRight: '6px', display: 'flex', alignItems: 'center' } }, targetItem.image && React.createElement(SwapIcon, { image: targetItem.image, label: targetItem.label })),
+                        React.createElement("span", null, targetItem.label)))))))))),
+            contextMenu.type === 'edge' && (React.createElement(React.Fragment, null,
+                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('reverseEdge') }, "\uD83D\uDD04 Reverse Direction"),
+                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleArrow') }, ((_k = rawEdgesDict[contextMenu.id]) === null || _k === void 0 ? void 0 : _k.arrow) !== false ? '❌ Remove Arrow' : '➡️ Add Arrow'),
+                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleLabel') }, ((_l = rawEdgesDict[contextMenu.id]) === null || _l === void 0 ? void 0 : _l.showLabel) === true ? '👁️ Hide Label' : '👁️ Show Label'),
+                React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleDashed') }, ((_m = rawEdgesDict[contextMenu.id]) === null || _m === void 0 ? void 0 : _m.dashed) ? '─── Solid Line' : '- - - Dashed Line'),
+                (() => {
+                    var _a;
+                    const e = rawEdgesDict[contextMenu.id];
+                    const lt = e === null || e === void 0 ? void 0 : e.lineType;
+                    const canClear = (!lt || lt === 'smoothstep' || lt === 'step') && ((_a = e === null || e === void 0 ? void 0 : e.waypoints) === null || _a === void 0 ? void 0 : _a.length) > 0;
+                    return canClear ? (React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('clearWaypoints') },
+                        "\u2299 Clear Path (",
+                        e.waypoints.length,
+                        " pt",
+                        e.waypoints.length !== 1 ? 's' : '',
+                        ")")) : null;
+                })(),
+                React.createElement("div", { style: MENU_DIVIDER_STYLE }),
+                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('lineType') },
+                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'lineType' ? 'var(--neutral-30)' : 'transparent' } },
+                        React.createElement("span", null, "\u3030\uFE0F Line Type"),
+                        React.createElement("span", null, "\u25B6")),
+                    activeSubMenu === 'lineType' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '120px' }) },
+                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('smoothstep') },
+                            React.createElement("span", null, "\u3030\uFE0F Smooth"),
+                            React.createElement("span", null, currentLineType === 'smoothstep' ? '✓' : '')),
+                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('step') },
+                            React.createElement("span", null, "\uD83D\uDD32 Stepped"),
+                            React.createElement("span", null, currentLineType === 'step' ? '✓' : '')),
+                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('straight') },
+                            React.createElement("span", null, "\uD83D\uDCCF Straight"),
+                            React.createElement("span", null, currentLineType === 'straight' ? '✓' : '')),
+                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('default') },
+                            React.createElement("span", null, "\u27B0 Bezier"),
+                            React.createElement("span", null, currentLineType === 'default' ? '✓' : ''))))),
+                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('animation') },
+                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'animation' ? 'var(--neutral-30)' : 'transparent' } },
+                        React.createElement("span", null, "\u2728 Animation"),
+                        React.createElement("span", null, "\u25B6")),
+                    activeSubMenu === 'animation' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '140px' }) },
+                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleAnimationChange('none') },
+                            React.createElement("span", null, "\uD83D\uDEAB None"),
+                            React.createElement("span", null, (((_o = rawEdgesDict[contextMenu.id]) === null || _o === void 0 ? void 0 : _o.animation) || 'none') === 'none' ? '✓' : '')),
+                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleAnimationChange('forward') },
+                            React.createElement("span", null, "\u27A1\uFE0F Forward"),
+                            React.createElement("span", null, ((_p = rawEdgesDict[contextMenu.id]) === null || _p === void 0 ? void 0 : _p.animation) === 'forward' ? '✓' : '')),
+                        React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleAnimationChange('bidirectional') },
+                            React.createElement("span", null, "\u2194\uFE0F Bidirectional"),
+                            React.createElement("span", null, ((_q = rawEdgesDict[contextMenu.id]) === null || _q === void 0 ? void 0 : _q.animation) === 'bidirectional' ? '✓' : ''))))),
+                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('connectionType') },
+                    React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'connectionType' ? 'var(--neutral-30)' : 'transparent' } },
+                        React.createElement("span", null, "\uD83D\uDD17 Connection"),
+                        React.createElement("span", null, "\u25B6")),
+                    activeSubMenu === 'connectionType' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '140px' }) }, availableConnections.length === 0
+                        ? React.createElement("div", { style: { padding: '5px 8px', color: 'var(--neutral-60)' } }, "No valid connections")
+                        : availableConnections.map(c => {
+                            var _a, _b;
+                            return (React.createElement("div", { key: c, style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }, onClick: () => handleConnectionTypeChange(c) },
+                                React.createElement("span", null,
+                                    React.createElement("span", { style: { color: ((_a = connectionTypes[c]) === null || _a === void 0 ? void 0 : _a.color) || 'var(--neutral-90)', marginRight: '4px' } }, "\u25CF"),
+                                    ((_b = connectionTypes[c]) === null || _b === void 0 ? void 0 : _b.label) || c),
+                                React.createElement("span", null, currentConnectionType === c ? '✓' : '')));
+                        })))))),
+            contextMenu.isContainer && (React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: '1px solid var(--neutral-40)' }, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('deleteWithContents') }, "\uD83D\uDDD1\uFE0F Delete Area & Contents")),
+            React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: contextMenu.isContainer ? 'none' : '1px solid var(--neutral-40)' }, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('delete') }, contextMenu.isContainer ? '🗑️ Delete Area Only' : '🗑️ Delete')))));
+});
 
 
 /***/ }),
@@ -17082,6 +17053,163 @@ exports.Sidebar = Sidebar;
 
 /***/ }),
 
+/***/ "./typescript/components/ArchitectureBuilder/StyleEditorModal.tsx":
+/*!************************************************************************!*\
+  !*** ./typescript/components/ArchitectureBuilder/StyleEditorModal.tsx ***!
+  \************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StyleEditorModal = void 0;
+const React = __importStar(__webpack_require__(/*! react */ "react"));
+const ColorPicker_1 = __webpack_require__(/*! ./ColorPicker */ "./typescript/components/ArchitectureBuilder/ColorPicker.tsx");
+const constants_1 = __webpack_require__(/*! ./constants */ "./typescript/components/ArchitectureBuilder/constants.ts");
+const StyleEditorModal = ({ node, onSave, onCancel }) => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+    const isTextNode = constants_1.TEXT_NODE_PALETTE_IDS.has(node.paletteId);
+    const [compBg, setCompBg] = React.useState(((_a = node.style) === null || _a === void 0 ? void 0 : _a.backgroundColor) || ((_b = node.style) === null || _b === void 0 ? void 0 : _b.fill) || '');
+    const [borderWidth, setBorderWidth] = React.useState(((_c = node.style) === null || _c === void 0 ? void 0 : _c.borderWidth) || '');
+    const [borderStyle, setBorderStyle] = React.useState(((_d = node.style) === null || _d === void 0 ? void 0 : _d.borderStyle) || '');
+    const [borderColor, setBorderColor] = React.useState(((_e = node.style) === null || _e === void 0 ? void 0 : _e.borderColor) || '');
+    const [borderRadius, setBorderRadius] = React.useState(((_f = node.style) === null || _f === void 0 ? void 0 : _f.borderRadius) || '');
+    const [labelBg, setLabelBg] = React.useState(((_g = node.labelStyle) === null || _g === void 0 ? void 0 : _g.backgroundColor) || '');
+    const [labelColor, setLabelColor] = React.useState(((_h = node.labelStyle) === null || _h === void 0 ? void 0 : _h.color) || '');
+    const [labelFontSize, setLabelFontSize] = React.useState(((_j = node.labelStyle) === null || _j === void 0 ? void 0 : _j.fontSize) || '');
+    const [iconColor, setIconColor] = React.useState(((_k = node.labelStyle) === null || _k === void 0 ? void 0 : _k.fill) || '');
+    const [textColor, setTextColor] = React.useState(((_l = node.textStyle) === null || _l === void 0 ? void 0 : _l.color) || '');
+    const [textFontSize, setTextFontSize] = React.useState(((_m = node.textStyle) === null || _m === void 0 ? void 0 : _m.fontSize) || '');
+    const handleSave = () => {
+        const newStyle = Object.assign({}, node.style);
+        if (compBg)
+            newStyle.backgroundColor = compBg;
+        else
+            delete newStyle.backgroundColor;
+        if (borderWidth || borderStyle || borderColor)
+            delete newStyle.border;
+        if (borderWidth)
+            newStyle.borderWidth = borderWidth;
+        else
+            delete newStyle.borderWidth;
+        if (borderStyle)
+            newStyle.borderStyle = borderStyle;
+        else
+            delete newStyle.borderStyle;
+        if (borderColor)
+            newStyle.borderColor = borderColor;
+        else
+            delete newStyle.borderColor;
+        if (borderRadius)
+            newStyle.borderRadius = borderRadius;
+        else
+            delete newStyle.borderRadius;
+        const newLabelStyle = Object.assign({}, node.labelStyle);
+        if (labelBg)
+            newLabelStyle.backgroundColor = labelBg;
+        else
+            delete newLabelStyle.backgroundColor;
+        if (labelColor)
+            newLabelStyle.color = labelColor;
+        else
+            delete newLabelStyle.color;
+        if (labelFontSize)
+            newLabelStyle.fontSize = labelFontSize;
+        else
+            delete newLabelStyle.fontSize;
+        if (iconColor)
+            newLabelStyle.fill = iconColor;
+        else
+            delete newLabelStyle.fill;
+        const newTextStyle = Object.assign({}, node.textStyle);
+        if (textColor)
+            newTextStyle.color = textColor;
+        else
+            delete newTextStyle.color;
+        if (textFontSize)
+            newTextStyle.fontSize = textFontSize;
+        else
+            delete newTextStyle.fontSize;
+        onSave(newStyle, newLabelStyle, newTextStyle);
+    };
+    return (React.createElement("div", { style: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' } },
+        React.createElement("div", { style: { backgroundColor: 'var(--neutral-20)', padding: '24px', borderRadius: '8px', width: '650px', border: '1px solid var(--neutral-50)', boxShadow: '0 8px 16px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: '20px' }, onClick: (e) => e.stopPropagation() },
+            React.createElement("h3", { style: { margin: 0, color: 'var(--neutral-90)' } },
+                "Edit Styles: ",
+                node.label),
+            React.createElement("div", { style: { display: 'flex', gap: '30px' } },
+                React.createElement("div", { style: { flex: 1 } },
+                    React.createElement("div", { style: constants_1.sectionTitleStyle }, "Component"),
+                    React.createElement("div", { style: constants_1.labelRowStyle },
+                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Background Color"),
+                        React.createElement(ColorPicker_1.ColorInput, { value: compBg, onChange: setCompBg, placeholder: "e.g. #333 or rgba()" })),
+                    React.createElement("div", { style: constants_1.labelRowStyle },
+                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Border Color"),
+                        React.createElement(ColorPicker_1.ColorInput, { value: borderColor, onChange: setBorderColor, placeholder: "e.g. #ff0000" })),
+                    React.createElement("div", { style: { display: 'flex', gap: '10px' } },
+                        React.createElement("div", { style: Object.assign(Object.assign({}, constants_1.labelRowStyle), { flex: 1 }) },
+                            React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Border Width"),
+                            React.createElement("input", { type: "text", value: borderWidth, onChange: e => setBorderWidth(e.target.value), placeholder: "e.g. 2px", style: Object.assign(Object.assign({}, constants_1.sharedInputStyle), { marginTop: '4px' }) })),
+                        React.createElement("div", { style: Object.assign(Object.assign({}, constants_1.labelRowStyle), { flex: 1 }) },
+                            React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Border Style"),
+                            React.createElement("select", { value: borderStyle, onChange: e => setBorderStyle(e.target.value), style: Object.assign(Object.assign({}, constants_1.sharedInputStyle), { marginTop: '4px' }) },
+                                React.createElement("option", { value: "", style: { backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)' } }, "Default"),
+                                React.createElement("option", { value: "solid", style: { backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)' } }, "Solid"),
+                                React.createElement("option", { value: "dashed", style: { backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)' } }, "Dashed"),
+                                React.createElement("option", { value: "dotted", style: { backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)' } }, "Dotted")))),
+                    React.createElement("div", { style: constants_1.labelRowStyle },
+                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Border Radius"),
+                        React.createElement("input", { type: "text", value: borderRadius, onChange: e => setBorderRadius(e.target.value), placeholder: "e.g. 8px", style: Object.assign(Object.assign({}, constants_1.sharedInputStyle), { marginTop: '4px' }) }))),
+                React.createElement("div", { style: { flex: 1 } },
+                    React.createElement("div", { style: constants_1.sectionTitleStyle }, "Label Tab"),
+                    React.createElement("div", { style: constants_1.labelRowStyle },
+                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Background Color"),
+                        React.createElement(ColorPicker_1.ColorInput, { value: labelBg, onChange: setLabelBg, placeholder: "e.g. var(--neutral-30)" })),
+                    React.createElement("div", { style: constants_1.labelRowStyle },
+                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Text Color"),
+                        React.createElement(ColorPicker_1.ColorInput, { value: labelColor, onChange: setLabelColor, placeholder: "e.g. #ffffff" })),
+                    React.createElement("div", { style: constants_1.labelRowStyle },
+                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Icon / Gear Color"),
+                        React.createElement(ColorPicker_1.ColorInput, { value: iconColor, onChange: setIconColor, placeholder: "e.g. var(--callToAction)" })),
+                    React.createElement("div", { style: constants_1.labelRowStyle },
+                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Text Size"),
+                        React.createElement("input", { type: "text", value: labelFontSize, onChange: e => setLabelFontSize(e.target.value), placeholder: "e.g. 14px", style: Object.assign(Object.assign({}, constants_1.sharedInputStyle), { marginTop: '4px' }) }))),
+                isTextNode && (React.createElement("div", { style: { flex: 1 } },
+                    React.createElement("div", { style: constants_1.sectionTitleStyle }, "Text Content"),
+                    React.createElement("div", { style: constants_1.labelRowStyle },
+                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Text Color"),
+                        React.createElement(ColorPicker_1.ColorInput, { value: textColor, onChange: setTextColor, placeholder: "e.g. #ffffff" })),
+                    React.createElement("div", { style: constants_1.labelRowStyle },
+                        React.createElement("span", { style: { fontSize: '12px', color: 'var(--neutral-80)' } }, "Text Size"),
+                        React.createElement("input", { type: "text", value: textFontSize, onChange: e => setTextFontSize(e.target.value), placeholder: "e.g. 14px", style: Object.assign(Object.assign({}, constants_1.sharedInputStyle), { marginTop: '4px' }) }))))),
+            React.createElement("div", { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' } },
+                React.createElement("button", { onClick: onCancel, style: { padding: '6px 12px', backgroundColor: 'var(--neutral-40)', border: 'none', borderRadius: '4px', color: 'var(--neutral-90)', cursor: 'pointer' } }, "Cancel"),
+                React.createElement("button", { onClick: handleSave, style: { padding: '6px 12px', backgroundColor: 'var(--callToAction)', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer', fontWeight: 'bold' } }, "Save Changes")))));
+};
+exports.StyleEditorModal = StyleEditorModal;
+
+
+/***/ }),
+
 /***/ "./typescript/components/ArchitectureBuilder/constants.ts":
 /*!****************************************************************!*\
   !*** ./typescript/components/ArchitectureBuilder/constants.ts ***!
@@ -17091,8 +17219,15 @@ exports.Sidebar = Sidebar;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.STANDARD_PALETTE = exports.TEXT_NODE_PALETTE_IDS = void 0;
+exports.STANDARD_PALETTE = exports.sectionTitleStyle = exports.labelRowStyle = exports.sharedInputStyle = exports.TEXT_NODE_PALETTE_IDS = void 0;
 exports.TEXT_NODE_PALETTE_IDS = new Set(['Note', 'Label']);
+// ─── Shared UI style primitives ───────────────────────────────────────────────
+exports.sharedInputStyle = {
+    width: '100%', padding: '6px 8px', backgroundColor: 'var(--neutral-00)', border: '1px solid var(--neutral-40)',
+    color: 'var(--neutral-90)', borderRadius: '4px', boxSizing: 'border-box', fontSize: '12px'
+};
+exports.labelRowStyle = { marginBottom: '10px', display: 'flex', flexDirection: 'column' };
+exports.sectionTitleStyle = { fontSize: '14px', fontWeight: 'bold', color: 'var(--callToAction)', borderBottom: '1px solid var(--neutral-40)', paddingBottom: '4px', marginBottom: '10px' };
 exports.STANDARD_PALETTE = [
     '#ffffff', '#e0e0e0', '#c0c0c0', '#a0a0a0', '#808080', '#606060', '#404040', '#202020', '#000000',
     '#ffcccc', '#ff9999', '#ff6666', '#ff3333', '#ff0000', '#cc0000', '#990000', '#660000', '#330000',
@@ -17300,11 +17435,15 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getSafeError = exports.useArchitectureFlowHandlers = void 0;
+exports.useArchitectureFlowHandlers = exports.getSafeError = void 0;
 const React = __importStar(__webpack_require__(/*! react */ "react"));
 // @ts-ignore
 const reactflow_1 = __webpack_require__(/*! reactflow */ "./node_modules/reactflow/dist/umd/index.js");
-const generateShortId = () => 'I' + Math.random().toString(16).substring(2, 10);
+const useEdgeHandlers_1 = __webpack_require__(/*! ./useEdgeHandlers */ "./typescript/components/ArchitectureBuilder/useEdgeHandlers.ts");
+const utils_1 = __webpack_require__(/*! ./utils */ "./typescript/components/ArchitectureBuilder/utils.ts");
+// Re-export for backward compatibility
+var utils_2 = __webpack_require__(/*! ./utils */ "./typescript/components/ArchitectureBuilder/utils.ts");
+Object.defineProperty(exports, "getSafeError", ({ enumerable: true, get: function () { return utils_2.getSafeError; } }));
 const getNodesInside = (containerId, allNodes) => {
     const container = allNodes[containerId];
     if (!container)
@@ -17330,232 +17469,29 @@ const getNodesInside = (containerId, allNodes) => {
     return inside;
 };
 const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, connectionTypes, globalHandleCount, paletteItems, snapEnabled, snapPixels, reactFlowInstance, reactFlowWrapper, isEnabled, selectedId, setSelectedId, setLocalNodes, setLocalEdges, contextMenu, setContextMenu, setActiveSubMenu, setStyleEditorNodeId, clipboardRef, draggedItemRef, }) => {
-    const [isUpdatingEdge, setIsUpdatingEdge] = React.useState(false);
     const [isDraggingNode, setIsDraggingNode] = React.useState(false);
-    const [isConnecting, setIsConnecting] = React.useState(false);
-    const updatingEdgeRef = React.useRef(null);
     const dragStartPos = React.useRef(null);
     const closeContextMenu = React.useCallback(() => {
         setContextMenu(null);
         setActiveSubMenu(null);
     }, [setContextMenu, setActiveSubMenu]);
-    // ─── Validation ──────────────────────────────────────────────────────────
-    const getValidIntersection = React.useCallback((sourceId, targetId, ignoreEdgeId) => {
-        const sourceNode = rawNodesDict[sourceId];
-        const targetNode = rawNodesDict[targetId];
-        if (!sourceNode || !targetNode || !sourceNode.supportedConnections || !targetNode.supportedConnections)
-            return [];
-        let intersection = sourceNode.supportedConnections.filter((c) => targetNode.supportedConnections.includes(c));
-        intersection = intersection.filter((connType) => {
-            const typeDef = connectionTypes[connType];
-            const isMultipleFalse = typeDef && (typeDef.multiple === false || String(typeDef.multiple).toLowerCase() === 'false');
-            if (isMultipleFalse) {
-                const edgeExists = Object.entries(rawEdgesDict).some(([id, e]) => {
-                    if (ignoreEdgeId && id === ignoreEdgeId)
-                        return false;
-                    return (e.source === sourceId && e.target === targetId && e.connectionType === connType) ||
-                        (e.source === targetId && e.target === sourceId && e.connectionType === connType);
-                });
-                return !edgeExists;
-            }
-            return true;
-        });
-        return intersection;
-    }, [rawNodesDict, rawEdgesDict, connectionTypes]);
-    const isValidConnection = React.useCallback((connection) => {
-        return getValidIntersection(connection.source, connection.target, updatingEdgeRef.current || undefined).length > 0;
-    }, [getValidIntersection]);
-    // ─── Edge handlers ───────────────────────────────────────────────────────
-    const handleWaypointsChange = React.useCallback((edgeId, waypoints) => {
-        try {
-            if (!(store === null || store === void 0 ? void 0 : store.props))
-                return;
-            const nextEdges = Object.assign({}, rawEdgesDict);
-            if (nextEdges[edgeId]) {
-                nextEdges[edgeId] = Object.assign(Object.assign({}, nextEdges[edgeId]), { waypoints });
-                store.props.write('edges', nextEdges);
-                // Optimistic local update
-                setLocalEdges(edges => edges.map(e => {
-                    if (e.id === edgeId) {
-                        return Object.assign(Object.assign({}, e), { data: Object.assign(Object.assign({}, e.data), { waypoints }) });
-                    }
-                    return e;
-                }));
-            }
-        }
-        catch (error) {
-            console.error("Error in handleWaypointsChange:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleWaypointsChange'));
-            }
-        }
-    }, [store, rawEdgesDict, componentEvents, setLocalEdges]);
-    const onConnect = React.useCallback((connectionParams) => {
-        try {
-            const validTypes = getValidIntersection(connectionParams.source, connectionParams.target);
-            if (validTypes.length === 0)
-                return;
-            let selectedType = validTypes[0];
-            const typeDef = connectionTypes[selectedType] || {};
-            if (store === null || store === void 0 ? void 0 : store.props) {
-                store.props.write('edges', Object.assign(Object.assign({}, rawEdgesDict), { [generateShortId()]: Object.assign(Object.assign({}, connectionParams), { lineType: 'smoothstep', dashed: false, arrow: typeDef.arrow !== false, showLabel: false, connectionType: selectedType, waypoints: [] }) }));
-            }
-        }
-        catch (error) {
-            console.error("Error in onConnect:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onConnect'));
-            }
-        }
-    }, [store, rawEdgesDict, rawNodesDict, globalHandleCount, getValidIntersection, connectionTypes, componentEvents]);
-    const onEdgeUpdate = React.useCallback((oldEdge, newConnection) => {
-        var _a, _b, _c, _d;
-        try {
-            if (!newConnection.source || !newConnection.target)
-                return;
-            const validTypes = getValidIntersection(newConnection.source, newConnection.target, oldEdge.id);
-            if (validTypes.length === 0)
-                return;
-            if (store === null || store === void 0 ? void 0 : store.props) {
-                const nextEdges = Object.assign({}, rawEdgesDict);
-                const oldData = nextEdges[oldEdge.id];
-                if (!validTypes.includes(oldData.connectionType))
-                    return;
-                const isHoriz = (side) => side === 'left' || side === 'right';
-                const oldSrcSide = (_a = oldEdge.sourceHandle) === null || _a === void 0 ? void 0 : _a.split('-')[0];
-                const newSrcSide = (_b = newConnection.sourceHandle) === null || _b === void 0 ? void 0 : _b.split('-')[0];
-                const oldTgtSide = (_c = oldEdge.targetHandle) === null || _c === void 0 ? void 0 : _c.split('-')[0];
-                const newTgtSide = (_d = newConnection.targetHandle) === null || _d === void 0 ? void 0 : _d.split('-')[0];
-                const srcAxisChanged = isHoriz(oldSrcSide) !== isHoriz(newSrcSide);
-                const tgtAxisChanged = isHoriz(oldTgtSide) !== isHoriz(newTgtSide);
-                // Re-route (clear waypoints) only if the handle orientation fundamentally changed.
-                // Otherwise, keep existing manual waypoints (terminal segments will stretch).
-                const nextWaypoints = (srcAxisChanged || tgtAxisChanged) ? [] : (oldData.waypoints || []);
-                nextEdges[oldEdge.id] = Object.assign(Object.assign({}, oldData), { source: newConnection.source, target: newConnection.target, sourceHandle: newConnection.sourceHandle, targetHandle: newConnection.targetHandle, waypoints: nextWaypoints });
-                store.props.write('edges', nextEdges);
-            }
-        }
-        catch (error) {
-            console.error("Error in onEdgeUpdate:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onEdgeUpdate'));
-            }
-        }
-    }, [store, rawEdgesDict, getValidIntersection, componentEvents]);
-    const onEdgeUpdateStart = React.useCallback((event, edge) => {
-        updatingEdgeRef.current = (edge === null || edge === void 0 ? void 0 : edge.id) || null;
-        setIsUpdatingEdge(true);
-    }, []);
-    const onEdgeUpdateEnd = React.useCallback(() => {
-        updatingEdgeRef.current = null;
-        setIsUpdatingEdge(false);
-    }, []);
-    const onConnectStart = React.useCallback(() => setIsConnecting(true), []);
-    const onConnectEnd = React.useCallback(() => setIsConnecting(false), []);
-    const onEdgesDelete = React.useCallback((deleted) => {
-        try {
-            if (!(store === null || store === void 0 ? void 0 : store.props))
-                return;
-            const nextEdges = Object.assign({}, rawEdgesDict);
-            deleted.forEach(e => { delete nextEdges[e.id]; if (e.id === selectedId)
-                setSelectedId(null); });
-            store.props.write('edges', nextEdges);
-        }
-        catch (error) {
-            console.error("Error in onEdgesDelete:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onEdgesDelete'));
-            }
-        }
-    }, [store, rawEdgesDict, selectedId, setSelectedId, componentEvents]);
-    const onEdgeContextMenu = React.useCallback((event, edge) => {
-        var _a;
-        event.preventDefault();
-        setSelectedId(edge.id);
-        const bounds = (_a = reactFlowWrapper.current) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
-        if (bounds) {
-            setContextMenu({ id: edge.id, top: event.clientY - bounds.top, left: event.clientX - bounds.left, type: 'edge' });
-            setActiveSubMenu(null);
-        }
-    }, [reactFlowWrapper, setSelectedId, setContextMenu, setActiveSubMenu]);
-    const onEdgeClick = React.useCallback((event, edge) => {
-        setSelectedId(edge.id);
-        const rawEdge = rawEdgesDict[edge.id];
-        if (componentEvents)
-            componentEvents.fireComponentEvent('onEdgeClick', { id: edge.id, paletteId: rawEdge === null || rawEdge === void 0 ? void 0 : rawEdge.connectionType, type: 'edge' });
-    }, [componentEvents, rawEdgesDict, setSelectedId]);
-    const handleLineTypeChange = React.useCallback((newLineType) => {
-        var _a;
-        try {
-            if (!contextMenu || contextMenu.type !== 'edge')
-                return;
-            if (componentEvents)
-                componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: (_a = rawEdgesDict[contextMenu.id]) === null || _a === void 0 ? void 0 : _a.connectionType, type: contextMenu.type, action: `lineType:${newLineType}` });
-            if (store === null || store === void 0 ? void 0 : store.props) {
-                const nextEdges = Object.assign({}, rawEdgesDict);
-                if (nextEdges[contextMenu.id]) {
-                    nextEdges[contextMenu.id].lineType = newLineType;
-                    store.props.write('edges', nextEdges);
-                }
-            }
-            closeContextMenu();
-        }
-        catch (error) {
-            console.error("Error in handleLineTypeChange:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleLineTypeChange'));
-            }
-        }
-    }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
-    const handleConnectionTypeChange = React.useCallback((newConnectionType) => {
-        var _a;
-        try {
-            if (!contextMenu || contextMenu.type !== 'edge')
-                return;
-            if (componentEvents)
-                componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: (_a = rawEdgesDict[contextMenu.id]) === null || _a === void 0 ? void 0 : _a.connectionType, type: contextMenu.type, action: `connectionType:${newConnectionType}` });
-            if (store === null || store === void 0 ? void 0 : store.props) {
-                const nextEdges = Object.assign({}, rawEdgesDict);
-                if (nextEdges[contextMenu.id]) {
-                    const typeDef = connectionTypes[newConnectionType] || {};
-                    nextEdges[contextMenu.id].connectionType = newConnectionType;
-                    nextEdges[contextMenu.id].arrow = typeDef.arrow !== false;
-                    store.props.write('edges', nextEdges);
-                }
-            }
-            closeContextMenu();
-        }
-        catch (error) {
-            console.error("Error in handleConnectionTypeChange:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleConnectionTypeChange'));
-            }
-        }
-    }, [contextMenu, componentEvents, rawEdgesDict, connectionTypes, store, closeContextMenu]);
-    const handleAnimationChange = React.useCallback((newAnimation) => {
-        var _a;
-        try {
-            if (!contextMenu || contextMenu.type !== 'edge')
-                return;
-            if (componentEvents)
-                componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: (_a = rawEdgesDict[contextMenu.id]) === null || _a === void 0 ? void 0 : _a.connectionType, type: contextMenu.type, action: `animation:${newAnimation}` });
-            if (store === null || store === void 0 ? void 0 : store.props) {
-                const nextEdges = Object.assign({}, rawEdgesDict);
-                if (nextEdges[contextMenu.id]) {
-                    nextEdges[contextMenu.id].animation = newAnimation;
-                    store.props.write('edges', nextEdges);
-                }
-            }
-            closeContextMenu();
-        }
-        catch (error) {
-            console.error("Error in handleAnimationChange:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleAnimationChange'));
-            }
-        }
-    }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
-    // ─── Node handlers ───────────────────────────────────────────────────────
+    // ─── Edge handlers (delegated) ────────────────────────────────────────────
+    const edgeHandlers = useEdgeHandlers_1.useEdgeHandlers({
+        store,
+        componentEvents,
+        rawNodesDict,
+        rawEdgesDict,
+        connectionTypes,
+        selectedId,
+        setSelectedId,
+        contextMenu,
+        setContextMenu,
+        setActiveSubMenu,
+        setLocalEdges,
+        reactFlowWrapper,
+        closeContextMenu,
+    });
+    // ─── Node handlers ────────────────────────────────────────────────────────
     const handleGearClick = React.useCallback((id) => {
         setSelectedId(id);
         const node = rawNodesDict[id];
@@ -17583,9 +17519,8 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         }
         catch (error) {
             console.error("Error in handleResizeEnd:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleResizeEnd'));
-            }
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleResizeEnd'));
         }
     }, [store, rawNodesDict, componentEvents]);
     const handleTextChange = React.useCallback((id, text) => {
@@ -17600,9 +17535,8 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         }
         catch (error) {
             console.error("Error in handleTextChange:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleTextChange'));
-            }
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleTextChange'));
         }
     }, [store, rawNodesDict, componentEvents]);
     const onNodesChange = React.useCallback((changes) => {
@@ -17620,8 +17554,6 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
             const insideIds = getNodesInside(node.id, rawNodesDict);
             const nodePositions = {};
             insideIds.forEach(id => { nodePositions[id] = { x: rawNodesDict[id].x, y: rawNodesDict[id].y }; });
-            // Capture all waypoints for edges that have ANY waypoint inside the container bbox.
-            // All waypoints translate together — partial translation creates diagonal middle segments.
             const edgeWaypoints = {};
             Object.entries(rawEdgesDict).forEach(([edgeId, edgeVal]) => {
                 if (!edgeVal || !Array.isArray(edgeVal.waypoints) || edgeVal.waypoints.length === 0)
@@ -17653,10 +17585,8 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
             setLocalEdges(edges => edges.map((edge) => {
                 const originalWps = edgeDragData[edge.id];
                 if (originalWps) {
-                    // Translate all waypoints — pinning in CustomEdge corrects the endpoints.
                     return Object.assign(Object.assign({}, edge), { data: Object.assign(Object.assign({}, edge.data), { waypoints: originalWps.map(wp => ({ x: wp.x + dx, y: wp.y + dy })) }) });
                 }
-                // Touch edges connected to moving nodes so CustomEdge pinning re-runs.
                 if (movingNodeIds.has(edge.source) || movingNodeIds.has(edge.target))
                     return Object.assign({}, edge);
                 return edge;
@@ -17682,24 +17612,16 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
                         }
                     });
                     const edgeDragData = dragStartPos.current.edges;
-                    // Translate waypoints for captured edges (those that were entirely inside the container)
                     Object.entries(edgeDragData).forEach(([edgeId, originalWps]) => {
                         if (nextEdges[edgeId]) {
                             nextEdges[edgeId] = Object.assign(Object.assign({}, nextEdges[edgeId]), { waypoints: originalWps.map(wp => ({ x: wp.x + dx, y: wp.y + dy })) });
                             edgesChanged = true;
                         }
                     });
-                    // We no longer clear waypoints for other edges; CustomEdge's pinning logic 
-                    // will handle stretching the segments to the new handle positions while 
-                    // preserving the manual waypoints.
-                }
-                else if (dx !== 0 || dy !== 0) {
-                    // Regular node move: we no longer clear waypoints here.
                 }
                 store.props.write('nodes', nextNodes);
                 if (edgesChanged)
                     store.props.write('edges', nextEdges);
-                // Final optimistic sync to ensure local state reflects final rounded positions
                 setLocalNodes(nds => nds.map(n => {
                     const final = nextNodes[n.id];
                     if (final)
@@ -17721,9 +17643,8 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         catch (error) {
             setTimeout(() => setIsDraggingNode(false), 250);
             console.error("Error in onNodeDragStop:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodeDragStop'));
-            }
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'onNodeDragStop'));
         }
     }, [store, rawNodesDict, rawEdgesDict, componentEvents]);
     const onNodesDelete = React.useCallback((deleted) => {
@@ -17750,9 +17671,8 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         }
         catch (error) {
             console.error("Error in onNodesDelete:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodesDelete'));
-            }
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'onNodesDelete'));
         }
     }, [store, rawNodesDict, rawEdgesDict, selectedId, setSelectedId, componentEvents]);
     const onNodeContextMenu = React.useCallback((event, node) => {
@@ -17772,7 +17692,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         if (componentEvents)
             componentEvents.fireComponentEvent('onNodeClick', { id: node.id, paletteId: rawNode === null || rawNode === void 0 ? void 0 : rawNode.paletteId, typeId: rawNode === null || rawNode === void 0 ? void 0 : rawNode.typeId, type: 'node' });
     }, [componentEvents, rawNodesDict, setSelectedId]);
-    // ─── Clipboard ───────────────────────────────────────────────────────────
+    // ─── Clipboard ────────────────────────────────────────────────────────────
     const executeCopy = React.useCallback((id) => {
         var _a;
         const isContainer = ((_a = rawNodesDict[id]) === null || _a === void 0 ? void 0 : _a.paletteId) === 'container';
@@ -17800,10 +17720,9 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
             const nextNodes = Object.assign({}, rawNodesDict);
             const nextEdges = Object.assign({}, rawEdgesDict);
             if (clipboard.type === 'single') {
-                const newNodeId = generateShortId();
+                const newNodeId = utils_1.generateShortId();
                 nextNodes[newNodeId] = JSON.parse(JSON.stringify(Object.assign(Object.assign({}, clipboard.node), { x: dropX, y: dropY })));
                 setSelectedId(newNodeId);
-                // We no longer overwrite the clipboard here.
             }
             else if (clipboard.type === 'group') {
                 let minX = Infinity, minY = Infinity;
@@ -17813,31 +17732,27 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
                 const dx = dropX - minX, dy = dropY - minY;
                 const idMap = {};
                 Object.keys(clipboard.nodes).forEach(oldId => {
-                    const newId = generateShortId();
+                    const newId = utils_1.generateShortId();
                     idMap[oldId] = newId;
                     const oldNode = clipboard.nodes[oldId];
-                    const newNode = JSON.parse(JSON.stringify(Object.assign(Object.assign({}, oldNode), { x: oldNode.x + dx, y: oldNode.y + dy })));
-                    nextNodes[newId] = newNode;
+                    nextNodes[newId] = JSON.parse(JSON.stringify(Object.assign(Object.assign({}, oldNode), { x: oldNode.x + dx, y: oldNode.y + dy })));
                 });
                 Object.keys(clipboard.edges).forEach(oldEdgeId => {
-                    const newEdgeId = generateShortId();
+                    const newEdgeId = utils_1.generateShortId();
                     const oldEdge = clipboard.edges[oldEdgeId];
-                    const newEdge = JSON.parse(JSON.stringify(Object.assign(Object.assign({}, oldEdge), { source: idMap[oldEdge.source], target: idMap[oldEdge.target] })));
-                    nextEdges[newEdgeId] = newEdge;
+                    nextEdges[newEdgeId] = JSON.parse(JSON.stringify(Object.assign(Object.assign({}, oldEdge), { source: idMap[oldEdge.source], target: idMap[oldEdge.target] })));
                 });
-                // We no longer overwrite the clipboard here.
             }
             store.props.write('nodes', nextNodes);
             store.props.write('edges', nextEdges);
         }
         catch (error) {
             console.error("Error in executePaste:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'executePaste'));
-            }
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'executePaste'));
         }
     }, [store, rawNodesDict, rawEdgesDict, setSelectedId, clipboardRef, componentEvents]);
-    // ─── Pane handlers ───────────────────────────────────────────────────────
+    // ─── Pane handlers ────────────────────────────────────────────────────────
     const onDragOver = React.useCallback((event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -17863,7 +17778,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
             const initialStyle = JSON.parse(JSON.stringify(paletteItem.style || { classes: '' }));
             const initialLabelStyle = JSON.parse(JSON.stringify(paletteItem.labelStyle || { classes: '' }));
             if (store === null || store === void 0 ? void 0 : store.props) {
-                const newNodeId = generateShortId();
+                const newNodeId = utils_1.generateShortId();
                 const newNodeData = {
                     paletteId: paletteItem.id,
                     typeId: paletteItem.typeId,
@@ -17894,17 +17809,14 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         }
         catch (error) {
             console.error("Error in onDrop:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onDrop'));
-            }
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'onDrop'));
         }
     }, [store, rawNodesDict, snapEnabled, snapPixels, reactFlowInstance, setSelectedId, draggedItemRef, componentEvents]);
     const onPaneClick = React.useCallback(() => {
         setSelectedId(null);
         closeContextMenu();
         if (componentEvents) {
-            // UNCOMMENT FOR TESTING:
-            // throw new Error("Verification: Pane clicked, triggering test error");
             componentEvents.fireComponentEvent('onPaneClick', { type: 'pane' });
         }
     }, [setSelectedId, closeContextMenu, componentEvents]);
@@ -17914,40 +17826,24 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         const bounds = (_a = reactFlowWrapper.current) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
         if (bounds && reactFlowInstance) {
             const flowPos = reactFlowInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
-            // Search for containers that the click might have landed on (since they may be pointer-events: none)
             const containerEntry = Object.entries(rawNodesDict)
                 .filter(([id, n]) => n && n.paletteId === 'container')
-                .sort((a, b) => { var _a, _b; return ((_a = b[1].zIndex) !== null && _a !== void 0 ? _a : -1) - ((_b = a[1].zIndex) !== null && _b !== void 0 ? _b : -1); }) // Top-most z-index first
+                .sort((a, b) => { var _a, _b; return ((_a = b[1].zIndex) !== null && _a !== void 0 ? _a : -1) - ((_b = a[1].zIndex) !== null && _b !== void 0 ? _b : -1); })
                 .find(([id, n]) => {
                 const w = n.width || 300, h = n.height || 300;
                 return flowPos.x >= n.x && flowPos.x <= n.x + w && flowPos.y >= n.y && flowPos.y <= n.y + h;
             });
             if (containerEntry) {
                 const [id] = containerEntry;
-                setContextMenu({
-                    id,
-                    top: event.clientY - bounds.top,
-                    left: event.clientX - bounds.left,
-                    type: 'node',
-                    isContainer: true,
-                    clientX: event.clientX,
-                    clientY: event.clientY
-                });
+                setContextMenu({ id, top: event.clientY - bounds.top, left: event.clientX - bounds.left, type: 'node', isContainer: true, clientX: event.clientX, clientY: event.clientY });
             }
             else {
-                setContextMenu({
-                    id: 'pane',
-                    top: event.clientY - bounds.top,
-                    left: event.clientX - bounds.left,
-                    type: 'pane',
-                    clientX: event.clientX,
-                    clientY: event.clientY
-                });
+                setContextMenu({ id: 'pane', top: event.clientY - bounds.top, left: event.clientX - bounds.left, type: 'pane', clientX: event.clientX, clientY: event.clientY });
             }
             setActiveSubMenu(null);
         }
     }, [reactFlowWrapper, reactFlowInstance, rawNodesDict, setContextMenu, setActiveSubMenu]);
-    // ─── Context menu actions ─────────────────────────────────────────────────
+    // ─── Context menu actions ──────────────────────────────────────────────────
     const handleNodeSwap = React.useCallback((newId) => {
         var _a;
         try {
@@ -17988,9 +17884,8 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         }
         catch (error) {
             console.error("Error in handleNodeSwap:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleNodeSwap'));
-            }
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleNodeSwap'));
         }
     }, [contextMenu, paletteItems, componentEvents, rawNodesDict, rawEdgesDict, store, closeContextMenu]);
     const handleContextMenuAction = React.useCallback((action) => {
@@ -18008,12 +17903,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
             if (componentEvents)
                 componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: currentPaletteId, type: contextMenu.type, action });
             if (action === 'editContent' && isNode) {
-                setLocalNodes(prev => prev.map(n => {
-                    if (n.id === contextMenu.id) {
-                        return Object.assign(Object.assign({}, n), { data: Object.assign(Object.assign({}, n.data), { isEditing: true }) });
-                    }
-                    return n;
-                }));
+                setLocalNodes(prev => prev.map(n => n.id === contextMenu.id ? Object.assign(Object.assign({}, n), { data: Object.assign(Object.assign({}, n.data), { isEditing: true }) }) : n));
                 closeContextMenu();
                 return;
             }
@@ -18023,7 +17913,6 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
                 if (node) {
                     const newUnlocked = !node.configs.unlocked;
                     node.configs = Object.assign(Object.assign({}, node.configs), { unlocked: newUnlocked });
-                    // Clean up old individual flags if they exist
                     delete node.configs.unlockMovement;
                     delete node.configs.enableResize;
                     store.props.write('nodes', nextNodes);
@@ -18041,9 +17930,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
                     const nextEdges = Object.assign({}, rawEdgesDict);
                     const currentEdge = nextEdges[contextMenu.id];
                     if (currentEdge) {
-                        const reversedWaypoints = Array.isArray(currentEdge.waypoints)
-                            ? [...currentEdge.waypoints].reverse()
-                            : [];
+                        const reversedWaypoints = Array.isArray(currentEdge.waypoints) ? [...currentEdge.waypoints].reverse() : [];
                         nextEdges[contextMenu.id] = Object.assign(Object.assign({}, currentEdge), { source: currentEdge.target, target: currentEdge.source, sourceHandle: currentEdge.targetHandle, targetHandle: currentEdge.sourceHandle, waypoints: reversedWaypoints });
                         store.props.write('edges', nextEdges);
                     }
@@ -18244,35 +18131,16 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         }
         catch (error) {
             console.error("Error in handleContextMenuAction:", error);
-            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleContextMenuAction'));
-            }
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleContextMenuAction'));
         }
     }, [contextMenu, rawNodesDict, rawEdgesDict, selectedId, snapEnabled, snapPixels, reactFlowInstance, store, componentEvents, setStyleEditorNodeId, executeCopy, executePaste, closeContextMenu, setSelectedId]);
-    return {
+    return Object.assign(Object.assign({ 
         // State
-        isUpdatingEdge,
         isDraggingNode,
-        isConnecting,
-        updatingEdgeRef,
         // Shared
-        closeContextMenu,
-        getValidIntersection,
-        // Edge
-        isValidConnection,
-        handleWaypointsChange,
-        onConnect,
-        onEdgeUpdate,
-        onEdgeUpdateStart,
-        onEdgeUpdateEnd,
-        onConnectStart,
-        onConnectEnd,
-        onEdgesDelete,
-        onEdgeContextMenu,
-        onEdgeClick,
-        handleLineTypeChange,
-        handleConnectionTypeChange,
-        // Node
+        closeContextMenu }, edgeHandlers), { 
+        // Node handlers
         handleGearClick,
         handlePaletteItemClick,
         handleResizeEnd,
@@ -18294,28 +18162,292 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         onPaneContextMenu,
         // Context menu
         handleNodeSwap,
-        handleAnimationChange,
-        handleContextMenuAction,
-    };
+        handleContextMenuAction });
 };
 exports.useArchitectureFlowHandlers = useArchitectureFlowHandlers;
-/**
- * Safely extracts error information for Perspective event firing.
- * Handles non-Error objects and ensures strings for all properties.
- */
+
+
+/***/ }),
+
+/***/ "./typescript/components/ArchitectureBuilder/useEdgeHandlers.ts":
+/*!**********************************************************************!*\
+  !*** ./typescript/components/ArchitectureBuilder/useEdgeHandlers.ts ***!
+  \**********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.useEdgeHandlers = void 0;
+const React = __importStar(__webpack_require__(/*! react */ "react"));
+const utils_1 = __webpack_require__(/*! ./utils */ "./typescript/components/ArchitectureBuilder/utils.ts");
+const useEdgeHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, connectionTypes, selectedId, setSelectedId, contextMenu, setContextMenu, setActiveSubMenu, setLocalEdges, reactFlowWrapper, closeContextMenu, }) => {
+    const [isUpdatingEdge, setIsUpdatingEdge] = React.useState(false);
+    const [isConnecting, setIsConnecting] = React.useState(false);
+    const updatingEdgeRef = React.useRef(null);
+    // ─── Validation ──────────────────────────────────────────────────────────
+    const getValidIntersection = React.useCallback((sourceId, targetId, ignoreEdgeId) => {
+        const sourceNode = rawNodesDict[sourceId];
+        const targetNode = rawNodesDict[targetId];
+        if (!sourceNode || !targetNode || !sourceNode.supportedConnections || !targetNode.supportedConnections)
+            return [];
+        let intersection = sourceNode.supportedConnections.filter((c) => targetNode.supportedConnections.includes(c));
+        intersection = intersection.filter((connType) => {
+            const typeDef = connectionTypes[connType];
+            const isMultipleFalse = typeDef && (typeDef.multiple === false || String(typeDef.multiple).toLowerCase() === 'false');
+            if (isMultipleFalse) {
+                const edgeExists = Object.entries(rawEdgesDict).some(([id, e]) => {
+                    if (ignoreEdgeId && id === ignoreEdgeId)
+                        return false;
+                    return (e.source === sourceId && e.target === targetId && e.connectionType === connType) ||
+                        (e.source === targetId && e.target === sourceId && e.connectionType === connType);
+                });
+                return !edgeExists;
+            }
+            return true;
+        });
+        return intersection;
+    }, [rawNodesDict, rawEdgesDict, connectionTypes]);
+    const isValidConnection = React.useCallback((connection) => {
+        return getValidIntersection(connection.source, connection.target, updatingEdgeRef.current || undefined).length > 0;
+    }, [getValidIntersection]);
+    // ─── Edge handlers ───────────────────────────────────────────────────────
+    const handleWaypointsChange = React.useCallback((edgeId, waypoints) => {
+        try {
+            if (!(store === null || store === void 0 ? void 0 : store.props))
+                return;
+            const nextEdges = Object.assign({}, rawEdgesDict);
+            if (nextEdges[edgeId]) {
+                nextEdges[edgeId] = Object.assign(Object.assign({}, nextEdges[edgeId]), { waypoints });
+                store.props.write('edges', nextEdges);
+                setLocalEdges(edges => edges.map(e => e.id === edgeId ? Object.assign(Object.assign({}, e), { data: Object.assign(Object.assign({}, e.data), { waypoints }) }) : e));
+            }
+        }
+        catch (error) {
+            console.error("Error in handleWaypointsChange:", error);
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleWaypointsChange'));
+        }
+    }, [store, rawEdgesDict, componentEvents, setLocalEdges]);
+    const onConnect = React.useCallback((connectionParams) => {
+        try {
+            const validTypes = getValidIntersection(connectionParams.source, connectionParams.target);
+            if (validTypes.length === 0)
+                return;
+            const selectedType = validTypes[0];
+            const typeDef = connectionTypes[selectedType] || {};
+            if (store === null || store === void 0 ? void 0 : store.props) {
+                store.props.write('edges', Object.assign(Object.assign({}, rawEdgesDict), { [utils_1.generateShortId()]: Object.assign(Object.assign({}, connectionParams), { lineType: 'smoothstep', dashed: false, arrow: typeDef.arrow !== false, showLabel: false, connectionType: selectedType, waypoints: [] }) }));
+            }
+        }
+        catch (error) {
+            console.error("Error in onConnect:", error);
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'onConnect'));
+        }
+    }, [store, rawEdgesDict, getValidIntersection, connectionTypes, componentEvents]);
+    const onEdgeUpdate = React.useCallback((oldEdge, newConnection) => {
+        var _a, _b, _c, _d;
+        try {
+            if (!newConnection.source || !newConnection.target)
+                return;
+            const validTypes = getValidIntersection(newConnection.source, newConnection.target, oldEdge.id);
+            if (validTypes.length === 0)
+                return;
+            if (store === null || store === void 0 ? void 0 : store.props) {
+                const nextEdges = Object.assign({}, rawEdgesDict);
+                const oldData = nextEdges[oldEdge.id];
+                if (!validTypes.includes(oldData.connectionType))
+                    return;
+                const isHoriz = (side) => side === 'left' || side === 'right';
+                const oldSrcSide = (_a = oldEdge.sourceHandle) === null || _a === void 0 ? void 0 : _a.split('-')[0];
+                const newSrcSide = (_b = newConnection.sourceHandle) === null || _b === void 0 ? void 0 : _b.split('-')[0];
+                const oldTgtSide = (_c = oldEdge.targetHandle) === null || _c === void 0 ? void 0 : _c.split('-')[0];
+                const newTgtSide = (_d = newConnection.targetHandle) === null || _d === void 0 ? void 0 : _d.split('-')[0];
+                const srcAxisChanged = isHoriz(oldSrcSide) !== isHoriz(newSrcSide);
+                const tgtAxisChanged = isHoriz(oldTgtSide) !== isHoriz(newTgtSide);
+                const nextWaypoints = (srcAxisChanged || tgtAxisChanged) ? [] : (oldData.waypoints || []);
+                nextEdges[oldEdge.id] = Object.assign(Object.assign({}, oldData), { source: newConnection.source, target: newConnection.target, sourceHandle: newConnection.sourceHandle, targetHandle: newConnection.targetHandle, waypoints: nextWaypoints });
+                store.props.write('edges', nextEdges);
+            }
+        }
+        catch (error) {
+            console.error("Error in onEdgeUpdate:", error);
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'onEdgeUpdate'));
+        }
+    }, [store, rawEdgesDict, getValidIntersection, componentEvents]);
+    const onEdgeUpdateStart = React.useCallback((event, edge) => {
+        updatingEdgeRef.current = (edge === null || edge === void 0 ? void 0 : edge.id) || null;
+        setIsUpdatingEdge(true);
+    }, []);
+    const onEdgeUpdateEnd = React.useCallback(() => {
+        updatingEdgeRef.current = null;
+        setIsUpdatingEdge(false);
+    }, []);
+    const onConnectStart = React.useCallback(() => setIsConnecting(true), []);
+    const onConnectEnd = React.useCallback(() => setIsConnecting(false), []);
+    const onEdgesDelete = React.useCallback((deleted) => {
+        try {
+            if (!(store === null || store === void 0 ? void 0 : store.props))
+                return;
+            const nextEdges = Object.assign({}, rawEdgesDict);
+            deleted.forEach(e => { delete nextEdges[e.id]; if (e.id === selectedId)
+                setSelectedId(null); });
+            store.props.write('edges', nextEdges);
+        }
+        catch (error) {
+            console.error("Error in onEdgesDelete:", error);
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'onEdgesDelete'));
+        }
+    }, [store, rawEdgesDict, selectedId, setSelectedId, componentEvents]);
+    const onEdgeContextMenu = React.useCallback((event, edge) => {
+        var _a;
+        event.preventDefault();
+        setSelectedId(edge.id);
+        const bounds = (_a = reactFlowWrapper.current) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
+        if (bounds) {
+            setContextMenu({ id: edge.id, top: event.clientY - bounds.top, left: event.clientX - bounds.left, type: 'edge' });
+            setActiveSubMenu(null);
+        }
+    }, [reactFlowWrapper, setSelectedId, setContextMenu, setActiveSubMenu]);
+    const onEdgeClick = React.useCallback((event, edge) => {
+        setSelectedId(edge.id);
+        const rawEdge = rawEdgesDict[edge.id];
+        if (componentEvents)
+            componentEvents.fireComponentEvent('onEdgeClick', { id: edge.id, paletteId: rawEdge === null || rawEdge === void 0 ? void 0 : rawEdge.connectionType, type: 'edge' });
+    }, [componentEvents, rawEdgesDict, setSelectedId]);
+    const handleLineTypeChange = React.useCallback((newLineType) => {
+        var _a;
+        try {
+            if (!contextMenu || contextMenu.type !== 'edge')
+                return;
+            if (componentEvents)
+                componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: (_a = rawEdgesDict[contextMenu.id]) === null || _a === void 0 ? void 0 : _a.connectionType, type: contextMenu.type, action: `lineType:${newLineType}` });
+            if (store === null || store === void 0 ? void 0 : store.props) {
+                const nextEdges = Object.assign({}, rawEdgesDict);
+                if (nextEdges[contextMenu.id]) {
+                    nextEdges[contextMenu.id].lineType = newLineType;
+                    store.props.write('edges', nextEdges);
+                }
+            }
+            closeContextMenu();
+        }
+        catch (error) {
+            console.error("Error in handleLineTypeChange:", error);
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleLineTypeChange'));
+        }
+    }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
+    const handleConnectionTypeChange = React.useCallback((newConnectionType) => {
+        var _a;
+        try {
+            if (!contextMenu || contextMenu.type !== 'edge')
+                return;
+            if (componentEvents)
+                componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: (_a = rawEdgesDict[contextMenu.id]) === null || _a === void 0 ? void 0 : _a.connectionType, type: contextMenu.type, action: `connectionType:${newConnectionType}` });
+            if (store === null || store === void 0 ? void 0 : store.props) {
+                const nextEdges = Object.assign({}, rawEdgesDict);
+                if (nextEdges[contextMenu.id]) {
+                    const typeDef = connectionTypes[newConnectionType] || {};
+                    nextEdges[contextMenu.id].connectionType = newConnectionType;
+                    nextEdges[contextMenu.id].arrow = typeDef.arrow !== false;
+                    store.props.write('edges', nextEdges);
+                }
+            }
+            closeContextMenu();
+        }
+        catch (error) {
+            console.error("Error in handleConnectionTypeChange:", error);
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleConnectionTypeChange'));
+        }
+    }, [contextMenu, componentEvents, rawEdgesDict, connectionTypes, store, closeContextMenu]);
+    const handleAnimationChange = React.useCallback((newAnimation) => {
+        var _a;
+        try {
+            if (!contextMenu || contextMenu.type !== 'edge')
+                return;
+            if (componentEvents)
+                componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: (_a = rawEdgesDict[contextMenu.id]) === null || _a === void 0 ? void 0 : _a.connectionType, type: contextMenu.type, action: `animation:${newAnimation}` });
+            if (store === null || store === void 0 ? void 0 : store.props) {
+                const nextEdges = Object.assign({}, rawEdgesDict);
+                if (nextEdges[contextMenu.id]) {
+                    nextEdges[contextMenu.id].animation = newAnimation;
+                    store.props.write('edges', nextEdges);
+                }
+            }
+            closeContextMenu();
+        }
+        catch (error) {
+            console.error("Error in handleAnimationChange:", error);
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleAnimationChange'));
+        }
+    }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
+    return {
+        isUpdatingEdge,
+        isConnecting,
+        updatingEdgeRef,
+        getValidIntersection,
+        isValidConnection,
+        handleWaypointsChange,
+        onConnect,
+        onEdgeUpdate,
+        onEdgeUpdateStart,
+        onEdgeUpdateEnd,
+        onConnectStart,
+        onConnectEnd,
+        onEdgesDelete,
+        onEdgeContextMenu,
+        onEdgeClick,
+        handleLineTypeChange,
+        handleConnectionTypeChange,
+        handleAnimationChange,
+    };
+};
+exports.useEdgeHandlers = useEdgeHandlers;
+
+
+/***/ }),
+
+/***/ "./typescript/components/ArchitectureBuilder/utils.ts":
+/*!************************************************************!*\
+  !*** ./typescript/components/ArchitectureBuilder/utils.ts ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getSafeError = exports.generateShortId = void 0;
+const generateShortId = () => 'I' + Math.random().toString(16).substring(2, 10);
+exports.generateShortId = generateShortId;
 function getSafeError(error, source) {
     if (error instanceof Error) {
-        return {
-            source,
-            message: error.message || String(error),
-            stack: error.stack || ''
-        };
+        return { source, message: error.message || String(error), stack: error.stack || '' };
     }
-    return {
-        source,
-        message: typeof error === 'string' ? error : JSON.stringify(error) || 'Unknown error',
-        stack: ''
-    };
+    return { source, message: typeof error === 'string' ? error : JSON.stringify(error) || 'Unknown error', stack: '' };
 }
 exports.getSafeError = getSafeError;
 
