@@ -16018,7 +16018,7 @@ const ArchitectureNode = ({ id, data, selected }) => {
         zIndex: 20,
         '--hit-size': `${hitSize}px`
     };
-    const handleCount = Math.max(1, Math.min(8, Number(data.handleCount) || 5));
+    const handleCount = Math.max(1, Math.min(8, Number(data.handleCount) || 3));
     const positions = Array.from({ length: handleCount }, (_, i) => `${((i + 0.5) / handleCount) * 100}%`);
     const highlighted = new Set(data.highlightedHandles || []);
     const handleClass = (id) => highlighted.has(id) ? 'arch-node-handle arch-node-handle--connected' : 'arch-node-handle';
@@ -17286,12 +17286,16 @@ function nextSvgScopeId() {
 }
 exports.nextSvgScopeId = nextSvgScopeId;
 const _sanitizeCache = new Map();
-/** Sanitize a raw SVG markup string and return clean SVG markup. Results are cached by input string. */
+const _SANITIZE_CACHE_MAX = 100;
+/** Sanitize a raw SVG markup string and return clean SVG markup. Results are cached by input string (LRU, max 100 entries). */
 function sanitizeSvg(raw) {
     const cached = _sanitizeCache.get(raw);
     if (cached !== undefined)
         return cached;
     const result = dompurify_1.default.sanitize(raw, SVG_CONFIG);
+    if (_sanitizeCache.size >= _SANITIZE_CACHE_MAX) {
+        _sanitizeCache.delete(_sanitizeCache.keys().next().value);
+    }
     _sanitizeCache.set(raw, result);
     return result;
 }

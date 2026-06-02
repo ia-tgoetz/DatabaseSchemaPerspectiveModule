@@ -1926,7 +1926,7 @@
     "handleCount": {
       "type": "number",
       "description": "Number of connection handles on each side of the nodes (1 to 8)",
-      "default": 5
+      "default": 3
     },
     "refreshHierarchy": {
       "type": "boolean",
