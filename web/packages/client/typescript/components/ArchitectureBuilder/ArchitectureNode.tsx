@@ -40,7 +40,7 @@ const NodeImage = ({ src, label }: { src: string, label: string }) => {
         );
     }
     const dataUri = toSafeDataUri(src);
-    return dataUri ? <img src={dataUri} alt={label} style={{padding: '4px', width: '100%', height: '100%', objectFit: 'contain' }} /> : null;
+    return dataUri ? <img src={dataUri} alt="" style={{padding: '4px', width: '100%', height: '100%', objectFit: 'contain' }} /> : null;
 };
 
 export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureNodeData>) => {

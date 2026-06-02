@@ -11,184 +11,11 @@ import { NoteLabelNode } from './NoteLabelNode';
 import { edgeTypes } from './CustomEdge';
 import { mapIgnitionToReactFlowEdges } from './EdgeUtils';
 import { useArchitectureFlowHandlers } from './useArchitectureFlowHandlers';
-import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
 import { ComponentErrorBoundary } from '../common/ComponentErrorBoundary';
-import { TEXT_NODE_PALETTE_IDS, STANDARD_PALETTE } from './constants';
+import { TEXT_NODE_PALETTE_IDS } from './constants';
 import { ContextMenuState } from './types';
-
-const SwapIcon = ({ image, label }: { image: string, label: string }) => {
-    const scopeId = React.useMemo(() => nextSvgScopeId(), []);
-    const svgHtml = React.useMemo(() => extractSvgMarkup(image, scopeId), [image, scopeId]);
-    if (svgHtml) return <div id={scopeId} style={{ width: '100%', height: '100%', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: svgHtml }} title={label} />;
-    const dataUri = toSafeDataUri(image);
-    return dataUri ? <img src={dataUri} alt={label} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : null;
-};
-
-// ─── Shared UI primitives ─────────────────────────────────────────────────────
-
-const sharedInputStyle: React.CSSProperties = {
-    width: '100%', padding: '6px 8px', backgroundColor: 'var(--neutral-00)', border: '1px solid var(--neutral-40)',
-    color: 'var(--neutral-90)', borderRadius: '4px', boxSizing: 'border-box', fontSize: '12px'
-};
-
-const labelRowStyle: React.CSSProperties = { marginBottom: '10px', display: 'flex', flexDirection: 'column' };
-const sectionTitleStyle: React.CSSProperties = { fontSize: '14px', fontWeight: 'bold', color: 'var(--callToAction)', borderBottom: '1px solid var(--neutral-40)', paddingBottom: '4px', marginBottom: '10px' };
-
-const MENU_ITEM_STYLE: React.CSSProperties = { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)' };
-const MENU_ITEM_FLEX_STYLE: React.CSSProperties = { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', gap: '12px' };
-const MENU_DIVIDER_STYLE: React.CSSProperties = { borderTop: '1px solid var(--neutral-40)', margin: '4px 0' };
-const FLYOUT_PANEL_STYLE: React.CSSProperties = { backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px' };
-const CONTEXT_MENU_CONTAINER_STYLE: React.CSSProperties = { position: 'absolute', zIndex: 10, backgroundColor: 'var(--neutral-20)', border: '1px solid var(--neutral-50)', borderRadius: '4px', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', padding: '4px', minWidth: '140px', fontSize: '12px' };
-
-const ColorInput = ({ value, onChange, placeholder }: { value: string, onChange: (val: string) => void, placeholder: string }) => {
-    const [pickerOpen, setPickerOpen] = React.useState(false);
-    const [activeTab, setActiveTab] = React.useState<'palette' | 'custom'>('palette');
-
-    let currentHex = '#000000';
-    let currentAlpha = 1;
-
-    if (value.startsWith('#')) {
-        if (value.length === 7) currentHex = value;
-        else if (value.length === 9) { currentHex = value.substring(0, 7); currentAlpha = Math.round((parseInt(value.substring(7, 9), 16) / 255) * 100) / 100; }
-        else if (value.length === 4) { currentHex = '#' + value[1]+value[1] + value[2]+value[2] + value[3]+value[3]; }
-    } else if (value.startsWith('rgba')) {
-        const parts = value.match(/[\d.]+/g);
-        if (parts && parts.length >= 4) { const r = parseInt(parts[0], 10), g = parseInt(parts[1], 10), b = parseInt(parts[2], 10); currentAlpha = parseFloat(parts[3]); currentHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1); }
-    } else if (value.startsWith('rgb')) {
-        const parts = value.match(/[\d.]+/g);
-        if (parts && parts.length >= 3) { const r = parseInt(parts[0], 10), g = parseInt(parts[1], 10), b = parseInt(parts[2], 10); currentHex = '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1); }
-    }
-
-    const handleColorChange = (newHex: string) => {
-        const r = parseInt(newHex.slice(1, 3), 16), g = parseInt(newHex.slice(3, 5), 16), b = parseInt(newHex.slice(5, 7), 16);
-        onChange(currentAlpha < 1 ? `rgba(${r}, ${g}, ${b}, ${currentAlpha})` : newHex);
-    };
-    const handleAlphaChange = (newAlpha: number) => {
-        const r = parseInt(currentHex.slice(1, 3), 16), g = parseInt(currentHex.slice(3, 5), 16), b = parseInt(currentHex.slice(5, 7), 16);
-        onChange(newAlpha === 1 ? currentHex : `rgba(${r}, ${g}, ${b}, ${newAlpha})`);
-    };
-
-    return (
-        <div style={{ position: 'relative', display: 'flex', gap: '6px', marginTop: '4px' }}>
-            <input type="text" value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} style={{ ...sharedInputStyle, marginTop: 0, flex: 1 }} />
-            <div onClick={() => setPickerOpen(!pickerOpen)} style={{ width: '28px', height: '28px', borderRadius: '4px', border: '1px solid var(--neutral-40)', backgroundColor: value || '#000000', cursor: 'pointer', flexShrink: 0 }} title="Open color picker" />
-            {pickerOpen && (
-                <>
-                    <div onClick={() => setPickerOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1001 }} />
-                    <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', zIndex: 1002, backgroundColor: 'var(--neutral-10)', border: '1px solid var(--neutral-50)', borderRadius: '6px', padding: '12px', width: '220px', boxShadow: '0 8px 16px rgba(0,0,0,0.5)' }}>
-                        <div style={{ display: 'flex', borderBottom: '1px solid var(--neutral-40)', marginBottom: '10px' }}>
-                            <div onClick={() => setActiveTab('palette')} style={{ padding: '4px 10px', fontSize: '11px', cursor: 'pointer', borderBottom: activeTab === 'palette' ? '2px solid var(--callToAction)' : '2px solid transparent', color: activeTab === 'palette' ? 'var(--neutral-90)' : 'var(--neutral-60)', fontWeight: activeTab === 'palette' ? 'bold' : 'normal' }}>Palette</div>
-                            <div onClick={() => setActiveTab('custom')} style={{ padding: '4px 10px', fontSize: '11px', cursor: 'pointer', borderBottom: activeTab === 'custom' ? '2px solid var(--callToAction)' : '2px solid transparent', color: activeTab === 'custom' ? 'var(--neutral-90)' : 'var(--neutral-60)', fontWeight: activeTab === 'custom' ? 'bold' : 'normal' }}>Custom</div>
-                        </div>
-                        {activeTab === 'palette' && (
-                            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                {STANDARD_PALETTE.map(swatch => (
-                                    <div key={`popover-palette-${swatch}`} onClick={() => { onChange(swatch); setPickerOpen(false); }} style={{ width: '18px', height: '18px', backgroundColor: swatch, border: '1px solid rgba(0,0,0,0.2)', borderRadius: '2px', cursor: 'pointer' }} title={swatch} />
-                                ))}
-                            </div>
-                        )}
-                        {activeTab === 'custom' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '5px 0' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <span style={{ fontSize: '11px', color: 'var(--neutral-80)' }}>Base Color:</span>
-                                    <div style={{ width: '100%', maxWidth: '100px', height: '24px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--neutral-40)', position: 'relative' }}>
-                                        <input type="color" value={currentHex} onChange={e => handleColorChange(e.target.value)} style={{ position: 'absolute', top: '-10px', left: '-10px', width: '150px', height: '50px', padding: 0, border: 'none', cursor: 'pointer' }} />
-                                    </div>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span style={{ fontSize: '11px', color: 'var(--neutral-80)', width: '40px' }}>Alpha:</span>
-                                    <input type="range" min="0" max="1" step="0.01" value={currentAlpha} onChange={e => handleAlphaChange(parseFloat(e.target.value))} style={{ flex: 1, cursor: 'pointer', height: '4px' }} />
-                                    <span style={{ fontSize: '11px', color: 'var(--neutral-80)', width: '30px', textAlign: 'right' }}>{Math.round(currentAlpha * 100)}%</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </>
-            )}
-        </div>
-    );
-};
-
-// ─── Style editor modal ───────────────────────────────────────────────────────
-
-const StyleEditorModal = ({ node, onSave, onCancel }: { node: any, onSave: (style: any, labelStyle: any, textStyle: any) => void, onCancel: () => void }) => {
-    const isTextNode = TEXT_NODE_PALETTE_IDS.has(node.paletteId);
-    const [compBg, setCompBg] = React.useState(node.style?.backgroundColor || node.style?.fill || '');
-    const [borderWidth, setBorderWidth] = React.useState(node.style?.borderWidth || '');
-    const [borderStyle, setBorderStyle] = React.useState(node.style?.borderStyle || '');
-    const [borderColor, setBorderColor] = React.useState(node.style?.borderColor || '');
-    const [borderRadius, setBorderRadius] = React.useState(node.style?.borderRadius || '');
-    const [labelBg, setLabelBg] = React.useState(node.labelStyle?.backgroundColor || '');
-    const [labelColor, setLabelColor] = React.useState(node.labelStyle?.color || '');
-    const [labelFontSize, setLabelFontSize] = React.useState(node.labelStyle?.fontSize || '');
-    const [iconColor, setIconColor] = React.useState(node.labelStyle?.fill || '');
-    const [textColor, setTextColor] = React.useState(node.textStyle?.color || '');
-    const [textFontSize, setTextFontSize] = React.useState(node.textStyle?.fontSize || '');
-
-    const handleSave = () => {
-        const newStyle: any = { ...node.style };
-        if (compBg) newStyle.backgroundColor = compBg; else delete newStyle.backgroundColor;
-        if (borderWidth || borderStyle || borderColor) delete newStyle.border;
-        if (borderWidth) newStyle.borderWidth = borderWidth; else delete newStyle.borderWidth;
-        if (borderStyle) newStyle.borderStyle = borderStyle; else delete newStyle.borderStyle;
-        if (borderColor) newStyle.borderColor = borderColor; else delete newStyle.borderColor;
-        if (borderRadius) newStyle.borderRadius = borderRadius; else delete newStyle.borderRadius;
-        const newLabelStyle: any = { ...node.labelStyle };
-        if (labelBg) newLabelStyle.backgroundColor = labelBg; else delete newLabelStyle.backgroundColor;
-        if (labelColor) newLabelStyle.color = labelColor; else delete newLabelStyle.color;
-        if (labelFontSize) newLabelStyle.fontSize = labelFontSize; else delete newLabelStyle.fontSize;
-        if (iconColor) newLabelStyle.fill = iconColor; else delete newLabelStyle.fill;
-        const newTextStyle: any = { ...node.textStyle };
-        if (textColor) newTextStyle.color = textColor; else delete newTextStyle.color;
-        if (textFontSize) newTextStyle.fontSize = textFontSize; else delete newTextStyle.fontSize;
-        onSave(newStyle, newLabelStyle, newTextStyle);
-    };
-
-    return (
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div style={{ backgroundColor: 'var(--neutral-20)', padding: '24px', borderRadius: '8px', width: '650px', border: '1px solid var(--neutral-50)', boxShadow: '0 8px 16px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', gap: '20px' }} onClick={(e) => e.stopPropagation()}>
-                <h3 style={{ margin: 0, color: 'var(--neutral-90)' }}>Edit Styles: {node.label}</h3>
-                <div style={{ display: 'flex', gap: '30px' }}>
-                    <div style={{ flex: 1 }}>
-                        <div style={sectionTitleStyle}>Component</div>
-                        <div style={labelRowStyle}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Background Color</span><ColorInput value={compBg} onChange={setCompBg} placeholder="e.g. #333 or rgba()" /></div>
-                        <div style={labelRowStyle}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Border Color</span><ColorInput value={borderColor} onChange={setBorderColor} placeholder="e.g. #ff0000" /></div>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <div style={{ ...labelRowStyle, flex: 1 }}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Border Width</span><input type="text" value={borderWidth} onChange={e => setBorderWidth(e.target.value)} placeholder="e.g. 2px" style={{...sharedInputStyle, marginTop: '4px'}} /></div>
-                            <div style={{ ...labelRowStyle, flex: 1 }}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Border Style</span>
-                                <select value={borderStyle} onChange={e => setBorderStyle(e.target.value)} style={{...sharedInputStyle, marginTop: '4px'}}>
-                                    <option value="" style={{backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)'}}>Default</option>
-                                    <option value="solid" style={{backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)'}}>Solid</option>
-                                    <option value="dashed" style={{backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)'}}>Dashed</option>
-                                    <option value="dotted" style={{backgroundColor: 'var(--neutral-20)', color: 'var(--neutral-90)'}}>Dotted</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div style={labelRowStyle}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Border Radius</span><input type="text" value={borderRadius} onChange={e => setBorderRadius(e.target.value)} placeholder="e.g. 8px" style={{...sharedInputStyle, marginTop: '4px'}} /></div>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                        <div style={sectionTitleStyle}>Label Tab</div>
-                        <div style={labelRowStyle}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Background Color</span><ColorInput value={labelBg} onChange={setLabelBg} placeholder="e.g. var(--neutral-30)" /></div>
-                        <div style={labelRowStyle}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Text Color</span><ColorInput value={labelColor} onChange={setLabelColor} placeholder="e.g. #ffffff" /></div>
-                        <div style={labelRowStyle}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Icon / Gear Color</span><ColorInput value={iconColor} onChange={setIconColor} placeholder="e.g. var(--callToAction)" /></div>
-                        <div style={labelRowStyle}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Text Size</span><input type="text" value={labelFontSize} onChange={e => setLabelFontSize(e.target.value)} placeholder="e.g. 14px" style={{...sharedInputStyle, marginTop: '4px'}} /></div>
-                    </div>
-                    {isTextNode && (
-                        <div style={{ flex: 1 }}>
-                            <div style={sectionTitleStyle}>Text Content</div>
-                            <div style={labelRowStyle}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Text Color</span><ColorInput value={textColor} onChange={setTextColor} placeholder="e.g. #ffffff" /></div>
-                            <div style={labelRowStyle}><span style={{ fontSize: '12px', color: 'var(--neutral-80)' }}>Text Size</span><input type="text" value={textFontSize} onChange={e => setTextFontSize(e.target.value)} placeholder="e.g. 14px" style={{...sharedInputStyle, marginTop: '4px'}} /></div>
-                        </div>
-                    )}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                    <button onClick={onCancel} style={{ padding: '6px 12px', backgroundColor: 'var(--neutral-40)', border: 'none', borderRadius: '4px', color: 'var(--neutral-90)', cursor: 'pointer' }}>Cancel</button>
-                    <button onClick={handleSave} style={{ padding: '6px 12px', backgroundColor: 'var(--callToAction)', border: 'none', borderRadius: '4px', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>Save Changes</button>
-                </div>
-            </div>
-        </div>
-    );
-};
+import { StyleEditorModal } from './StyleEditorModal';
+import { ContextMenu } from './ContextMenu';
 
 // ─── Node types registration ──────────────────────────────────────────────────
 
@@ -225,7 +52,7 @@ const mapIgnitionToReactFlowNodes = (
             const isContainer = nodeData.paletteId === 'container';
             const isTextNode = TEXT_NODE_PALETTE_IDS.has(nodeData.paletteId);
             const paletteImage = (nodeData.useOverrideImage && palette?.overrideImage) ? palette.overrideImage : palette?.image || '';
-            
+
             let type = 'architecture';
             if (isContainer) type = 'container';
             else if (isTextNode) type = nodeData.paletteId;
@@ -236,8 +63,8 @@ const mapIgnitionToReactFlowNodes = (
                 id, type, selected: id === selectedId,
                 position: { x: nodeData.x || 0, y: nodeData.y || 0 },
                 zIndex: isContainer ? (nodeData.zIndex ?? -1) : 1000,
-                style: { 
-                    width: nodeData.width || (isContainer ? 300 : (isTextNode ? 150 : 150)), 
+                style: {
+                    width: nodeData.width || (isContainer ? 300 : (isTextNode ? 150 : 150)),
                     height: nodeData.height || (isContainer ? 300 : (isTextNode ? 80 : 150)),
                     pointerEvents: (isContainer && !isUnlocked) ? 'none' : 'auto'
                 },
@@ -317,8 +144,8 @@ const computeHierarchyData = (nodesDict: any, edgesDict: any) => {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export interface ArchitectureBuilderProps {
-    enabled?: any; enableOnClickEvents?: any; hideHandles?: any; handleCount?: any; 
-    refreshHierarchy?: boolean; snapEnabled?: any; snapPixels?: any; edgeWidth?: any; 
+    enabled?: any; enableOnClickEvents?: any; hideHandles?: any; handleCount?: any;
+    refreshHierarchy?: boolean; snapEnabled?: any; snapPixels?: any; edgeWidth?: any;
     style?: any; connectionTypes: any; paletteItems: any[];
     nodes: any; edges: any; hierarchy?: any;
 }
@@ -350,7 +177,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
 
         const handleOnError = (msg: any) => {
             if (typeof msg === 'string' && (msg.includes('ResizeObserver loop') || msg.includes('ResizeObserver loop limit exceeded'))) {
-                return true; // Tells the browser/Ignition to ignore the error
+                return true;
             }
             return false;
         };
@@ -362,6 +189,23 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         return () => {
             window.removeEventListener('error', suppressResizeObserverError, true);
             window.onerror = oldOnError;
+        };
+    }, []);
+
+    // Set document title and html[lang] for accessibility (WCAG 2.4.2, 3.1.1).
+    // Both are restored on unmount so other Ignition views are not affected.
+    React.useEffect(() => {
+        const prevTitle = document.title;
+        document.title = 'Architecture Builder';
+        return () => { document.title = prevTitle; };
+    }, []);
+
+    React.useEffect(() => {
+        const prevLang = document.documentElement.getAttribute('lang');
+        document.documentElement.setAttribute('lang', 'en');
+        return () => {
+            if (prevLang === null) document.documentElement.removeAttribute('lang');
+            else document.documentElement.setAttribute('lang', prevLang);
         };
     }, []);
 
@@ -407,19 +251,16 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         if (!props.store?.props || !rawNodesDict || !rawEdgesDict) return;
 
         const { nodeEnrichments, rootHierarchy } = computeHierarchyData(rawNodesDict, rawEdgesDict);
-        
-        // Always sync hierarchy
+
         props.store.props.write('hierarchy', rootHierarchy);
 
-        // Always update node enrichment
         const enrichedNodes: any = {};
         Object.keys(rawNodesDict).forEach(id => {
             if (!rawNodesDict[id]) return;
             const { image: _image, ...nodeWithoutImage } = rawNodesDict[id];
             enrichedNodes[id] = { ...nodeWithoutImage, ...nodeEnrichments[id] };
         });
-        
-        // Only write back if it's different to prevent infinite cycles
+
         const serialized = JSON.stringify(enrichedNodes);
         if (serialized !== hierarchyWriteRef.current) {
             hierarchyWriteRef.current = serialized;
@@ -495,7 +336,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
             setLocalNodes(flowNodes);
         }
     }, [flowNodes, isDraggingNode]);
-    
+
     React.useEffect(() => {
         if (!isUpdatingEdge && !isDraggingNode) {
             setLocalEdges(flowEdges);
@@ -509,10 +350,10 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
             const isHovered = fresh.id === hoveredEdgeId;
             const isSelected = fresh.data?.isSelected === true;
             const isAnimated = fresh.data?.animation !== 'none';
-            
+
             let zIndex = fresh.zIndex || 0;
             if (isHovered) zIndex = Math.max(zIndex, 500);
-            if (isAnimated) zIndex = 1000; // Always top priority
+            if (isAnimated) zIndex = 1000;
 
             const strokeWidth = (isHovered || isSelected) ? globalEdgeWidth + 2 : globalEdgeWidth;
             const waypoints = local?.data?.waypoints ?? fresh.data?.waypoints;
@@ -548,33 +389,6 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isEnabled, selectedId, rawNodesDict, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
 
-    // ─── Context menu derived state ────────────────────────────────────────
-
-    let availableConnections: string[] = [], currentLineType = 'smoothstep', currentConnectionType = '';
-    let validSwapItems: any[] = [];
-
-    if (contextMenu && contextMenu.type === 'edge') {
-        const edge = rawEdgesDict[contextMenu.id];
-        if (edge) {
-            currentLineType = edge.lineType || 'smoothstep';
-            currentConnectionType = edge.connectionType;
-            availableConnections = getValidIntersection(edge.source, edge.target, contextMenu.id);
-            if (!availableConnections.includes(currentConnectionType)) availableConnections.push(currentConnectionType);
-        }
-    }
-    if (contextMenu && contextMenu.type === 'node') {
-        const node = rawNodesDict[contextMenu.id];
-        if (node) {
-            const currentPaletteItem = paletteItems.find((p: any) => p.id === node.paletteId);
-            if (currentPaletteItem?.swappableWith) validSwapItems = paletteItems.filter((p: any) => currentPaletteItem.swappableWith.includes(p.id));
-        }
-    }
-
-    const flyoutStyle: React.CSSProperties = (reactFlowWrapper.current && contextMenu && contextMenu.left + 310 > reactFlowWrapper.current.clientWidth)
-
-        ? { position: 'absolute', top: '-0px', right: '100%', marginRight: '0px' } 
-        : { position: 'absolute', top: '-0px', left: '100%', marginLeft: '0px' }; 
-
     const { classes, ...ignitionStyles } = props.props.style || {};
     const containerStyle: React.CSSProperties = { display: 'flex', width: '100%', height: '100%', backgroundColor: 'var(--neutral-00)', ...ignitionStyles };
 
@@ -599,12 +413,12 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                 /* Animation keyframes: distance must match (dash + gap) for seamless loops */
                 @keyframes arch-flow-forward { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
                 @keyframes arch-flow-reverse { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 100; } }
-                
+
                 /* Base handle is a transparent anchor — React Flow's translate(-50%,-50%) is forced via !important */
-                .arch-node-handle { 
-                    background: transparent !important; 
-                    border-color: transparent !important; 
-                    transform: translate(-50%, -50%) !important; 
+                .arch-node-handle {
+                    background: transparent !important;
+                    border-color: transparent !important;
+                    transform: translate(-50%, -50%) !important;
                 }
 
                 /* ::before provides the large, zoom-aware hit area (interaction zone).
@@ -619,29 +433,29 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                     height: var(--hit-size, 24px);
                     background: transparent;
                 }
-                
+
                 /* ::after renders the visible dot and owns all visual transitions.
                    By default, it is invisible (opacity: 0) to maintain a zero-footprint aesthetic when idle. */
-                .arch-node-handle::after { 
-                    content: ''; 
-                    position: absolute; 
-                    top: 50%; 
-                    left: 50%; 
-                    transform: translate(-50%, -50%); 
-                    width: 6px; 
-                    height: 6px; 
-                    border-radius: 50%; 
-                    background: var(--neutral-90); 
-                    border: 1px solid var(--neutral-90); 
-                    pointer-events: none; 
+                .arch-node-handle::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: var(--neutral-90);
+                    border: 1px solid var(--neutral-90);
+                    pointer-events: none;
                     opacity: 0;
-                    transition: transform 0.15s ease-in-out, background 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out; 
+                    transition: transform 0.15s ease-in-out, background 0.15s ease-in-out, border-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
                 }
 
-                /* Show handles when: 
+                /* Show handles when:
                    1. The specific handle is hovered.
                    2. The parent node is hovered or selected.
-                   3. The user is actively creating or moving an edge on the canvas. 
+                   3. The user is actively creating or moving an edge on the canvas.
                 */
                 .arch-node-handle:hover::after,
                 .react-flow__node:hover .arch-node-handle::after,
@@ -652,21 +466,21 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                 }
 
                 /* Handle Hover State: Provide clear feedback and scale the dot. */
-                .arch-node-handle:hover::after { 
-                    background: var(--callToAction) !important; 
-                    border-color: var(--callToAction) !important; 
-                    transform: translate(-50%, -50%) scale(2.0); 
+                .arch-node-handle:hover::after {
+                    background: var(--callToAction) !important;
+                    border-color: var(--callToAction) !important;
+                    transform: translate(-50%, -50%) scale(2.0);
                     opacity: 1 !important;
                 }
 
                 /* Connected handle: Always visible and emphasized when the edge/node is selected. */
-                .arch-node-handle--connected::after { 
+                .arch-node-handle--connected::after {
                     opacity: 1 !important;
-                    background: var(--callToAction) !important; 
-                    border-color: var(--callToAction) !important; 
-                    width: 10px !important; 
-                    height: 10px !important; 
-                    box-shadow: 0 0 8px var(--callToAction); 
+                    background: var(--callToAction) !important;
+                    border-color: var(--callToAction) !important;
+                    width: 10px !important;
+                    height: 10px !important;
+                    box-shadow: 0 0 8px var(--callToAction);
                 }
                 /* React Flow connection states: base stays transparent, ::after carries the color */
                 .react-flow__handle.connecting { background: transparent !important; border-color: transparent !important; }
@@ -680,12 +494,13 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                 .arch-moving-edge   .arch-node-handle.connecting:not(.valid):hover { cursor: not-allowed !important; }
                 .arch-creating-edge .arch-node-handle.connecting:not(.valid):hover::after,
                 .arch-moving-edge   .arch-node-handle.connecting:not(.valid):hover::after { background: #ef4444 !important; border-color: #dc2626 !important; }
+                .react-flow__attribution a { min-height: 24px; min-width: 24px; display: inline-flex; align-items: center; padding: 0 6px; }
                 `}</style>
 
                 <div className="arch-theme-wrapper">
                     {isEnabled && <Sidebar paletteItems={paletteItems} isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onDragStartItem={(item) => { draggedItemRef.current = item; }} onItemClick={handlePaletteItemClick} />}
 
-                    <div style={{ flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }} ref={reactFlowWrapper} className={isConnecting ? 'arch-creating-edge' : isUpdatingEdge ? 'arch-moving-edge' : ''}>
+                    <div role="main" aria-label="Architecture Builder Canvas" style={{ flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }} ref={reactFlowWrapper} className={isConnecting ? 'arch-creating-edge' : isUpdatingEdge ? 'arch-moving-edge' : ''}>
                         <ReactFlowProvider>
                             <ReactFlow
                                 nodes={localNodes} edges={displayEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
@@ -738,160 +553,23 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                         )}
 
                         {contextMenu && (
-                            <div style={{ ...CONTEXT_MENU_CONTAINER_STYLE, top: contextMenu.top, left: contextMenu.left }}>
-
-                                {contextMenu.type === 'pane' && (
-                                    <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>
-                                        📋 Paste
-                                    </div>
-                                )}
-
-                                {contextMenu.type !== 'pane' && (
-                                    <>
-                                        <div style={MENU_ITEM_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('config')}>⚙️ Config</div>
-
-                                        {contextMenu.type === 'node' && (
-                                            <>
-                                                <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--callToAction)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('editStyle')}>🎨 Edit Style</div>
-                                                {TEXT_NODE_PALETTE_IDS.has(rawNodesDict[contextMenu.id]?.paletteId) && (
-                                                    <div style={MENU_ITEM_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('editContent')}>📝 Edit Content</div>
-                                                )}
-                                                {contextMenu.isContainer && (
-                                                    <>
-                                                        <div style={MENU_DIVIDER_STYLE} />
-                                                        <div style={MENU_ITEM_FLEX_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleUnlocked')}>
-                                                            {rawNodesDict[contextMenu.id]?.configs?.unlocked ? (
-                                                                <><span>🔒 Lock Interaction</span><span>✓</span></>
-                                                            ) : (
-                                                                <><span>🔓 Unlock Interaction</span><span></span></>
-                                                            )}
-                                                        </div>
-                                                        <div style={MENU_ITEM_FLEX_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLink')}>
-                                                            <span>🔗 Link Contents</span><span>{!rawNodesDict[contextMenu.id]?.configs?.unlinked ? '✓' : ''}</span>
-                                                        </div>
-                                                    </>
-                                                )}
-                                                {!contextMenu.isContainer && !TEXT_NODE_PALETTE_IDS.has(rawNodesDict[contextMenu.id]?.paletteId) && (
-                                                    <div style={MENU_ITEM_FLEX_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleGrayscale')}>
-                                                        <span>⬜ Toggle Inactive</span><span>{rawNodesDict[contextMenu.id]?.inactive ? '✓' : ''}</span>
-                                                    </div>
-                                                )}
-                                                <div style={MENU_DIVIDER_STYLE} />
-                                                <div style={MENU_ITEM_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('copy')}>📋 Copy</div>
-                                                {contextMenu.isContainer && (
-                                                    <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>📋 Paste</div>
-                                                )}
-                                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('order')}>
-                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'order' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                        <span>📑 Order</span><span>▶</span>
-                                                    </div>
-                                                    {activeSubMenu === 'order' && (
-                                                        <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '150px' }}>
-                                                            <div style={MENU_ITEM_STYLE} onClick={() => handleContextMenuAction('bringToFront')}>⏫ Bring to Front</div>
-                                                            <div style={MENU_ITEM_STYLE} onClick={() => handleContextMenuAction('bringForward')}>🔼 Bring Forward</div>
-                                                            <div style={MENU_ITEM_STYLE} onClick={() => handleContextMenuAction('sendBackward')}>🔽 Send Backward</div>
-                                                            <div style={MENU_ITEM_STYLE} onClick={() => handleContextMenuAction('sendToBack')}>⏬ Send to Back</div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {validSwapItems.length > 0 && (
-                                                    <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('swapNode')}>
-                                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'swapNode' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                            <span>🔄 Swap Node</span><span>▶</span>
-                                                        </div>
-                                                        {activeSubMenu === 'swapNode' && (
-                                                            <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '150px' }}>
-                                                                {validSwapItems.map(targetItem => (
-                                                                    <div key={targetItem.id} style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center' }} onClick={() => handleNodeSwap(targetItem.id)}>
-                                                                        <div style={{ width: '16px', height: '16px', marginRight: '6px', display: 'flex', alignItems: 'center' }}>{targetItem.image && <SwapIcon image={targetItem.image} label={targetItem.label} />}</div>
-                                                                        <span>{targetItem.label}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-
-                                        {contextMenu.type === 'edge' && (
-                                            <>
-                                                <div style={MENU_ITEM_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('reverseEdge')}>🔄 Reverse Direction</div>
-                                                <div style={MENU_ITEM_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleArrow')}>
-                                                    {rawEdgesDict[contextMenu.id]?.arrow !== false ? '❌ Remove Arrow' : '➡️ Add Arrow'}
-                                                </div>
-                                                <div style={MENU_ITEM_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLabel')}>
-                                                    {rawEdgesDict[contextMenu.id]?.showLabel === true ? '👁️ Hide Label' : '👁️ Show Label'}
-                                                </div>
-                                                <div style={MENU_ITEM_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleDashed')}>
-                                                    {rawEdgesDict[contextMenu.id]?.dashed ? '─── Solid Line' : '- - - Dashed Line'}
-                                                </div>
-                                                {(() => {
-                                                    const e = rawEdgesDict[contextMenu.id];
-                                                    const lt = e?.lineType;
-                                                    const canClear = (!lt || lt === 'smoothstep' || lt === 'step') && e?.waypoints?.length > 0;
-                                                    return canClear ? (
-                                                        <div style={MENU_ITEM_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('clearWaypoints')}>
-                                                            ⊙ Clear Path ({e.waypoints.length} pt{e.waypoints.length !== 1 ? 's' : ''})
-                                                        </div>
-                                                    ) : null;
-                                                })()}
-                                                <div style={MENU_DIVIDER_STYLE} />
-                                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('lineType')}>
-                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'lineType' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                        <span>〰️ Line Type</span><span>▶</span>
-                                                    </div>
-                                                    {activeSubMenu === 'lineType' && (
-                                                        <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '120px' }}>
-                                                            <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleLineTypeChange('smoothstep')}><span>〰️ Smooth</span><span>{currentLineType === 'smoothstep' ? '✓' : ''}</span></div>
-                                                            <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleLineTypeChange('step')}><span>🔲 Stepped</span><span>{currentLineType === 'step' ? '✓' : ''}</span></div>
-                                                            <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleLineTypeChange('straight')}><span>📏 Straight</span><span>{currentLineType === 'straight' ? '✓' : ''}</span></div>
-                                                            <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleLineTypeChange('default')}><span>➰ Bezier</span><span>{currentLineType === 'default' ? '✓' : ''}</span></div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('animation')}>
-                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'animation' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                        <span>✨ Animation</span><span>▶</span>
-                                                    </div>
-                                                    {activeSubMenu === 'animation' && (
-                                                        <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '140px' }}>
-                                                            <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleAnimationChange('none')}><span>🚫 None</span><span>{(rawEdgesDict[contextMenu.id]?.animation || 'none') === 'none' ? '✓' : ''}</span></div>
-                                                            <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleAnimationChange('forward')}><span>➡️ Forward</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'forward' ? '✓' : ''}</span></div>
-                                                            <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleAnimationChange('bidirectional')}><span>↔️ Bidirectional</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'bidirectional' ? '✓' : ''}</span></div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('connectionType')}>
-                                                    <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'connectionType' ? 'var(--neutral-30)' : 'transparent' }}>
-                                                        <span>🔗 Connection</span><span>▶</span>
-                                                    </div>
-                                                    {activeSubMenu === 'connectionType' && (
-                                                        <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '140px' }}>
-                                                            {availableConnections.length === 0
-                                                                ? <div style={{ padding: '5px 8px', color: 'var(--neutral-60)' }}>No valid connections</div>
-                                                                : availableConnections.map(c => (
-                                                                    <div key={c} style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', whiteSpace: 'nowrap', gap: '12px' }} onClick={() => handleConnectionTypeChange(c)}>
-                                                                        <span><span style={{ color: connectionTypes[c]?.color || 'var(--neutral-90)', marginRight: '4px' }}>●</span>{connectionTypes[c]?.label || c}</span>
-                                                                        <span>{currentConnectionType === c ? '✓' : ''}</span>
-                                                                    </div>
-                                                                ))
-                                                            }
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-
-                                        {contextMenu.isContainer && (
-                                            <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: '1px solid var(--neutral-40)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('deleteWithContents')}>🗑️ Delete Area & Contents</div>
-                                        )}
-                                        <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--error)', borderTop: contextMenu.isContainer ? 'none' : '1px solid var(--neutral-40)' }} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('delete')}>
-                                            {contextMenu.isContainer ? '🗑️ Delete Area Only' : '🗑️ Delete'}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                            <ContextMenu
+                                contextMenu={contextMenu}
+                                activeSubMenu={activeSubMenu}
+                                setActiveSubMenu={setActiveSubMenu}
+                                rawNodesDict={rawNodesDict}
+                                rawEdgesDict={rawEdgesDict}
+                                paletteItems={paletteItems}
+                                connectionTypes={connectionTypes}
+                                clipboardRef={clipboardRef}
+                                wrapperRef={reactFlowWrapper}
+                                getValidIntersection={getValidIntersection}
+                                handleContextMenuAction={handleContextMenuAction}
+                                handleNodeSwap={handleNodeSwap}
+                                handleLineTypeChange={handleLineTypeChange}
+                                handleConnectionTypeChange={handleConnectionTypeChange}
+                                handleAnimationChange={handleAnimationChange}
+                            />
                         )}
                     </div>
                 </div>

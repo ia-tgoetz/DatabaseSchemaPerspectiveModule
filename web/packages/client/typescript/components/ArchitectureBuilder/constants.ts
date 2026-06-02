@@ -1,4 +1,16 @@
+import type { CSSProperties } from 'react';
+
 export const TEXT_NODE_PALETTE_IDS = new Set(['Note', 'Label']);
+
+// ─── Shared UI style primitives ───────────────────────────────────────────────
+
+export const sharedInputStyle: CSSProperties = {
+    width: '100%', padding: '6px 8px', backgroundColor: 'var(--neutral-00)', border: '1px solid var(--neutral-40)',
+    color: 'var(--neutral-90)', borderRadius: '4px', boxSizing: 'border-box', fontSize: '12px'
+};
+
+export const labelRowStyle: CSSProperties = { marginBottom: '10px', display: 'flex', flexDirection: 'column' };
+export const sectionTitleStyle: CSSProperties = { fontSize: '14px', fontWeight: 'bold', color: 'var(--callToAction)', borderBottom: '1px solid var(--neutral-40)', paddingBottom: '4px', marginBottom: '10px' };
 
 export const STANDARD_PALETTE: string[] = [
     '#ffffff', '#e0e0e0', '#c0c0c0', '#a0a0a0', '#808080', '#606060', '#404040', '#202020', '#000000',
