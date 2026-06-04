@@ -1,6 +1,6 @@
 import React from 'react';
 // @ts-ignore
-import { Handle, Position, NodeProps, useViewport, NodeResizer } from 'reactflow';
+import { Handle, Position, NodeProps, useViewport, NodeResizer, useStore } from 'reactflow';
 import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
 
 export interface ArchitectureNodeData {
@@ -45,7 +45,10 @@ const NodeImage = ({ src, label }: { src: string, label: string }) => {
 
 export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureNodeData>) => {
     const { zoom } = useViewport();
+    const [hovered, setHovered] = React.useState(false);
     const showHandles = !data.globalHideHandles && !data.hideHandles && data.isEditable !== false;
+    const hasHighlightedHandles = !!(data.highlightedHandles && data.highlightedHandles.length > 0);
+    const isConnectionInProgress = useStore((s: any) => s.connectionNodeId != null);
     const isTextNode = TEXT_PALETTE_IDS.has(data.paletteId);
 
     const [localText, setLocalText] = React.useState(data.text || '');
@@ -56,11 +59,6 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
     const finalGearColor = data.labelStyle?.fill || finalLabelColor; 
 
     const { backgroundColor: imageBg, ...restStyle } = data.style || {};
-
-    const dummyTargetStyle: React.CSSProperties = {
-        position: 'absolute', width: '1px', height: '1px', background: 'transparent',
-        border: 'none', opacity: 0, pointerEvents: 'none', zIndex: -1
-    };
 
     const combinedStyle: React.CSSProperties = {
         padding: '0px',
@@ -84,57 +82,47 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
     // Targeting ~24px at 1.0 zoom, scaling up to ~22px as we zoom out.
     const hitSize = Math.min(22, Math.max(16, Math.round(24 / zoom)));
 
+    // Handles are always mounted so React Flow's store always has registered positions.
+    // This prevents the intermittent missing connection line (handle mounts just as a
+    // drag starts, before its useEffect registration fires) and keeps edges anchored
+    // when hideHandles is true.
+    // Interactivity and visual appearance are controlled via pointerEvents + CSS (::after).
+    const isHandleInteractive = showHandles && (hovered || selected || hasHighlightedHandles || isConnectionInProgress);
     const handleStyle: any = {
         background: 'transparent',
         width: '4px',
         height: '4px',
-        // Control interaction and base visibility via showHandles.
-        // We keep the element size small and fixed (4px) to ensure React Flow 
-        // maintains perfect edge alignment regardless of zoom.
-        // The actual hit area is rendered via ::before in the CSS.
-        opacity: showHandles ? 1 : 0,
-        pointerEvents: showHandles ? 'auto' : 'none',
-        zIndex: 20, // Ensure handles are above node content and labels
+        opacity: 1,
+        pointerEvents: isHandleInteractive ? 'auto' : 'none',
+        zIndex: 20,
         '--hit-size': `${hitSize}px`
     };
 
-    const handleCount = Math.max(1, Math.min(8, Number(data.handleCount) || 3));
+    const handleCount = 1; // FORCED FOR STRESS TEST 11: 4 handles total (1 per side)
     const positions = Array.from({ length: handleCount }, (_, i) => `${((i + 0.5) / handleCount) * 100}%`);
     const highlighted = new Set(data.highlightedHandles || []);
-    const handleClass = (id: string) => highlighted.has(id) ? 'arch-node-handle arch-node-handle--connected' : 'arch-node-handle';
+    const handleClass = (id: string) => {
+        if (!showHandles) return 'arch-node-handle arch-node-handle--suppressed';
+        return highlighted.has(id) ? 'arch-node-handle arch-node-handle--connected' : 'arch-node-handle';
+    };
 
     // Calculate dynamic resizer handle size based on zoom
     const resizerSize = Math.max(10, Math.round(16 / zoom));
 
     return (
-        <div style={combinedStyle} title={data.tooltip}>
+        <div style={combinedStyle} title={data.tooltip} onMouseEnter={() => setHovered(true)} onMouseLeave={(e) => { if (e.buttons === 0) setHovered(false); }}>
 
             {positions.map((pos, i) => (
-                <React.Fragment key={`top-${i}`}>
-                    <Handle className={handleClass(`top-${i}`)} type="source" position={Position.Top} id={`top-${i}`} style={{ ...handleStyle, left: pos, top: '0px', transform: 'translate(-50%, -50%)' }} />
-                    <Handle type="target" position={Position.Top} id={`top-${i}`} style={{ ...dummyTargetStyle, left: pos, top: '0px', transform: 'translate(-50%, -50%)' }} />
-                </React.Fragment>
+                <Handle key={`top-${i}`} className={handleClass(`top-${i}`)} type="source" position={Position.Top} id={`top-${i}`} style={{ ...handleStyle, left: pos, top: '0px', transform: 'translate(-50%, -50%)' }} />
             ))}
-            
             {positions.map((pos, i) => (
-                <React.Fragment key={`right-${i}`}>
-                    <Handle className={handleClass(`right-${i}`)} type="source" position={Position.Right} id={`right-${i}`} style={{ ...handleStyle, top: pos, left: '100%', transform: 'translate(-50%, -50%)' }} />
-                    <Handle type="target" position={Position.Right} id={`right-${i}`} style={{ ...dummyTargetStyle, top: pos, left: '100%', transform: 'translate(-50%, -50%)' }} />
-                </React.Fragment>
+                <Handle key={`right-${i}`} className={handleClass(`right-${i}`)} type="source" position={Position.Right} id={`right-${i}`} style={{ ...handleStyle, top: pos, left: '100%', transform: 'translate(-50%, -50%)' }} />
             ))}
-            
             {positions.map((pos, i) => (
-                <React.Fragment key={`bottom-${i}`}>
-                    <Handle className={handleClass(`bottom-${i}`)} type="source" position={Position.Bottom} id={`bottom-${i}`} style={{ ...handleStyle, left: pos, top: '100%', transform: 'translate(-50%, -50%)' }} />
-                    <Handle type="target" position={Position.Bottom} id={`bottom-${i}`} style={{ ...dummyTargetStyle, left: pos, top: '100%', transform: 'translate(-50%, -50%)' }} />
-                </React.Fragment>
+                <Handle key={`bottom-${i}`} className={handleClass(`bottom-${i}`)} type="source" position={Position.Bottom} id={`bottom-${i}`} style={{ ...handleStyle, left: pos, top: '100%', transform: 'translate(-50%, -50%)' }} />
             ))}
-            
             {positions.map((pos, i) => (
-                <React.Fragment key={`left-${i}`}>
-                    <Handle className={handleClass(`left-${i}`)} type="source" position={Position.Left} id={`left-${i}`} style={{ ...handleStyle, top: pos, left: '0px', transform: 'translate(-50%, -50%)' }} />
-                    <Handle type="target" position={Position.Left} id={`left-${i}`} style={{ ...dummyTargetStyle, top: pos, left: '0px', transform: 'translate(-50%, -50%)' }} />
-                </React.Fragment>
+                <Handle key={`left-${i}`} className={handleClass(`left-${i}`)} type="source" position={Position.Left} id={`left-${i}`} style={{ ...handleStyle, top: pos, left: '0px', transform: 'translate(-50%, -50%)' }} />
             ))}
 
             <div

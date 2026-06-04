@@ -1925,8 +1925,10 @@
     },
     "handleCount": {
       "type": "number",
-      "description": "Number of connection handles on each side of the nodes (1 to 8)",
-      "default": 3
+      "description": "Number of connection handles per side (1 to 5). Higher values increase memory cost per node.",
+      "default": 3,
+      "minimum": 1,
+      "maximum": 5
     },
     "refreshHierarchy": {
       "type": "boolean",

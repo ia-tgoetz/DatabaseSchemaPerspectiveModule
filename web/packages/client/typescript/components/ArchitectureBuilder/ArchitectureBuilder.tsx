@@ -151,6 +151,7 @@ export interface ArchitectureBuilderProps {
 }
 
 export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureBuilderProps>) => {
+    console.log('DEBUG: ArchitectureBuilder rendering, props:', props);
     const reactFlowWrapper = React.useRef<HTMLDivElement>(null);
     const clipboardRef = React.useRef<any>(null);
     const draggedItemRef = React.useRef<PaletteItem | null>(null);
@@ -211,16 +212,30 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
 
     // ─── Prop extraction ───────────────────────────────────────────────────
 
-    const rawNodesJson = JSON.stringify(extractDeep(props.props.nodes) || {});
-    const rawEdgesJson = JSON.stringify(extractDeep(props.props.edges) || {});
-    const connectionTypesJson = JSON.stringify(extractDeep(props.props.connectionTypes) || {});
-    const paletteItemsJson = JSON.stringify(extractDeep(props.props.paletteItems) || []);
+    // Wrapped in useMemo so extractDeep (deep MobX clone) and JSON.stringify
+    // only run when the relevant prop reference actually changes, not on every render.
+    const rawNodesJson = React.useMemo(
+        () => JSON.stringify(extractDeep(props.props.nodes) || {}),
+        [props.props.nodes]
+    );
+    const rawEdgesJson = React.useMemo(
+        () => JSON.stringify(extractDeep(props.props.edges) || {}),
+        [props.props.edges]
+    );
+    const connectionTypesJson = React.useMemo(
+        () => JSON.stringify(extractDeep(props.props.connectionTypes) || {}),
+        [props.props.connectionTypes]
+    );
+    const paletteItemsJson = React.useMemo(
+        () => JSON.stringify(extractDeep(props.props.paletteItems) || []),
+        [props.props.paletteItems]
+    );
 
     // Scalar display props use the same extractDeep + JSON pipeline as complex props.
     // Direct property access on Perspective's observable store can miss scalar updates;
     // running them through extractDeep forces a MobX subscription that reliably
     // triggers re-renders when any of these values change in the Designer or Session.
-    const rawConfigJson = JSON.stringify({
+    const rawConfigJson = React.useMemo(() => JSON.stringify({
         edgeWidth:             extractDeep(props.props.edgeWidth),
         snapEnabled:           extractDeep(props.props.snapEnabled),
         snapPixels:            extractDeep(props.props.snapPixels),
@@ -228,7 +243,11 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         handleCount:           extractDeep(props.props.handleCount),
         enabled:               extractDeep(props.props.enabled),
         enableOnClickEvents:   extractDeep(props.props.enableOnClickEvents),
-    });
+    }), [
+        props.props.edgeWidth, props.props.snapEnabled, props.props.snapPixels,
+        props.props.hideHandles, props.props.handleCount, props.props.enabled,
+        props.props.enableOnClickEvents,
+    ]);
 
     const rawNodesDict = React.useMemo(() => JSON.parse(rawNodesJson), [rawNodesJson]);
     const rawEdgesDict = React.useMemo(() => JSON.parse(rawEdgesJson), [rawEdgesJson]);
@@ -237,7 +256,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     const rawConfig = React.useMemo(() => JSON.parse(rawConfigJson), [rawConfigJson]);
 
     const globalHideHandles = rawConfig.hideHandles === true || String(rawConfig.hideHandles ?? '').toLowerCase() === 'true';
-    const globalHandleCount = Number(rawConfig.handleCount) || 5;
+    const globalHandleCount = Number(rawConfig.handleCount) || 3;
     const isEnabled = rawConfig.enabled !== false && String(rawConfig.enabled ?? 'true').toLowerCase() !== 'false';
     const enableOnClickEvents = rawConfig.enableOnClickEvents !== false && String(rawConfig.enableOnClickEvents ?? 'true').toLowerCase() !== 'false';
     const snapEnabled = rawConfig.snapEnabled !== false && String(rawConfig.snapEnabled ?? 'true').toLowerCase() !== 'false';
@@ -272,7 +291,8 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     // ─── Handlers hook ─────────────────────────────────────────────────────
 
     const {
-        isUpdatingEdge, isDraggingNode, isConnecting, updatingEdgeRef,
+        isUpdatingEdge, isDraggingNode, updatingEdgeRef,
+        rawNodesDictRef,
         closeContextMenu,
         getValidIntersection,
         isValidConnection,
@@ -314,20 +334,27 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     // ─── Derived flow data ─────────────────────────────────────────────────
 
     const highlightedHandlesMap = React.useMemo<Record<string, string[]>>(() => {
-        const edge = selectedId ? rawEdgesDict[selectedId] : null;
-        if (!edge) return {};
         const map: Record<string, string[]> = {};
-        if (edge.source && edge.sourceHandle) map[edge.source] = [edge.sourceHandle];
-        if (edge.target && edge.targetHandle) map[edge.target] = [...(map[edge.target] || []), edge.targetHandle];
+        Object.values(rawEdgesDict).forEach((edge: any) => {
+            if (!edge) return;
+            if (edge.source && edge.sourceHandle) {
+                if (!map[edge.source]) map[edge.source] = [];
+                if (!map[edge.source].includes(edge.sourceHandle)) map[edge.source].push(edge.sourceHandle);
+            }
+            if (edge.target && edge.targetHandle) {
+                if (!map[edge.target]) map[edge.target] = [];
+                if (!map[edge.target].includes(edge.targetHandle)) map[edge.target].push(edge.targetHandle);
+            }
+        });
         return map;
-    }, [selectedId, rawEdgesDict]);
+    }, [rawEdgesDict]);
 
     const flowNodes = React.useMemo(
         () => mapIgnitionToReactFlowNodes(rawNodesDict, paletteItems, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled),
         [rawNodesDict, paletteItems, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled]
     );
-    const flowEdges = React.useMemo(
-        () => mapIgnitionToReactFlowEdges(rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth),
+    const flowEdges = React.useMemo(() =>
+        mapIgnitionToReactFlowEdges(rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth),
         [rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth]
     );
 
@@ -374,7 +401,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
             if (e.key === 'Escape') { closeContextMenu(); setStyleEditorNodeId(null); return; }
             if (!isEnabled) return;
             if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return;
-            if ((e.ctrlKey || e.metaKey) && e.key === 'c') { if (selectedId && rawNodesDict[selectedId]) executeCopy(selectedId); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'c') { if (selectedId && rawNodesDictRef.current[selectedId]) executeCopy(selectedId); }
             if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
                 const clipboard = clipboardRef.current;
                 if (clipboard && props.store?.props) {
@@ -387,7 +414,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isEnabled, selectedId, rawNodesDict, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
+    }, [isEnabled, selectedId, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
 
     const { classes, ...ignitionStyles } = props.props.style || {};
     const containerStyle: React.CSSProperties = { display: 'flex', width: '100%', height: '100%', backgroundColor: 'var(--neutral-00)', ...ignitionStyles };
@@ -473,6 +500,10 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                     opacity: 1 !important;
                 }
 
+                /* Suppressed: handle is in DOM for edge routing but completely invisible/non-interactive. */
+                .arch-node-handle--suppressed::after { opacity: 0 !important; pointer-events: none !important; }
+                .arch-node-handle--suppressed::before { pointer-events: none !important; }
+
                 /* Connected handle: Always visible and emphasized when the edge/node is selected. */
                 .arch-node-handle--connected::after {
                     opacity: 1 !important;
@@ -500,7 +531,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                 <div className="arch-theme-wrapper">
                     {isEnabled && <Sidebar paletteItems={paletteItems} isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onDragStartItem={(item) => { draggedItemRef.current = item; }} onItemClick={handlePaletteItemClick} />}
 
-                    <div role="main" aria-label="Architecture Builder Canvas" style={{ flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }} ref={reactFlowWrapper} className={isConnecting ? 'arch-creating-edge' : isUpdatingEdge ? 'arch-moving-edge' : ''}>
+                    <div role="main" aria-label="Architecture Builder Canvas" style={{ flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }} ref={reactFlowWrapper} className={isUpdatingEdge ? 'arch-moving-edge' : ''}>
                         <ReactFlowProvider>
                             <ReactFlow
                                 nodes={localNodes} edges={displayEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
@@ -521,7 +552,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                 onPaneClick={onPaneClick} onPaneContextMenu={isEnabled ? onPaneContextMenu : undefined}
                                 nodesDraggable={isEnabled} nodesConnectable={isEnabled} elementsSelectable={isEnabled}
                                 connectionMode={ConnectionMode.Loose} snapToGrid={snapEnabled} snapGrid={snapGrid}
-                                connectionLineStyle={{ stroke: '#cccccc', strokeWidth: 6 }}
+                                connectionLineStyle={{ stroke: '#cccccc', strokeWidth: 6, fill: 'none' }}
                                 elevateNodesOnSelect={false}
                                 minZoom={0.05}
                                 panOnScroll={false}

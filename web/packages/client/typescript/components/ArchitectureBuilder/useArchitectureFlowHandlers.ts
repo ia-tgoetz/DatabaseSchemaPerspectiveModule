@@ -86,6 +86,13 @@ export const useArchitectureFlowHandlers = ({
     const [isDraggingNode, setIsDraggingNode] = React.useState(false);
     const dragStartPos = React.useRef<DragStartState | null>(null);
 
+    // Stable refs so callbacks that only READ rawNodesDict/rawEdgesDict at call-time
+    // don't need them in their dep arrays — prevents cascade rebuilds of flowNodes.
+    const rawNodesDictRef = React.useRef(rawNodesDict);
+    const rawEdgesDictRef = React.useRef(rawEdgesDict);
+    React.useEffect(() => { rawNodesDictRef.current = rawNodesDict; }, [rawNodesDict]);
+    React.useEffect(() => { rawEdgesDictRef.current = rawEdgesDict; }, [rawEdgesDict]);
+
     const closeContextMenu = React.useCallback(() => {
         setContextMenu(null);
         setActiveSubMenu(null);
@@ -113,11 +120,11 @@ export const useArchitectureFlowHandlers = ({
 
     const handleGearClick = React.useCallback((id: string) => {
         setSelectedId(id);
-        const node = rawNodesDict[id];
+        const node = rawNodesDictRef.current[id];
         if (componentEvents && node) {
             componentEvents.fireComponentEvent('onGearClick', { id, paletteId: node.paletteId, typeId: node.typeId, type: 'node', action: 'config' });
         }
-    }, [componentEvents, rawNodesDict, setSelectedId]);
+    }, [componentEvents, setSelectedId]);
 
     const handlePaletteItemClick = React.useCallback((item: any) => {
         if (componentEvents) {
@@ -128,7 +135,7 @@ export const useArchitectureFlowHandlers = ({
     const handleResizeEnd = React.useCallback((id: string, x: number, y: number, width: number, height: number) => {
         try {
             if (store?.props) {
-                const nextNodes = { ...rawNodesDict };
+                const nextNodes = { ...rawNodesDictRef.current };
                 if (nextNodes[id]) {
                     nextNodes[id].x = Math.round(x);
                     nextNodes[id].y = Math.round(y);
@@ -141,12 +148,12 @@ export const useArchitectureFlowHandlers = ({
             console.error("Error in handleResizeEnd:", error);
             if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleResizeEnd'));
         }
-    }, [store, rawNodesDict, componentEvents]);
+    }, [store, componentEvents]);
 
     const handleTextChange = React.useCallback((id: string, text: string) => {
         try {
             if (store?.props) {
-                const nextNodes = { ...rawNodesDict };
+                const nextNodes = { ...rawNodesDictRef.current };
                 if (nextNodes[id]) {
                     nextNodes[id] = { ...nextNodes[id], text };
                     store.props.write('nodes', nextNodes);
@@ -156,7 +163,7 @@ export const useArchitectureFlowHandlers = ({
             console.error("Error in handleTextChange:", error);
             if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleTextChange'));
         }
-    }, [store, rawNodesDict, componentEvents]);
+    }, [store, componentEvents]);
 
     const onNodesChange = React.useCallback((changes: NodeChange[]) => {
         setLocalNodes((nds) => applyNodeChanges(changes, nds));
@@ -673,6 +680,8 @@ export const useArchitectureFlowHandlers = ({
     return {
         // State
         isDraggingNode,
+        // Refs
+        rawNodesDictRef,
         // Shared
         closeContextMenu,
         // Edge handlers (delegated)

@@ -36,7 +36,6 @@ export const useEdgeHandlers = ({
     closeContextMenu,
 }: UseEdgeHandlersParams) => {
     const [isUpdatingEdge, setIsUpdatingEdge] = React.useState(false);
-    const [isConnecting, setIsConnecting] = React.useState(false);
     const updatingEdgeRef = React.useRef<string | null>(null);
 
     // ─── Validation ──────────────────────────────────────────────────────────
@@ -147,8 +146,12 @@ export const useEdgeHandlers = ({
         setIsUpdatingEdge(false);
     }, []);
 
-    const onConnectStart = React.useCallback(() => setIsConnecting(true), []);
-    const onConnectEnd = React.useCallback(() => setIsConnecting(false), []);
+    const onConnectStart = React.useCallback(() => {
+        reactFlowWrapper.current?.classList.add('arch-creating-edge');
+    }, [reactFlowWrapper]);
+    const onConnectEnd = React.useCallback(() => {
+        reactFlowWrapper.current?.classList.remove('arch-creating-edge');
+    }, [reactFlowWrapper]);
 
     const onEdgesDelete = React.useCallback((deleted: Edge[]) => {
         try {
@@ -233,7 +236,6 @@ export const useEdgeHandlers = ({
 
     return {
         isUpdatingEdge,
-        isConnecting,
         updatingEdgeRef,
         getValidIntersection,
         isValidConnection,
