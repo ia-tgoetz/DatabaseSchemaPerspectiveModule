@@ -7521,6 +7521,56 @@
                       "value": 100
                     },
                     "type": "ia.input.numeric-entry-field"
+                  },
+                  {
+                    "meta": {
+                      "name": "Label"
+                    },
+                    "position": {
+                      "basis": "32px",
+                      "grow": 1
+                    },
+                    "propConfig": {
+                      "props.text": {
+                        "binding": {
+                          "config": {
+                            "expression": "\"Total Nodes: \"+len({...../ArchitectureBuilder.props.nodes})"
+                          },
+                          "type": "expr"
+                        }
+                      }
+                    },
+                    "props": {
+                      "style": {
+                        "textAlign": "center"
+                      }
+                    },
+                    "type": "ia.display.label"
+                  },
+                  {
+                    "meta": {
+                      "name": "Label_0"
+                    },
+                    "position": {
+                      "basis": "32px",
+                      "grow": 1
+                    },
+                    "propConfig": {
+                      "props.text": {
+                        "binding": {
+                          "config": {
+                            "expression": "\"Total Edges: \"+len({...../ArchitectureBuilder.props.edges})"
+                          },
+                          "type": "expr"
+                        }
+                      }
+                    },
+                    "props": {
+                      "style": {
+                        "textAlign": "center"
+                      }
+                    },
+                    "type": "ia.display.label"
                   }
                 ],
                 "meta": {
@@ -7598,7 +7648,10 @@
             },
             "props": {
               "data": {
-                "type": "pane"
+                "id": "I50eee209",
+                "paletteId": "standard",
+                "type": "node",
+                "typeId": "standard"
               },
               "datak": {
                 "action": "delete",
