@@ -24,6 +24,7 @@ Thumbs.db
 Desktop.ini
 
 # Project-specific ignores
+reports
 .claude/
 .gemini
 .gemini/*

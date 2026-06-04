@@ -31,12 +31,16 @@ export function nextSvgScopeId(): string {
 }
 
 const _sanitizeCache = new Map<string, string>();
+const _SANITIZE_CACHE_MAX = 100;
 
-/** Sanitize a raw SVG markup string and return clean SVG markup. Results are cached by input string. */
+/** Sanitize a raw SVG markup string and return clean SVG markup. Results are cached by input string (LRU, max 100 entries). */
 export function sanitizeSvg(raw: string): string {
     const cached = _sanitizeCache.get(raw);
     if (cached !== undefined) return cached;
     const result = DOMPurify.sanitize(raw, SVG_CONFIG) as string;
+    if (_sanitizeCache.size >= _SANITIZE_CACHE_MAX) {
+        _sanitizeCache.delete(_sanitizeCache.keys().next().value as string);
+    }
     _sanitizeCache.set(raw, result);
     return result;
 }

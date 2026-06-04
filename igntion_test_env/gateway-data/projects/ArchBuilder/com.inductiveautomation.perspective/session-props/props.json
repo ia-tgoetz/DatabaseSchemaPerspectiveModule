@@ -1,5 +1,7 @@
 {
-  "custom": {},
+  "custom": {
+    "key": "value"
+  },
   "propConfig": {
     "props.auth": {
       "access": "PRIVATE",
@@ -63,7 +65,7 @@
     }
   },
   "props": {
-    "address": "172.18.0.3",
+    "address": "172.18.0.7",
     "appBar": {
       "togglePosition": "hidden"
     },

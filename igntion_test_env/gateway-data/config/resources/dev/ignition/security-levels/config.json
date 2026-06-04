@@ -8,17 +8,38 @@
               "children": [],
               "description": "System generated security level representing read and write privileges to Gateway configuration",
               "name": "Administrator"
+            },
+            {
+              "children": [],
+              "name": "Manager"
+            },
+            {
+              "children": [],
+              "name": "Operator"
             }
           ],
           "description": "Represents the roles that a user has.",
           "name": "Roles"
+        },
+        {
+          "children": [],
+          "name": "NewLevel"
         }
       ],
       "description": "Represents a user who has been authenticated by the system.",
       "name": "Authenticated"
     },
     {
-      "children": [],
+      "children": [
+        {
+          "children": [],
+          "name": "read"
+        },
+        {
+          "children": [],
+          "name": "write"
+        }
+      ],
       "name": "APICalls"
     }
   ]

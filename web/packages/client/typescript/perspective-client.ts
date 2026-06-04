@@ -95,7 +95,7 @@ export class ArchitectureBuilderMeta implements ComponentMeta {
             snapPixels: tree.read('snapPixels', 15),
             edgeWidth: tree.read('edgeWidth', 6),
             hideHandles: tree.read('hideHandles', false),
-            handleCount: tree.read('handleCount', 5),
+            handleCount: tree.read('handleCount', 3),
             refreshHierarchy: tree.read('refreshHierarchy', false),
             style: tree.read('style')
         };

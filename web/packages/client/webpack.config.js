@@ -67,7 +67,7 @@ const config = {
                 use: [
                     MiniCssExtractPlugin.loader,
                     { loader: 'css-loader', options: { url: false } },
-                    { loader: "sass-loader" }
+                    { loader: "sass-loader", options: { api: 'modern' } }
                 ]
             }
         ]

@@ -1,9 +1,18 @@
 import * as React from 'react';
 // @ts-ignore
-import { Edge, Connection, NodeChange, applyNodeChanges } from 'reactflow';
+import { NodeChange, applyNodeChanges } from 'reactflow';
 import { getHandlePixelPos, computeAutoWaypoints } from './EdgeUtils';
+import { ContextMenuState } from './types';
+import { useEdgeHandlers } from './useEdgeHandlers';
+import { getSafeError, generateShortId } from './utils';
 
-const generateShortId = () => 'I' + Math.random().toString(16).substring(2, 10);
+// Re-export for backward compatibility
+export { getSafeError } from './utils';
+
+interface DragStartState {
+    nodes: Record<string, { x: number; y: number }>;
+    edges: Record<string, { x: number; y: number }[]>;
+}
 
 const getNodesInside = (containerId: string, allNodes: any): string[] => {
     const container = allNodes[containerId];
@@ -42,8 +51,8 @@ export interface UseArchitectureFlowHandlersParams {
     setSelectedId: React.Dispatch<React.SetStateAction<string | null>>;
     setLocalNodes: React.Dispatch<React.SetStateAction<any[]>>;
     setLocalEdges: React.Dispatch<React.SetStateAction<any[]>>;
-    contextMenu: any;
-    setContextMenu: React.Dispatch<React.SetStateAction<any>>;
+    contextMenu: ContextMenuState | null;
+    setContextMenu: React.Dispatch<React.SetStateAction<ContextMenuState | null>>;
     setActiveSubMenu: React.Dispatch<React.SetStateAction<any>>;
     setStyleEditorNodeId: React.Dispatch<React.SetStateAction<string | null>>;
     clipboardRef: React.MutableRefObject<any>;
@@ -74,243 +83,48 @@ export const useArchitectureFlowHandlers = ({
     clipboardRef,
     draggedItemRef,
 }: UseArchitectureFlowHandlersParams) => {
-    const [isUpdatingEdge, setIsUpdatingEdge] = React.useState(false);
     const [isDraggingNode, setIsDraggingNode] = React.useState(false);
-    const [isConnecting, setIsConnecting] = React.useState(false);
-    const updatingEdgeRef = React.useRef<string | null>(null);
-    const dragStartPos = React.useRef<any>(null);
+    const dragStartPos = React.useRef<DragStartState | null>(null);
+
+    // Stable refs so callbacks that only READ rawNodesDict/rawEdgesDict at call-time
+    // don't need them in their dep arrays — prevents cascade rebuilds of flowNodes.
+    const rawNodesDictRef = React.useRef(rawNodesDict);
+    const rawEdgesDictRef = React.useRef(rawEdgesDict);
+    React.useEffect(() => { rawNodesDictRef.current = rawNodesDict; }, [rawNodesDict]);
+    React.useEffect(() => { rawEdgesDictRef.current = rawEdgesDict; }, [rawEdgesDict]);
 
     const closeContextMenu = React.useCallback(() => {
         setContextMenu(null);
         setActiveSubMenu(null);
     }, [setContextMenu, setActiveSubMenu]);
 
-    // ─── Validation ──────────────────────────────────────────────────────────
+    // ─── Edge handlers (delegated) ────────────────────────────────────────────
 
-    const getValidIntersection = React.useCallback((sourceId: string, targetId: string, ignoreEdgeId?: string): string[] => {
-        const sourceNode = rawNodesDict[sourceId];
-        const targetNode = rawNodesDict[targetId];
-        if (!sourceNode || !targetNode || !sourceNode.supportedConnections || !targetNode.supportedConnections) return [];
-        let intersection = sourceNode.supportedConnections.filter((c: string) => targetNode.supportedConnections.includes(c));
-        intersection = intersection.filter((connType: string) => {
-            const typeDef = connectionTypes[connType];
-            const isMultipleFalse = typeDef && (typeDef.multiple === false || String(typeDef.multiple).toLowerCase() === 'false');
-            if (isMultipleFalse) {
-                const edgeExists = Object.entries(rawEdgesDict).some(([id, e]: any) => {
-                    if (ignoreEdgeId && id === ignoreEdgeId) return false;
-                    return (e.source === sourceId && e.target === targetId && e.connectionType === connType) ||
-                           (e.source === targetId && e.target === sourceId && e.connectionType === connType);
-                });
-                return !edgeExists;
-            }
-            return true;
-        });
-        return intersection;
-    }, [rawNodesDict, rawEdgesDict, connectionTypes]);
+    const edgeHandlers = useEdgeHandlers({
+        store,
+        componentEvents,
+        rawNodesDict,
+        rawEdgesDict,
+        connectionTypes,
+        selectedId,
+        setSelectedId,
+        contextMenu,
+        setContextMenu,
+        setActiveSubMenu,
+        setLocalEdges,
+        reactFlowWrapper,
+        closeContextMenu,
+    });
 
-    const isValidConnection = React.useCallback((connection: any) => {
-        return getValidIntersection(connection.source, connection.target, updatingEdgeRef.current || undefined).length > 0;
-    }, [getValidIntersection]);
-
-    // ─── Edge handlers ───────────────────────────────────────────────────────
-
-    const handleWaypointsChange = React.useCallback((edgeId: string, waypoints: { x: number; y: number }[]) => {
-        try {
-            if (!store?.props) return;
-            const nextEdges = { ...rawEdgesDict };
-            if (nextEdges[edgeId]) {
-                nextEdges[edgeId] = { ...nextEdges[edgeId], waypoints };
-                store.props.write('edges', nextEdges);
-                
-                // Optimistic local update
-                setLocalEdges(edges => edges.map(e => {
-                    if (e.id === edgeId) {
-                        return { ...e, data: { ...e.data, waypoints } };
-                    }
-                    return e;
-                }));
-            }
-        } catch (error: any) {
-            console.error("Error in handleWaypointsChange:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleWaypointsChange'));
-            }
-        }
-    }, [store, rawEdgesDict, componentEvents, setLocalEdges]);
-
-    const onConnect = React.useCallback((connectionParams: any) => {
-        try {
-            const validTypes = getValidIntersection(connectionParams.source, connectionParams.target);
-            if (validTypes.length === 0) return;
-            let selectedType = validTypes[0];
-            const typeDef = connectionTypes[selectedType] || {};
-            if (store?.props) {
-                store.props.write('edges', {
-                    ...rawEdgesDict,
-                    [generateShortId()]: { ...connectionParams, lineType: 'smoothstep', dashed: false, arrow: typeDef.arrow !== false, showLabel: false, connectionType: selectedType, waypoints: [] },
-                });
-            }
-        } catch (error: any) {
-            console.error("Error in onConnect:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onConnect'));
-            }
-        }
-    }, [store, rawEdgesDict, rawNodesDict, globalHandleCount, getValidIntersection, connectionTypes, componentEvents]);
-
-    const onEdgeUpdate = React.useCallback((oldEdge: Edge, newConnection: Connection) => {
-        try {
-            if (!newConnection.source || !newConnection.target) return;
-            const validTypes = getValidIntersection(newConnection.source, newConnection.target, oldEdge.id);
-            if (validTypes.length === 0) return;
-            if (store?.props) {
-                const nextEdges = { ...rawEdgesDict };
-                const oldData = nextEdges[oldEdge.id];
-                if (!validTypes.includes(oldData.connectionType)) return;
-                
-                const isHoriz = (side: string | undefined) => side === 'left' || side === 'right';
-                const oldSrcSide = oldEdge.sourceHandle?.split('-')[0];
-                const newSrcSide = newConnection.sourceHandle?.split('-')[0];
-                const oldTgtSide = oldEdge.targetHandle?.split('-')[0];
-                const newTgtSide = newConnection.targetHandle?.split('-')[0];
-
-                const srcAxisChanged = isHoriz(oldSrcSide) !== isHoriz(newSrcSide);
-                const tgtAxisChanged = isHoriz(oldTgtSide) !== isHoriz(newTgtSide);
-
-                // Re-route (clear waypoints) only if the handle orientation fundamentally changed.
-                // Otherwise, keep existing manual waypoints (terminal segments will stretch).
-                const nextWaypoints = (srcAxisChanged || tgtAxisChanged) ? [] : (oldData.waypoints || []);
-
-                nextEdges[oldEdge.id] = { 
-                    ...oldData, 
-                    source: newConnection.source, 
-                    target: newConnection.target, 
-                    sourceHandle: newConnection.sourceHandle, 
-                    targetHandle: newConnection.targetHandle, 
-                    waypoints: nextWaypoints
-                };
-                
-                store.props.write('edges', nextEdges);
-            }
-        } catch (error: any) {
-            console.error("Error in onEdgeUpdate:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onEdgeUpdate'));
-            }
-        }
-    }, [store, rawEdgesDict, getValidIntersection, componentEvents]);
-
-    const onEdgeUpdateStart = React.useCallback((event: any, edge: any) => {
-        updatingEdgeRef.current = edge?.id || null;
-        setIsUpdatingEdge(true);
-    }, []);
-
-    const onEdgeUpdateEnd = React.useCallback(() => {
-        updatingEdgeRef.current = null;
-        setIsUpdatingEdge(false);
-    }, []);
-
-    const onConnectStart = React.useCallback(() => setIsConnecting(true), []);
-    const onConnectEnd = React.useCallback(() => setIsConnecting(false), []);
-
-    const onEdgesDelete = React.useCallback((deleted: Edge[]) => {
-        try {
-            if (!store?.props) return;
-            const nextEdges = { ...rawEdgesDict };
-            deleted.forEach(e => { delete nextEdges[e.id]; if (e.id === selectedId) setSelectedId(null); });
-            store.props.write('edges', nextEdges);
-        } catch (error: any) {
-            console.error("Error in onEdgesDelete:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onEdgesDelete'));
-            }
-        }
-    }, [store, rawEdgesDict, selectedId, setSelectedId, componentEvents]);
-
-    const onEdgeContextMenu = React.useCallback((event: any, edge: any) => {
-        event.preventDefault();
-        setSelectedId(edge.id);
-        const bounds = reactFlowWrapper.current?.getBoundingClientRect();
-        if (bounds) {
-            setContextMenu({ id: edge.id, top: event.clientY - bounds.top, left: event.clientX - bounds.left, type: 'edge' });
-            setActiveSubMenu(null);
-        }
-    }, [reactFlowWrapper, setSelectedId, setContextMenu, setActiveSubMenu]);
-
-    const onEdgeClick = React.useCallback((event: any, edge: any) => {
-        setSelectedId(edge.id);
-        const rawEdge = rawEdgesDict[edge.id];
-        if (componentEvents) componentEvents.fireComponentEvent('onEdgeClick', { id: edge.id, paletteId: rawEdge?.connectionType, type: 'edge' });
-    }, [componentEvents, rawEdgesDict, setSelectedId]);
-
-    const handleLineTypeChange = React.useCallback((newLineType: string) => {
-        try {
-            if (!contextMenu || contextMenu.type !== 'edge') return;
-            if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `lineType:${newLineType}` });
-            if (store?.props) {
-                const nextEdges = { ...rawEdgesDict };
-                if (nextEdges[contextMenu.id]) { nextEdges[contextMenu.id].lineType = newLineType; store.props.write('edges', nextEdges); }
-            }
-            closeContextMenu();
-        } catch (error: any) {
-            console.error("Error in handleLineTypeChange:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleLineTypeChange'));
-            }
-        }
-    }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
-
-    const handleConnectionTypeChange = React.useCallback((newConnectionType: string) => {
-        try {
-            if (!contextMenu || contextMenu.type !== 'edge') return;
-            if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `connectionType:${newConnectionType}` });
-            if (store?.props) {
-                const nextEdges = { ...rawEdgesDict };
-                if (nextEdges[contextMenu.id]) {
-                    const typeDef = connectionTypes[newConnectionType] || {};
-                    nextEdges[contextMenu.id].connectionType = newConnectionType;
-                    nextEdges[contextMenu.id].arrow = typeDef.arrow !== false;
-                    store.props.write('edges', nextEdges);
-                }
-            }
-            closeContextMenu();
-        } catch (error: any) {
-            console.error("Error in handleConnectionTypeChange:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleConnectionTypeChange'));
-            }
-        }
-    }, [contextMenu, componentEvents, rawEdgesDict, connectionTypes, store, closeContextMenu]);
-
-    const handleAnimationChange = React.useCallback((newAnimation: string) => {
-        try {
-            if (!contextMenu || contextMenu.type !== 'edge') return;
-            if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: rawEdgesDict[contextMenu.id]?.connectionType, type: contextMenu.type, action: `animation:${newAnimation}` });
-            if (store?.props) {
-                const nextEdges = { ...rawEdgesDict };
-                if (nextEdges[contextMenu.id]) {
-                    nextEdges[contextMenu.id].animation = newAnimation;
-                    store.props.write('edges', nextEdges);
-                }
-            }
-            closeContextMenu();
-        } catch (error: any) {
-            console.error("Error in handleAnimationChange:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleAnimationChange'));
-            }
-        }
-    }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
-
-    // ─── Node handlers ───────────────────────────────────────────────────────
+    // ─── Node handlers ────────────────────────────────────────────────────────
 
     const handleGearClick = React.useCallback((id: string) => {
         setSelectedId(id);
-        const node = rawNodesDict[id];
+        const node = rawNodesDictRef.current[id];
         if (componentEvents && node) {
             componentEvents.fireComponentEvent('onGearClick', { id, paletteId: node.paletteId, typeId: node.typeId, type: 'node', action: 'config' });
         }
-    }, [componentEvents, rawNodesDict, setSelectedId]);
+    }, [componentEvents, setSelectedId]);
 
     const handlePaletteItemClick = React.useCallback((item: any) => {
         if (componentEvents) {
@@ -321,7 +135,7 @@ export const useArchitectureFlowHandlers = ({
     const handleResizeEnd = React.useCallback((id: string, x: number, y: number, width: number, height: number) => {
         try {
             if (store?.props) {
-                const nextNodes = { ...rawNodesDict };
+                const nextNodes = { ...rawNodesDictRef.current };
                 if (nextNodes[id]) {
                     nextNodes[id].x = Math.round(x);
                     nextNodes[id].y = Math.round(y);
@@ -332,16 +146,14 @@ export const useArchitectureFlowHandlers = ({
             }
         } catch (error: any) {
             console.error("Error in handleResizeEnd:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleResizeEnd'));
-            }
+            if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleResizeEnd'));
         }
-    }, [store, rawNodesDict, componentEvents]);
+    }, [store, componentEvents]);
 
     const handleTextChange = React.useCallback((id: string, text: string) => {
         try {
             if (store?.props) {
-                const nextNodes = { ...rawNodesDict };
+                const nextNodes = { ...rawNodesDictRef.current };
                 if (nextNodes[id]) {
                     nextNodes[id] = { ...nextNodes[id], text };
                     store.props.write('nodes', nextNodes);
@@ -349,11 +161,9 @@ export const useArchitectureFlowHandlers = ({
             }
         } catch (error: any) {
             console.error("Error in handleTextChange:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleTextChange'));
-            }
+            if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleTextChange'));
         }
-    }, [store, rawNodesDict, componentEvents]);
+    }, [store, componentEvents]);
 
     const onNodesChange = React.useCallback((changes: NodeChange[]) => {
         setLocalNodes((nds) => applyNodeChanges(changes, nds));
@@ -372,8 +182,6 @@ export const useArchitectureFlowHandlers = ({
             const nodePositions: Record<string, { x: number; y: number }> = {};
             insideIds.forEach(id => { nodePositions[id] = { x: rawNodesDict[id].x, y: rawNodesDict[id].y }; });
 
-            // Capture all waypoints for edges that have ANY waypoint inside the container bbox.
-            // All waypoints translate together — partial translation creates diagonal middle segments.
             const edgeWaypoints: Record<string, { x: number; y: number }[]> = {};
             Object.entries(rawEdgesDict).forEach(([edgeId, edgeVal]: any) => {
                 if (!edgeVal || !Array.isArray(edgeVal.waypoints) || edgeVal.waypoints.length === 0) return;
@@ -407,10 +215,8 @@ export const useArchitectureFlowHandlers = ({
             setLocalEdges(edges => edges.map((edge: any) => {
                 const originalWps = edgeDragData[edge.id];
                 if (originalWps) {
-                    // Translate all waypoints — pinning in CustomEdge corrects the endpoints.
                     return { ...edge, data: { ...edge.data, waypoints: originalWps.map(wp => ({ x: wp.x + dx, y: wp.y + dy })) } };
                 }
-                // Touch edges connected to moving nodes so CustomEdge pinning re-runs.
                 if (movingNodeIds.has(edge.source) || movingNodeIds.has(edge.target)) return { ...edge };
                 return edge;
             }));
@@ -438,25 +244,17 @@ export const useArchitectureFlowHandlers = ({
                     });
 
                     const edgeDragData = dragStartPos.current.edges as Record<string, { x: number; y: number }[]>;
-                    // Translate waypoints for captured edges (those that were entirely inside the container)
                     Object.entries(edgeDragData).forEach(([edgeId, originalWps]: [string, { x: number; y: number }[]]) => {
                         if (nextEdges[edgeId]) {
                             nextEdges[edgeId] = { ...nextEdges[edgeId], waypoints: originalWps.map(wp => ({ x: wp.x + dx, y: wp.y + dy })) };
                             edgesChanged = true;
                         }
                     });
-
-                    // We no longer clear waypoints for other edges; CustomEdge's pinning logic 
-                    // will handle stretching the segments to the new handle positions while 
-                    // preserving the manual waypoints.
-                } else if (dx !== 0 || dy !== 0) {
-                    // Regular node move: we no longer clear waypoints here.
                 }
 
                 store.props.write('nodes', nextNodes);
                 if (edgesChanged) store.props.write('edges', nextEdges);
-                
-                // Final optimistic sync to ensure local state reflects final rounded positions
+
                 setLocalNodes(nds => nds.map(n => {
                     const final = nextNodes[n.id];
                     if (final) return { ...n, position: { x: final.x, y: final.y } };
@@ -476,9 +274,7 @@ export const useArchitectureFlowHandlers = ({
         } catch (error: any) {
             setTimeout(() => setIsDraggingNode(false), 250);
             console.error("Error in onNodeDragStop:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodeDragStop'));
-            }
+            if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodeDragStop'));
         }
     }, [store, rawNodesDict, rawEdgesDict, componentEvents]);
 
@@ -499,9 +295,7 @@ export const useArchitectureFlowHandlers = ({
             if (edgesChanged) store.props.write('edges', nextEdges);
         } catch (error: any) {
             console.error("Error in onNodesDelete:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodesDelete'));
-            }
+            if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onNodesDelete'));
         }
     }, [store, rawNodesDict, rawEdgesDict, selectedId, setSelectedId, componentEvents]);
 
@@ -522,7 +316,7 @@ export const useArchitectureFlowHandlers = ({
         if (componentEvents) componentEvents.fireComponentEvent('onNodeClick', { id: node.id, paletteId: rawNode?.paletteId, typeId: rawNode?.typeId, type: 'node' });
     }, [componentEvents, rawNodesDict, setSelectedId]);
 
-    // ─── Clipboard ───────────────────────────────────────────────────────────
+    // ─── Clipboard ────────────────────────────────────────────────────────────
 
     const executeCopy = React.useCallback((id: string) => {
         const isContainer = rawNodesDict[id]?.paletteId === 'container';
@@ -541,52 +335,46 @@ export const useArchitectureFlowHandlers = ({
         }
     }, [rawNodesDict, rawEdgesDict, clipboardRef]);
 
-const executePaste = React.useCallback((dropX: number, dropY: number) => {
+    const executePaste = React.useCallback((dropX: number, dropY: number) => {
         try {
             const clipboard = clipboardRef.current;
             if (!clipboard || !store?.props) return;
             const nextNodes = { ...rawNodesDict };
             const nextEdges = { ...rawEdgesDict };
-            
+
             if (clipboard.type === 'single') {
                 const newNodeId = generateShortId();
                 nextNodes[newNodeId] = JSON.parse(JSON.stringify({ ...clipboard.node, x: dropX, y: dropY }));
                 setSelectedId(newNodeId);
-                // We no longer overwrite the clipboard here.
             } else if (clipboard.type === 'group') {
                 let minX = Infinity, minY = Infinity;
                 Object.values(clipboard.nodes).forEach((n: any) => { if (n.x < minX) minX = n.x; if (n.y < minY) minY = n.y; });
                 const dx = dropX - minX, dy = dropY - minY;
                 const idMap: any = {};
-                
+
                 Object.keys(clipboard.nodes).forEach(oldId => {
                     const newId = generateShortId();
                     idMap[oldId] = newId;
                     const oldNode = clipboard.nodes[oldId];
-                    const newNode = JSON.parse(JSON.stringify({ ...oldNode, x: oldNode.x + dx, y: oldNode.y + dy }));
-                    nextNodes[newId] = newNode;
+                    nextNodes[newId] = JSON.parse(JSON.stringify({ ...oldNode, x: oldNode.x + dx, y: oldNode.y + dy }));
                 });
-                
+
                 Object.keys(clipboard.edges).forEach(oldEdgeId => {
                     const newEdgeId = generateShortId();
                     const oldEdge = clipboard.edges[oldEdgeId];
-                    const newEdge = JSON.parse(JSON.stringify({ ...oldEdge, source: idMap[oldEdge.source], target: idMap[oldEdge.target] }));
-                    nextEdges[newEdgeId] = newEdge;
+                    nextEdges[newEdgeId] = JSON.parse(JSON.stringify({ ...oldEdge, source: idMap[oldEdge.source], target: idMap[oldEdge.target] }));
                 });
-                // We no longer overwrite the clipboard here.
             }
-            
+
             store.props.write('nodes', nextNodes);
             store.props.write('edges', nextEdges);
         } catch (error: any) {
             console.error("Error in executePaste:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'executePaste'));
-            }
+            if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'executePaste'));
         }
     }, [store, rawNodesDict, rawEdgesDict, setSelectedId, clipboardRef, componentEvents]);
 
-    // ─── Pane handlers ───────────────────────────────────────────────────────
+    // ─── Pane handlers ────────────────────────────────────────────────────────
 
     const onDragOver = React.useCallback((event: any) => {
         event.preventDefault();
@@ -612,16 +400,16 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             if (store?.props) {
                 const newNodeId = generateShortId();
                 const newNodeData: any = {
-                    paletteId: paletteItem.id, 
-                    typeId: paletteItem.typeId, 
-                    label: paletteItem.label, 
+                    paletteId: paletteItem.id,
+                    typeId: paletteItem.typeId,
+                    label: paletteItem.label,
                     tooltip: paletteItem.tooltip,
-                    x: dropX, 
+                    x: dropX,
                     y: dropY,
-                    hideHandles: paletteItem.hideHandles === true, 
-                    style: initialStyle, 
-                    labelStyle: initialLabelStyle, 
-                    configs: initialConfigs, 
+                    hideHandles: paletteItem.hideHandles === true,
+                    style: initialStyle,
+                    labelStyle: initialLabelStyle,
+                    configs: initialConfigs,
                     supportedConnections: paletteItem.supportedConnections || [],
                     useOverrideImage: paletteItem.useOverrideImage || false,
                     inactive: paletteItem.inactive || false,
@@ -636,9 +424,7 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             draggedItemRef.current = null;
         } catch (error: any) {
             console.error("Error in onDrop:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onDrop'));
-            }
+            if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onDrop'));
         }
     }, [store, rawNodesDict, snapEnabled, snapPixels, reactFlowInstance, setSelectedId, draggedItemRef, componentEvents]);
 
@@ -646,8 +432,6 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
         setSelectedId(null);
         closeContextMenu();
         if (componentEvents) {
-            // UNCOMMENT FOR TESTING:
-            // throw new Error("Verification: Pane clicked, triggering test error");
             componentEvents.fireComponentEvent('onPaneClick', { type: 'pane' });
         }
     }, [setSelectedId, closeContextMenu, componentEvents]);
@@ -657,11 +441,10 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
         const bounds = reactFlowWrapper.current?.getBoundingClientRect();
         if (bounds && reactFlowInstance) {
             const flowPos = reactFlowInstance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
-            
-            // Search for containers that the click might have landed on (since they may be pointer-events: none)
+
             const containerEntry = Object.entries(rawNodesDict)
                 .filter(([id, n]: any) => n && n.paletteId === 'container')
-                .sort((a: any, b: any) => (b[1].zIndex ?? -1) - (a[1].zIndex ?? -1)) // Top-most z-index first
+                .sort((a: any, b: any) => (b[1].zIndex ?? -1) - (a[1].zIndex ?? -1))
                 .find(([id, n]: any) => {
                     const w = n.width || 300, h = n.height || 300;
                     return flowPos.x >= n.x && flowPos.x <= n.x + w && flowPos.y >= n.y && flowPos.y <= n.y + h;
@@ -669,30 +452,15 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
 
             if (containerEntry) {
                 const [id] = containerEntry;
-                setContextMenu({ 
-                    id, 
-                    top: event.clientY - bounds.top, 
-                    left: event.clientX - bounds.left, 
-                    type: 'node', 
-                    isContainer: true, 
-                    clientX: event.clientX, 
-                    clientY: event.clientY 
-                });
+                setContextMenu({ id, top: event.clientY - bounds.top, left: event.clientX - bounds.left, type: 'node', isContainer: true, clientX: event.clientX, clientY: event.clientY });
             } else {
-                setContextMenu({ 
-                    id: 'pane', 
-                    top: event.clientY - bounds.top, 
-                    left: event.clientX - bounds.left, 
-                    type: 'pane', 
-                    clientX: event.clientX, 
-                    clientY: event.clientY 
-                });
+                setContextMenu({ id: 'pane', top: event.clientY - bounds.top, left: event.clientX - bounds.left, type: 'pane', clientX: event.clientX, clientY: event.clientY });
             }
             setActiveSubMenu(null);
         }
     }, [reactFlowWrapper, reactFlowInstance, rawNodesDict, setContextMenu, setActiveSubMenu]);
 
-    // ─── Context menu actions ─────────────────────────────────────────────────
+    // ─── Context menu actions ──────────────────────────────────────────────────
 
     const handleNodeSwap = React.useCallback((newId: string) => {
         try {
@@ -725,9 +493,7 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             closeContextMenu();
         } catch (error: any) {
             console.error("Error in handleNodeSwap:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleNodeSwap'));
-            }
+            if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleNodeSwap'));
         }
     }, [contextMenu, paletteItems, componentEvents, rawNodesDict, rawEdgesDict, store, closeContextMenu]);
 
@@ -742,14 +508,8 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             if (componentEvents) componentEvents.fireComponentEvent('onContextMenuAction', { id: contextMenu.id, paletteId: currentPaletteId, type: contextMenu.type, action });
 
             if (action === 'editContent' && isNode) {
-                setLocalNodes(prev => prev.map(n => {
-                    if (n.id === contextMenu.id) {
-                        return { ...n, data: { ...n.data, isEditing: true } };
-                    }
-                    return n;
-                }));
-                closeContextMenu();
-                return;
+                setLocalNodes(prev => prev.map(n => n.id === contextMenu.id ? { ...n, data: { ...n.data, isEditing: true } } : n));
+                closeContextMenu(); return;
             }
 
             if (action === 'toggleUnlocked' && isNode) {
@@ -758,13 +518,11 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
                 if (node) {
                     const newUnlocked = !node.configs.unlocked;
                     node.configs = { ...node.configs, unlocked: newUnlocked };
-                    // Clean up old individual flags if they exist
                     delete node.configs.unlockMovement;
                     delete node.configs.enableResize;
                     store.props.write('nodes', nextNodes);
                 }
-                closeContextMenu();
-                return;
+                closeContextMenu(); return;
             }
 
             if (action === 'selectNode' && isNode) { setSelectedId(contextMenu.id); closeContextMenu(); return; }
@@ -774,17 +532,8 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
                     const nextEdges = { ...rawEdgesDict };
                     const currentEdge = nextEdges[contextMenu.id];
                     if (currentEdge) {
-                        const reversedWaypoints = Array.isArray(currentEdge.waypoints)
-                            ? [...currentEdge.waypoints].reverse()
-                            : [];
-                        nextEdges[contextMenu.id] = {
-                            ...currentEdge,
-                            source: currentEdge.target,
-                            target: currentEdge.source,
-                            sourceHandle: currentEdge.targetHandle,
-                            targetHandle: currentEdge.sourceHandle,
-                            waypoints: reversedWaypoints,
-                        };
+                        const reversedWaypoints = Array.isArray(currentEdge.waypoints) ? [...currentEdge.waypoints].reverse() : [];
+                        nextEdges[contextMenu.id] = { ...currentEdge, source: currentEdge.target, target: currentEdge.source, sourceHandle: currentEdge.targetHandle, targetHandle: currentEdge.sourceHandle, waypoints: reversedWaypoints };
                         store.props.write('edges', nextEdges);
                     }
                 }
@@ -924,36 +673,20 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
             closeContextMenu();
         } catch (error: any) {
             console.error("Error in handleContextMenuAction:", error);
-            if (componentEvents?.fireComponentEvent) {
-                componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleContextMenuAction'));
-            }
+            if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleContextMenuAction'));
         }
     }, [contextMenu, rawNodesDict, rawEdgesDict, selectedId, snapEnabled, snapPixels, reactFlowInstance, store, componentEvents, setStyleEditorNodeId, executeCopy, executePaste, closeContextMenu, setSelectedId]);
 
     return {
         // State
-        isUpdatingEdge,
         isDraggingNode,
-        isConnecting,
-        updatingEdgeRef,
+        // Refs
+        rawNodesDictRef,
         // Shared
         closeContextMenu,
-        getValidIntersection,
-        // Edge
-        isValidConnection,
-        handleWaypointsChange,
-        onConnect,
-        onEdgeUpdate,
-        onEdgeUpdateStart,
-        onEdgeUpdateEnd,
-        onConnectStart,
-        onConnectEnd,
-        onEdgesDelete,
-        onEdgeContextMenu,
-        onEdgeClick,
-        handleLineTypeChange,
-        handleConnectionTypeChange,
-        // Node
+        // Edge handlers (delegated)
+        ...edgeHandlers,
+        // Node handlers
         handleGearClick,
         handlePaletteItemClick,
         handleResizeEnd,
@@ -975,26 +708,6 @@ const executePaste = React.useCallback((dropX: number, dropY: number) => {
         onPaneContextMenu,
         // Context menu
         handleNodeSwap,
-        handleAnimationChange,
         handleContextMenuAction,
     };
 };
-
-/**
- * Safely extracts error information for Perspective event firing.
- * Handles non-Error objects and ensures strings for all properties.
- */
-export function getSafeError(error: any, source: string) {
-    if (error instanceof Error) {
-        return {
-            source,
-            message: error.message || String(error),
-            stack: error.stack || ''
-        };
-    }
-    return {
-        source,
-        message: typeof error === 'string' ? error : JSON.stringify(error) || 'Unknown error',
-        stack: ''
-    };
-}
