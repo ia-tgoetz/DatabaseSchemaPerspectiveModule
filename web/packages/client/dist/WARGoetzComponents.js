@@ -15619,6 +15619,7 @@ const computeHierarchyData = (nodesDict, edgesDict) => {
 };
 exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
     var _a, _b, _c, _d;
+    console.log('DEBUG: ArchitectureBuilder rendering, props:', props);
     const reactFlowWrapper = React.useRef(null);
     const clipboardRef = React.useRef(null);
     const draggedItemRef = React.useRef(null);
@@ -15672,15 +15673,17 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         };
     }, []);
     // ─── Prop extraction ───────────────────────────────────────────────────
-    const rawNodesJson = JSON.stringify(extractDeep(props.props.nodes) || {});
-    const rawEdgesJson = JSON.stringify(extractDeep(props.props.edges) || {});
-    const connectionTypesJson = JSON.stringify(extractDeep(props.props.connectionTypes) || {});
-    const paletteItemsJson = JSON.stringify(extractDeep(props.props.paletteItems) || []);
+    // Wrapped in useMemo so extractDeep (deep MobX clone) and JSON.stringify
+    // only run when the relevant prop reference actually changes, not on every render.
+    const rawNodesJson = React.useMemo(() => JSON.stringify(extractDeep(props.props.nodes) || {}), [props.props.nodes]);
+    const rawEdgesJson = React.useMemo(() => JSON.stringify(extractDeep(props.props.edges) || {}), [props.props.edges]);
+    const connectionTypesJson = React.useMemo(() => JSON.stringify(extractDeep(props.props.connectionTypes) || {}), [props.props.connectionTypes]);
+    const paletteItemsJson = React.useMemo(() => JSON.stringify(extractDeep(props.props.paletteItems) || []), [props.props.paletteItems]);
     // Scalar display props use the same extractDeep + JSON pipeline as complex props.
     // Direct property access on Perspective's observable store can miss scalar updates;
     // running them through extractDeep forces a MobX subscription that reliably
     // triggers re-renders when any of these values change in the Designer or Session.
-    const rawConfigJson = JSON.stringify({
+    const rawConfigJson = React.useMemo(() => JSON.stringify({
         edgeWidth: extractDeep(props.props.edgeWidth),
         snapEnabled: extractDeep(props.props.snapEnabled),
         snapPixels: extractDeep(props.props.snapPixels),
@@ -15688,14 +15691,18 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         handleCount: extractDeep(props.props.handleCount),
         enabled: extractDeep(props.props.enabled),
         enableOnClickEvents: extractDeep(props.props.enableOnClickEvents),
-    });
+    }), [
+        props.props.edgeWidth, props.props.snapEnabled, props.props.snapPixels,
+        props.props.hideHandles, props.props.handleCount, props.props.enabled,
+        props.props.enableOnClickEvents,
+    ]);
     const rawNodesDict = React.useMemo(() => JSON.parse(rawNodesJson), [rawNodesJson]);
     const rawEdgesDict = React.useMemo(() => JSON.parse(rawEdgesJson), [rawEdgesJson]);
     const connectionTypes = React.useMemo(() => JSON.parse(connectionTypesJson), [connectionTypesJson]);
     const paletteItems = React.useMemo(() => JSON.parse(paletteItemsJson), [paletteItemsJson]);
     const rawConfig = React.useMemo(() => JSON.parse(rawConfigJson), [rawConfigJson]);
     const globalHideHandles = rawConfig.hideHandles === true || String((_a = rawConfig.hideHandles) !== null && _a !== void 0 ? _a : '').toLowerCase() === 'true';
-    const globalHandleCount = Number(rawConfig.handleCount) || 5;
+    const globalHandleCount = Number(rawConfig.handleCount) || 3;
     const isEnabled = rawConfig.enabled !== false && String((_b = rawConfig.enabled) !== null && _b !== void 0 ? _b : 'true').toLowerCase() !== 'false';
     const enableOnClickEvents = rawConfig.enableOnClickEvents !== false && String((_c = rawConfig.enableOnClickEvents) !== null && _c !== void 0 ? _c : 'true').toLowerCase() !== 'false';
     const snapEnabled = rawConfig.snapEnabled !== false && String((_d = rawConfig.snapEnabled) !== null && _d !== void 0 ? _d : 'true').toLowerCase() !== 'false';
@@ -15724,7 +15731,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         props.store.props.write('refreshHierarchy', false);
     }, [props.props.refreshHierarchy, props.store]);
     // ─── Handlers hook ─────────────────────────────────────────────────────
-    const { isUpdatingEdge, isDraggingNode, isConnecting, updatingEdgeRef, closeContextMenu, getValidIntersection, isValidConnection, handleWaypointsChange, onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd, onEdgesDelete, onEdgeContextMenu, onEdgeClick, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, handleGearClick, handlePaletteItemClick, handleResizeEnd, handleTextChange, onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onNodeContextMenu, onNodeClick, executeCopy, executePaste, onDragOver, onDrop, onPaneClick, onPaneContextMenu, handleNodeSwap, handleContextMenuAction, } = useArchitectureFlowHandlers_1.useArchitectureFlowHandlers({
+    const { isUpdatingEdge, isDraggingNode, updatingEdgeRef, rawNodesDictRef, closeContextMenu, getValidIntersection, isValidConnection, handleWaypointsChange, onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd, onEdgesDelete, onEdgeContextMenu, onEdgeClick, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, handleGearClick, handlePaletteItemClick, handleResizeEnd, handleTextChange, onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onNodeContextMenu, onNodeClick, executeCopy, executePaste, onDragOver, onDrop, onPaneClick, onPaneContextMenu, handleNodeSwap, handleContextMenuAction, } = useArchitectureFlowHandlers_1.useArchitectureFlowHandlers({
         store: props.store,
         componentEvents: props.componentEvents,
         rawNodesDict,
@@ -15750,16 +15757,25 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
     });
     // ─── Derived flow data ─────────────────────────────────────────────────
     const highlightedHandlesMap = React.useMemo(() => {
-        const edge = selectedId ? rawEdgesDict[selectedId] : null;
-        if (!edge)
-            return {};
         const map = {};
-        if (edge.source && edge.sourceHandle)
-            map[edge.source] = [edge.sourceHandle];
-        if (edge.target && edge.targetHandle)
-            map[edge.target] = [...(map[edge.target] || []), edge.targetHandle];
+        Object.values(rawEdgesDict).forEach((edge) => {
+            if (!edge)
+                return;
+            if (edge.source && edge.sourceHandle) {
+                if (!map[edge.source])
+                    map[edge.source] = [];
+                if (!map[edge.source].includes(edge.sourceHandle))
+                    map[edge.source].push(edge.sourceHandle);
+            }
+            if (edge.target && edge.targetHandle) {
+                if (!map[edge.target])
+                    map[edge.target] = [];
+                if (!map[edge.target].includes(edge.targetHandle))
+                    map[edge.target].push(edge.targetHandle);
+            }
+        });
         return map;
-    }, [selectedId, rawEdgesDict]);
+    }, [rawEdgesDict]);
     const flowNodes = React.useMemo(() => mapIgnitionToReactFlowNodes(rawNodesDict, paletteItems, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled), [rawNodesDict, paletteItems, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled]);
     const flowEdges = React.useMemo(() => EdgeUtils_1.mapIgnitionToReactFlowEdges(rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth), [rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth]);
     React.useEffect(() => {
@@ -15804,7 +15820,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')
                 return;
             if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-                if (selectedId && rawNodesDict[selectedId])
+                if (selectedId && rawNodesDictRef.current[selectedId])
                     executeCopy(selectedId);
             }
             if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
@@ -15819,7 +15835,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isEnabled, selectedId, rawNodesDict, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
+    }, [isEnabled, selectedId, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
     const _e = props.props.style || {}, { classes } = _e, ignitionStyles = __rest(_e, ["classes"]);
     const containerStyle = Object.assign({ display: 'flex', width: '100%', height: '100%', backgroundColor: 'var(--neutral-00)' }, ignitionStyles);
     // ─── Render ────────────────────────────────────────────────────────────
@@ -15901,6 +15917,10 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                     opacity: 1 !important;
                 }
 
+                /* Suppressed: handle is in DOM for edge routing but completely invisible/non-interactive. */
+                .arch-node-handle--suppressed::after { opacity: 0 !important; pointer-events: none !important; }
+                .arch-node-handle--suppressed::before { pointer-events: none !important; }
+
                 /* Connected handle: Always visible and emphasized when the edge/node is selected. */
                 .arch-node-handle--connected::after {
                     opacity: 1 !important;
@@ -15926,9 +15946,9 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                 `),
             React.createElement("div", { className: "arch-theme-wrapper" },
                 isEnabled && React.createElement(Sidebar_1.Sidebar, { paletteItems: paletteItems, isOpen: isSidebarOpen, toggleSidebar: () => setIsSidebarOpen(!isSidebarOpen), onDragStartItem: (item) => { draggedItemRef.current = item; }, onItemClick: handlePaletteItemClick }),
-                React.createElement("div", { role: "main", "aria-label": "Architecture Builder Canvas", style: { flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }, ref: reactFlowWrapper, className: isConnecting ? 'arch-creating-edge' : isUpdatingEdge ? 'arch-moving-edge' : '' },
+                React.createElement("div", { role: "main", "aria-label": "Architecture Builder Canvas", style: { flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }, ref: reactFlowWrapper, className: isUpdatingEdge ? 'arch-moving-edge' : '' },
                     React.createElement(reactflow_1.ReactFlowProvider, null,
-                        React.createElement(reactflow_1.default, { nodes: localNodes, edges: displayEdges, nodeTypes: nodeTypes, edgeTypes: CustomEdge_1.edgeTypes, isValidConnection: isValidConnection, onInit: setReactFlowInstance, onDrop: isEnabled ? onDrop : undefined, onDragOver: isEnabled ? onDragOver : undefined, onConnect: isEnabled ? onConnect : undefined, onEdgeUpdate: isEnabled ? onEdgeUpdate : undefined, onEdgeUpdateStart: isEnabled ? onEdgeUpdateStart : undefined, onEdgeUpdateEnd: isEnabled ? onEdgeUpdateEnd : undefined, onConnectStart: isEnabled ? onConnectStart : undefined, onConnectEnd: isEnabled ? onConnectEnd : undefined, onNodeDragStart: isEnabled ? onNodeDragStart : undefined, onNodeDrag: isEnabled ? onNodeDrag : undefined, onNodeDragStop: isEnabled ? onNodeDragStop : undefined, onNodesChange: onNodesChange, onNodeClick: onNodeClick, onEdgeClick: onEdgeClick, onNodesDelete: isEnabled ? onNodesDelete : undefined, onEdgesDelete: isEnabled ? onEdgesDelete : undefined, onNodeContextMenu: isEnabled ? onNodeContextMenu : undefined, onEdgeContextMenu: isEnabled ? onEdgeContextMenu : undefined, onEdgeMouseEnter: (_evt, edge) => setHoveredEdgeId(edge.id), onEdgeMouseLeave: () => setHoveredEdgeId(null), onPaneClick: onPaneClick, onPaneContextMenu: isEnabled ? onPaneContextMenu : undefined, nodesDraggable: isEnabled, nodesConnectable: isEnabled, elementsSelectable: isEnabled, connectionMode: reactflow_1.ConnectionMode.Loose, snapToGrid: snapEnabled, snapGrid: snapGrid, connectionLineStyle: { stroke: '#cccccc', strokeWidth: 6 }, elevateNodesOnSelect: false, minZoom: 0.05, panOnScroll: false, zoomOnScroll: true, panOnDrag: true, selectionOnDrag: false, deleteKeyCode: ['Delete', 'Backspace'] },
+                        React.createElement(reactflow_1.default, { nodes: localNodes, edges: displayEdges, nodeTypes: nodeTypes, edgeTypes: CustomEdge_1.edgeTypes, isValidConnection: isValidConnection, onInit: setReactFlowInstance, onDrop: isEnabled ? onDrop : undefined, onDragOver: isEnabled ? onDragOver : undefined, onConnect: isEnabled ? onConnect : undefined, onEdgeUpdate: isEnabled ? onEdgeUpdate : undefined, onEdgeUpdateStart: isEnabled ? onEdgeUpdateStart : undefined, onEdgeUpdateEnd: isEnabled ? onEdgeUpdateEnd : undefined, onConnectStart: isEnabled ? onConnectStart : undefined, onConnectEnd: isEnabled ? onConnectEnd : undefined, onNodeDragStart: isEnabled ? onNodeDragStart : undefined, onNodeDrag: isEnabled ? onNodeDrag : undefined, onNodeDragStop: isEnabled ? onNodeDragStop : undefined, onNodesChange: onNodesChange, onNodeClick: onNodeClick, onEdgeClick: onEdgeClick, onNodesDelete: isEnabled ? onNodesDelete : undefined, onEdgesDelete: isEnabled ? onEdgesDelete : undefined, onNodeContextMenu: isEnabled ? onNodeContextMenu : undefined, onEdgeContextMenu: isEnabled ? onEdgeContextMenu : undefined, onEdgeMouseEnter: (_evt, edge) => setHoveredEdgeId(edge.id), onEdgeMouseLeave: () => setHoveredEdgeId(null), onPaneClick: onPaneClick, onPaneContextMenu: isEnabled ? onPaneContextMenu : undefined, nodesDraggable: isEnabled, nodesConnectable: isEnabled, elementsSelectable: isEnabled, connectionMode: reactflow_1.ConnectionMode.Loose, snapToGrid: snapEnabled, snapGrid: snapGrid, connectionLineStyle: { stroke: '#cccccc', strokeWidth: 6, fill: 'none' }, elevateNodesOnSelect: false, minZoom: 0.05, panOnScroll: false, zoomOnScroll: true, panOnDrag: true, selectionOnDrag: false, deleteKeyCode: ['Delete', 'Backspace'] },
                             React.createElement(reactflow_1.Background, { gap: snapPixels }),
                             React.createElement(reactflow_1.Controls, { showInteractive: false }))),
                     styleEditorNodeId && rawNodesDict[styleEditorNodeId] && (React.createElement(StyleEditorModal_1.StyleEditorModal, { node: rawNodesDict[styleEditorNodeId], onSave: (newStyle, newLabelStyle, newTextStyle) => {
@@ -15989,7 +16009,10 @@ const NodeImage = ({ src, label }) => {
 const ArchitectureNode = ({ id, data, selected }) => {
     var _a, _b, _c;
     const { zoom } = reactflow_1.useViewport();
+    const [hovered, setHovered] = react_1.default.useState(false);
     const showHandles = !data.globalHideHandles && !data.hideHandles && data.isEditable !== false;
+    const hasHighlightedHandles = !!(data.highlightedHandles && data.highlightedHandles.length > 0);
+    const isConnectionInProgress = reactflow_1.useStore((s) => s.connectionNodeId != null);
     const isTextNode = TEXT_PALETTE_IDS.has(data.paletteId);
     const [localText, setLocalText] = react_1.default.useState(data.text || '');
     react_1.default.useEffect(() => { setLocalText(data.text || ''); }, [data.text]);
@@ -15997,46 +16020,41 @@ const ArchitectureNode = ({ id, data, selected }) => {
     const finalLabelColor = ((_b = data.labelStyle) === null || _b === void 0 ? void 0 : _b.color) || 'var(--neutral-90)';
     const finalGearColor = ((_c = data.labelStyle) === null || _c === void 0 ? void 0 : _c.fill) || finalLabelColor;
     const _d = data.style || {}, { backgroundColor: imageBg } = _d, restStyle = __rest(_d, ["backgroundColor"]);
-    const dummyTargetStyle = {
-        position: 'absolute', width: '1px', height: '1px', background: 'transparent',
-        border: 'none', opacity: 0, pointerEvents: 'none', zIndex: -1
-    };
     const combinedStyle = Object.assign(Object.assign({ padding: '0px', borderRadius: '8px', backgroundColor: 'var(--neutral-10)', border: '1px solid var(--neutral-50)', color: 'var(--neutral-90)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', boxSizing: 'border-box', position: 'relative' }, restStyle), { boxShadow: selected ? '0 0 0 2px rgba(0, 123, 255, 0.25)' : (restStyle.boxShadow || '0 2px 4px rgba(0,0,0,0.1)') });
     // Enhanced hit area: generous size that remains consistent in screen pixels for usability.
     // Targeting ~24px at 1.0 zoom, scaling up to ~22px as we zoom out.
     const hitSize = Math.min(22, Math.max(16, Math.round(24 / zoom)));
+    // Handles are always mounted so React Flow's store always has registered positions.
+    // This prevents the intermittent missing connection line (handle mounts just as a
+    // drag starts, before its useEffect registration fires) and keeps edges anchored
+    // when hideHandles is true.
+    // Interactivity and visual appearance are controlled via pointerEvents + CSS (::after).
+    const isHandleInteractive = showHandles && (hovered || selected || hasHighlightedHandles || isConnectionInProgress);
     const handleStyle = {
         background: 'transparent',
         width: '4px',
         height: '4px',
-        // Control interaction and base visibility via showHandles.
-        // We keep the element size small and fixed (4px) to ensure React Flow 
-        // maintains perfect edge alignment regardless of zoom.
-        // The actual hit area is rendered via ::before in the CSS.
-        opacity: showHandles ? 1 : 0,
-        pointerEvents: showHandles ? 'auto' : 'none',
+        opacity: 1,
+        pointerEvents: isHandleInteractive ? 'auto' : 'none',
         zIndex: 20,
         '--hit-size': `${hitSize}px`
     };
-    const handleCount = Math.max(1, Math.min(8, Number(data.handleCount) || 3));
+    const handleCount = 1; // FORCED FOR STRESS TEST 11: 4 handles total (1 per side)
     const positions = Array.from({ length: handleCount }, (_, i) => `${((i + 0.5) / handleCount) * 100}%`);
     const highlighted = new Set(data.highlightedHandles || []);
-    const handleClass = (id) => highlighted.has(id) ? 'arch-node-handle arch-node-handle--connected' : 'arch-node-handle';
+    const handleClass = (id) => {
+        if (!showHandles)
+            return 'arch-node-handle arch-node-handle--suppressed';
+        return highlighted.has(id) ? 'arch-node-handle arch-node-handle--connected' : 'arch-node-handle';
+    };
     // Calculate dynamic resizer handle size based on zoom
     const resizerSize = Math.max(10, Math.round(16 / zoom));
-    return (react_1.default.createElement("div", { style: combinedStyle, title: data.tooltip },
-        positions.map((pos, i) => (react_1.default.createElement(react_1.default.Fragment, { key: `top-${i}` },
-            react_1.default.createElement(reactflow_1.Handle, { className: handleClass(`top-${i}`), type: "source", position: reactflow_1.Position.Top, id: `top-${i}`, style: Object.assign(Object.assign({}, handleStyle), { left: pos, top: '0px', transform: 'translate(-50%, -50%)' }) }),
-            react_1.default.createElement(reactflow_1.Handle, { type: "target", position: reactflow_1.Position.Top, id: `top-${i}`, style: Object.assign(Object.assign({}, dummyTargetStyle), { left: pos, top: '0px', transform: 'translate(-50%, -50%)' }) })))),
-        positions.map((pos, i) => (react_1.default.createElement(react_1.default.Fragment, { key: `right-${i}` },
-            react_1.default.createElement(reactflow_1.Handle, { className: handleClass(`right-${i}`), type: "source", position: reactflow_1.Position.Right, id: `right-${i}`, style: Object.assign(Object.assign({}, handleStyle), { top: pos, left: '100%', transform: 'translate(-50%, -50%)' }) }),
-            react_1.default.createElement(reactflow_1.Handle, { type: "target", position: reactflow_1.Position.Right, id: `right-${i}`, style: Object.assign(Object.assign({}, dummyTargetStyle), { top: pos, left: '100%', transform: 'translate(-50%, -50%)' }) })))),
-        positions.map((pos, i) => (react_1.default.createElement(react_1.default.Fragment, { key: `bottom-${i}` },
-            react_1.default.createElement(reactflow_1.Handle, { className: handleClass(`bottom-${i}`), type: "source", position: reactflow_1.Position.Bottom, id: `bottom-${i}`, style: Object.assign(Object.assign({}, handleStyle), { left: pos, top: '100%', transform: 'translate(-50%, -50%)' }) }),
-            react_1.default.createElement(reactflow_1.Handle, { type: "target", position: reactflow_1.Position.Bottom, id: `bottom-${i}`, style: Object.assign(Object.assign({}, dummyTargetStyle), { left: pos, top: '100%', transform: 'translate(-50%, -50%)' }) })))),
-        positions.map((pos, i) => (react_1.default.createElement(react_1.default.Fragment, { key: `left-${i}` },
-            react_1.default.createElement(reactflow_1.Handle, { className: handleClass(`left-${i}`), type: "source", position: reactflow_1.Position.Left, id: `left-${i}`, style: Object.assign(Object.assign({}, handleStyle), { top: pos, left: '0px', transform: 'translate(-50%, -50%)' }) }),
-            react_1.default.createElement(reactflow_1.Handle, { type: "target", position: reactflow_1.Position.Left, id: `left-${i}`, style: Object.assign(Object.assign({}, dummyTargetStyle), { top: pos, left: '0px', transform: 'translate(-50%, -50%)' }) })))),
+    return (react_1.default.createElement("div", { style: combinedStyle, title: data.tooltip, onMouseEnter: () => setHovered(true), onMouseLeave: (e) => { if (e.buttons === 0)
+            setHovered(false); } },
+        positions.map((pos, i) => (react_1.default.createElement(reactflow_1.Handle, { key: `top-${i}`, className: handleClass(`top-${i}`), type: "source", position: reactflow_1.Position.Top, id: `top-${i}`, style: Object.assign(Object.assign({}, handleStyle), { left: pos, top: '0px', transform: 'translate(-50%, -50%)' }) }))),
+        positions.map((pos, i) => (react_1.default.createElement(reactflow_1.Handle, { key: `right-${i}`, className: handleClass(`right-${i}`), type: "source", position: reactflow_1.Position.Right, id: `right-${i}`, style: Object.assign(Object.assign({}, handleStyle), { top: pos, left: '100%', transform: 'translate(-50%, -50%)' }) }))),
+        positions.map((pos, i) => (react_1.default.createElement(reactflow_1.Handle, { key: `bottom-${i}`, className: handleClass(`bottom-${i}`), type: "source", position: reactflow_1.Position.Bottom, id: `bottom-${i}`, style: Object.assign(Object.assign({}, handleStyle), { left: pos, top: '100%', transform: 'translate(-50%, -50%)' }) }))),
+        positions.map((pos, i) => (react_1.default.createElement(reactflow_1.Handle, { key: `left-${i}`, className: handleClass(`left-${i}`), type: "source", position: reactflow_1.Position.Left, id: `left-${i}`, style: Object.assign(Object.assign({}, handleStyle), { top: pos, left: '0px', transform: 'translate(-50%, -50%)' }) }))),
         react_1.default.createElement("div", { style: Object.assign({ position: 'absolute', top: 0, left: 0, maxWidth: '100%', boxSizing: 'border-box', backgroundColor: finalLabelBg, padding: '4px 8px', borderTopLeftRadius: '7px', borderTopRightRadius: '7px', borderBottomRightRadius: '8px', fontSize: '12px', fontWeight: 'bold', color: finalLabelColor, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', zIndex: 10 }, (data.labelStyle || {})), onClick: (e) => {
                 e.stopPropagation();
                 if (data.onGearClick)
@@ -17475,6 +17493,12 @@ const getNodesInside = (containerId, allNodes) => {
 const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, connectionTypes, globalHandleCount, paletteItems, snapEnabled, snapPixels, reactFlowInstance, reactFlowWrapper, isEnabled, selectedId, setSelectedId, setLocalNodes, setLocalEdges, contextMenu, setContextMenu, setActiveSubMenu, setStyleEditorNodeId, clipboardRef, draggedItemRef, }) => {
     const [isDraggingNode, setIsDraggingNode] = React.useState(false);
     const dragStartPos = React.useRef(null);
+    // Stable refs so callbacks that only READ rawNodesDict/rawEdgesDict at call-time
+    // don't need them in their dep arrays — prevents cascade rebuilds of flowNodes.
+    const rawNodesDictRef = React.useRef(rawNodesDict);
+    const rawEdgesDictRef = React.useRef(rawEdgesDict);
+    React.useEffect(() => { rawNodesDictRef.current = rawNodesDict; }, [rawNodesDict]);
+    React.useEffect(() => { rawEdgesDictRef.current = rawEdgesDict; }, [rawEdgesDict]);
     const closeContextMenu = React.useCallback(() => {
         setContextMenu(null);
         setActiveSubMenu(null);
@@ -17498,11 +17522,11 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
     // ─── Node handlers ────────────────────────────────────────────────────────
     const handleGearClick = React.useCallback((id) => {
         setSelectedId(id);
-        const node = rawNodesDict[id];
+        const node = rawNodesDictRef.current[id];
         if (componentEvents && node) {
             componentEvents.fireComponentEvent('onGearClick', { id, paletteId: node.paletteId, typeId: node.typeId, type: 'node', action: 'config' });
         }
-    }, [componentEvents, rawNodesDict, setSelectedId]);
+    }, [componentEvents, setSelectedId]);
     const handlePaletteItemClick = React.useCallback((item) => {
         if (componentEvents) {
             componentEvents.fireComponentEvent('onPaletteItemClick', { id: item.id, typeId: item.typeId, label: item.label, category: item.category, tooltip: item.tooltip, image: item.image, supportedConnections: item.supportedConnections, swappableWith: item.swappableWith, defaultConfigs: item.defaultConfigs, hideHandles: item.hideHandles, style: item.style, labelStyle: item.labelStyle });
@@ -17511,7 +17535,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
     const handleResizeEnd = React.useCallback((id, x, y, width, height) => {
         try {
             if (store === null || store === void 0 ? void 0 : store.props) {
-                const nextNodes = Object.assign({}, rawNodesDict);
+                const nextNodes = Object.assign({}, rawNodesDictRef.current);
                 if (nextNodes[id]) {
                     nextNodes[id].x = Math.round(x);
                     nextNodes[id].y = Math.round(y);
@@ -17526,11 +17550,11 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
             if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
                 componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleResizeEnd'));
         }
-    }, [store, rawNodesDict, componentEvents]);
+    }, [store, componentEvents]);
     const handleTextChange = React.useCallback((id, text) => {
         try {
             if (store === null || store === void 0 ? void 0 : store.props) {
-                const nextNodes = Object.assign({}, rawNodesDict);
+                const nextNodes = Object.assign({}, rawNodesDictRef.current);
                 if (nextNodes[id]) {
                     nextNodes[id] = Object.assign(Object.assign({}, nextNodes[id]), { text });
                     store.props.write('nodes', nextNodes);
@@ -17542,7 +17566,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
             if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
                 componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleTextChange'));
         }
-    }, [store, rawNodesDict, componentEvents]);
+    }, [store, componentEvents]);
     const onNodesChange = React.useCallback((changes) => {
         setLocalNodes((nds) => reactflow_1.applyNodeChanges(changes, nds));
     }, [setLocalNodes]);
@@ -18142,6 +18166,8 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
     return Object.assign(Object.assign({ 
         // State
         isDraggingNode,
+        // Refs
+        rawNodesDictRef,
         // Shared
         closeContextMenu }, edgeHandlers), { 
         // Node handlers
@@ -18206,7 +18232,6 @@ const React = __importStar(__webpack_require__(/*! react */ "react"));
 const utils_1 = __webpack_require__(/*! ./utils */ "./typescript/components/ArchitectureBuilder/utils.ts");
 const useEdgeHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, connectionTypes, selectedId, setSelectedId, contextMenu, setContextMenu, setActiveSubMenu, setLocalEdges, reactFlowWrapper, closeContextMenu, }) => {
     const [isUpdatingEdge, setIsUpdatingEdge] = React.useState(false);
-    const [isConnecting, setIsConnecting] = React.useState(false);
     const updatingEdgeRef = React.useRef(null);
     // ─── Validation ──────────────────────────────────────────────────────────
     const getValidIntersection = React.useCallback((sourceId, targetId, ignoreEdgeId) => {
@@ -18308,8 +18333,14 @@ const useEdgeHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, c
         updatingEdgeRef.current = null;
         setIsUpdatingEdge(false);
     }, []);
-    const onConnectStart = React.useCallback(() => setIsConnecting(true), []);
-    const onConnectEnd = React.useCallback(() => setIsConnecting(false), []);
+    const onConnectStart = React.useCallback(() => {
+        var _a;
+        (_a = reactFlowWrapper.current) === null || _a === void 0 ? void 0 : _a.classList.add('arch-creating-edge');
+    }, [reactFlowWrapper]);
+    const onConnectEnd = React.useCallback(() => {
+        var _a;
+        (_a = reactFlowWrapper.current) === null || _a === void 0 ? void 0 : _a.classList.remove('arch-creating-edge');
+    }, [reactFlowWrapper]);
     const onEdgesDelete = React.useCallback((deleted) => {
         try {
             if (!(store === null || store === void 0 ? void 0 : store.props))
@@ -18411,7 +18442,6 @@ const useEdgeHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, c
     }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
     return {
         isUpdatingEdge,
-        isConnecting,
         updatingEdgeRef,
         getValidIntersection,
         isValidConnection,
@@ -19378,7 +19408,7 @@ class ArchitectureBuilderMeta {
             snapPixels: tree.read('snapPixels', 15),
             edgeWidth: tree.read('edgeWidth', 6),
             hideHandles: tree.read('hideHandles', false),
-            handleCount: tree.read('handleCount', 5),
+            handleCount: tree.read('handleCount', 3),
             refreshHierarchy: tree.read('refreshHierarchy', false),
             style: tree.read('style')
         };
