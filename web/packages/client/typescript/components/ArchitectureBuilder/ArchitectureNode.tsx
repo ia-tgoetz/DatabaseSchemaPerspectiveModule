@@ -98,7 +98,7 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
         '--hit-size': `${hitSize}px`
     };
 
-    const handleCount = 1; // FORCED FOR STRESS TEST 11: 4 handles total (1 per side)
+    const handleCount = data.handleCount ?? 3;
     const positions = Array.from({ length: handleCount }, (_, i) => `${((i + 0.5) / handleCount) * 100}%`);
     const highlighted = new Set(data.highlightedHandles || []);
     const handleClass = (id: string) => {
