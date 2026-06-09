@@ -5813,6 +5813,7 @@
           }
         },
         "props": {
+          "handleCount": 5,
           "hierarchy": {
             "areas": [],
             "nodes": []
@@ -7648,10 +7649,7 @@
             },
             "props": {
               "data": {
-                "id": "I50eee209",
-                "paletteId": "standard",
-                "type": "node",
-                "typeId": "standard"
+                "type": "pane"
               },
               "datak": {
                 "action": "delete",
