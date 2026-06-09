@@ -16007,7 +16007,7 @@ const NodeImage = ({ src, label }) => {
     return dataUri ? react_1.default.createElement("img", { src: dataUri, alt: "", style: { padding: '4px', width: '100%', height: '100%', objectFit: 'contain' } }) : null;
 };
 const ArchitectureNode = ({ id, data, selected }) => {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     const { zoom } = reactflow_1.useViewport();
     const [hovered, setHovered] = react_1.default.useState(false);
     const showHandles = !data.globalHideHandles && !data.hideHandles && data.isEditable !== false;
@@ -16019,7 +16019,7 @@ const ArchitectureNode = ({ id, data, selected }) => {
     const finalLabelBg = ((_a = data.labelStyle) === null || _a === void 0 ? void 0 : _a.backgroundColor) || 'var(--neutral-30)';
     const finalLabelColor = ((_b = data.labelStyle) === null || _b === void 0 ? void 0 : _b.color) || 'var(--neutral-90)';
     const finalGearColor = ((_c = data.labelStyle) === null || _c === void 0 ? void 0 : _c.fill) || finalLabelColor;
-    const _d = data.style || {}, { backgroundColor: imageBg } = _d, restStyle = __rest(_d, ["backgroundColor"]);
+    const _e = data.style || {}, { backgroundColor: imageBg } = _e, restStyle = __rest(_e, ["backgroundColor"]);
     const combinedStyle = Object.assign(Object.assign({ padding: '0px', borderRadius: '8px', backgroundColor: 'var(--neutral-10)', border: '1px solid var(--neutral-50)', color: 'var(--neutral-90)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', boxSizing: 'border-box', position: 'relative' }, restStyle), { boxShadow: selected ? '0 0 0 2px rgba(0, 123, 255, 0.25)' : (restStyle.boxShadow || '0 2px 4px rgba(0,0,0,0.1)') });
     // Enhanced hit area: generous size that remains consistent in screen pixels for usability.
     // Targeting ~24px at 1.0 zoom, scaling up to ~22px as we zoom out.
@@ -16039,7 +16039,7 @@ const ArchitectureNode = ({ id, data, selected }) => {
         zIndex: 20,
         '--hit-size': `${hitSize}px`
     };
-    const handleCount = 1; // FORCED FOR STRESS TEST 11: 4 handles total (1 per side)
+    const handleCount = (_d = data.handleCount) !== null && _d !== void 0 ? _d : 3;
     const positions = Array.from({ length: handleCount }, (_, i) => `${((i + 0.5) / handleCount) * 100}%`);
     const highlighted = new Set(data.highlightedHandles || []);
     const handleClass = (id) => {
