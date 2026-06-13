@@ -146,6 +146,7 @@ export const mapIgnitionToReactFlowEdges = (
                     animation: effectiveAnimation,
                     snapEnabled: snapEnabled ?? true,
                     snapPixels: snapPixels ?? 15,
+                    dashed: edgeData.dashed === true,
                     onWaypointsChange: onWaypointsChange
                         ? (wps: { x: number; y: number }[]) => onWaypointsChange(id, wps)
                         : undefined,
