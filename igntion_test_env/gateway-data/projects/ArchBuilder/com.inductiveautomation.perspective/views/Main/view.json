@@ -5677,408 +5677,11 @@
         "custom": {
           "newArch": {
             "edgeWidth": 6,
-            "edges": {
-              "I03da1512": {
-                "arrow": false,
-                "connectionType": "standard",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": false,
-                "source": "Iddf52891",
-                "sourceHandle": "top-2",
-                "target": "Ib604db9f",
-                "targetHandle": "bottom-2",
-                "waypoints": []
-              },
-              "I094224dd": {
-                "arrow": false,
-                "connectionType": "client",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": false,
-                "source": "I90408f77",
-                "sourceHandle": "right-0",
-                "target": "Ib104f231",
-                "targetHandle": "bottom-2",
-                "waypoints": []
-              },
-              "I1a7b036e": {
-                "arrow": false,
-                "connectionType": "client",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": false,
-                "source": "Ib604db9f",
-                "sourceHandle": "right-1",
-                "target": "Ib104f231",
-                "targetHandle": "bottom-2",
-                "waypoints": []
-              },
-              "I53414fb4": {
-                "arrow": false,
-                "connectionType": "client",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": false,
-                "source": "I90408f77",
-                "sourceHandle": "left-0",
-                "target": "I50fb97a9",
-                "targetHandle": "bottom-2",
-                "waypoints": []
-              },
-              "I5a2d4737": {
-                "arrow": false,
-                "connectionType": "client",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": false,
-                "source": "I50fb97a9",
-                "sourceHandle": "bottom-2",
-                "target": "Ib604db9f",
-                "targetHandle": "left-1",
-                "waypoints": []
-              },
-              "I6be54665": {
-                "arrow": false,
-                "connectionType": "client",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": false,
-                "source": "I90408f77",
-                "sourceHandle": "left-1",
-                "target": "I93cf4a0c",
-                "targetHandle": "right-3",
-                "waypoints": []
-              },
-              "Ib43c1903": {
-                "arrow": false,
-                "connectionType": "client",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": false,
-                "source": "Idf47061a",
-                "sourceHandle": "bottom-2",
-                "target": "Ib604db9f",
-                "targetHandle": "top-2",
-                "waypoints": []
-              },
-              "Id02262f0": {
-                "arrow": false,
-                "connectionType": "client",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": false,
-                "source": "I90408f77",
-                "sourceHandle": "right-1",
-                "target": "I58590322",
-                "targetHandle": "left-2",
-                "waypoints": []
-              },
-              "Idf64573f": {
-                "arrow": false,
-                "connectionType": "standard",
-                "dashed": false,
-                "lineType": "smoothstep",
-                "showLabel": false,
-                "source": "I90408f77",
-                "sourceHandle": "top-2",
-                "target": "Iddf52891",
-                "targetHandle": "bottom-2",
-                "waypoints": []
-              }
-            },
+            "edges": {},
             "enableOnClickEvents": true,
             "enabled": true,
             "handleCount": 5,
-            "nodes": {
-              "I50fb97a9": {
-                "configs": {
-                  "connections": [
-                    "I5a2d4737",
-                    "I53414fb4"
-                  ],
-                  "image": "ClientKeyboardBlue-Left",
-                  "quantity": 1
-                },
-                "height": 150,
-                "hideHandles": false,
-                "inactive": false,
-                "label": "Client",
-                "paletteId": "KBBlueLeft",
-                "supportedConnections": [
-                  "client",
-                  "rest"
-                ],
-                "tooltip": "",
-                "typeId": "Client",
-                "width": 150,
-                "x": 30,
-                "y": 0
-              },
-              "I58590322": {
-                "configs": {
-                  "connections": [
-                    "Id02262f0"
-                  ],
-                  "image": "ClientKeyboardBlue-Left",
-                  "quantity": 1
-                },
-                "height": 150,
-                "hideHandles": false,
-                "inactive": false,
-                "label": "Client",
-                "paletteId": "KBBlueLeft",
-                "supportedConnections": [
-                  "client",
-                  "rest"
-                ],
-                "tooltip": "",
-                "typeId": "Client",
-                "width": 150,
-                "x": 540,
-                "y": 510
-              },
-              "I90408f77": {
-                "configs": {
-                  "connections": [
-                    "Idf64573f",
-                    "I6be54665",
-                    "Id02262f0",
-                    "I094224dd",
-                    "I53414fb4"
-                  ],
-                  "development": false,
-                  "displayModules": true,
-                  "licenseKey": "",
-                  "licenseKeyRedun": "",
-                  "modules": {
-                    "CL": [],
-                    "IA": [
-                      {
-                        "name": "Platform"
-                      },
-                      {
-                        "name": "OPC UA"
-                      },
-                      {
-                        "name": "Perspective",
-                        "selection": "Unlimited"
-                      },
-                      {
-                        "name": "Tag Historian",
-                        "selection": "Full"
-                      },
-                      {
-                        "name": "Alarm Notification"
-                      },
-                      {
-                        "name": "SQL Bridge"
-                      }
-                    ],
-                    "SS": [],
-                    "TPM": []
-                  },
-                  "redundant": false,
-                  "sepasoft": false,
-                  "supportPlan": "Total",
-                  "trial": false,
-                  "version": "8.1.x"
-                },
-                "height": 150,
-                "hideHandles": false,
-                "inactive": false,
-                "label": "Standard",
-                "paletteId": "standard",
-                "supportedConnections": [
-                  "gateway-network",
-                  "device-driver",
-                  "client",
-                  "db",
-                  "opc-ua",
-                  "mqtt",
-                  "rest",
-                  "opc-com",
-                  "mongodb",
-                  "kafka",
-                  "standard"
-                ],
-                "tooltip": "",
-                "typeId": "standard",
-                "width": 150,
-                "x": 270,
-                "y": 600
-              },
-              "I93cf4a0c": {
-                "configs": {
-                  "connections": [
-                    "I6be54665"
-                  ],
-                  "image": "ClientKeyboardBlue-Left",
-                  "quantity": 1
-                },
-                "height": 150,
-                "hideHandles": false,
-                "inactive": false,
-                "label": "Client",
-                "paletteId": "KBBlueLeft",
-                "supportedConnections": [
-                  "client",
-                  "rest"
-                ],
-                "tooltip": "",
-                "typeId": "Client",
-                "width": 150,
-                "x": 0,
-                "y": 510
-              },
-              "Ib104f231": {
-                "configs": {
-                  "connections": [
-                    "I1a7b036e",
-                    "I094224dd"
-                  ],
-                  "image": "ClientKeyboardBlue-Left",
-                  "quantity": 1
-                },
-                "height": 150,
-                "hideHandles": false,
-                "inactive": false,
-                "label": "Client",
-                "paletteId": "KBBlueLeft",
-                "supportedConnections": [
-                  "client",
-                  "rest"
-                ],
-                "tooltip": "",
-                "typeId": "Client",
-                "width": 150,
-                "x": 510,
-                "y": 0
-              },
-              "Ib604db9f": {
-                "configs": {
-                  "connections": [
-                    "I03da1512",
-                    "I1a7b036e",
-                    "I5a2d4737",
-                    "Ib43c1903"
-                  ],
-                  "development": false,
-                  "displayModules": true,
-                  "licenseKey": "",
-                  "licenseKeyRedun": "",
-                  "modules": {
-                    "CL": [],
-                    "IA": [
-                      {
-                        "name": "Platform"
-                      },
-                      {
-                        "name": "OPC UA"
-                      },
-                      {
-                        "name": "Perspective",
-                        "selection": "Unlimited"
-                      },
-                      {
-                        "name": "Tag Historian",
-                        "selection": "Full"
-                      },
-                      {
-                        "name": "Alarm Notification"
-                      },
-                      {
-                        "name": "SQL Bridge"
-                      }
-                    ],
-                    "SS": [],
-                    "TPM": []
-                  },
-                  "redundant": false,
-                  "sepasoft": false,
-                  "supportPlan": "Total",
-                  "trial": false,
-                  "version": "8.1.x"
-                },
-                "height": 150,
-                "hideHandles": false,
-                "inactive": false,
-                "label": "Standard",
-                "paletteId": "standard",
-                "supportedConnections": [
-                  "gateway-network",
-                  "device-driver",
-                  "client",
-                  "db",
-                  "opc-ua",
-                  "mqtt",
-                  "rest",
-                  "opc-com",
-                  "mongodb",
-                  "kafka",
-                  "standard"
-                ],
-                "tooltip": "",
-                "typeId": "standard",
-                "width": 150,
-                "x": 270,
-                "y": 180
-              },
-              "Iddf52891": {
-                "configs": {
-                  "connections": [
-                    "Idf64573f",
-                    "I03da1512"
-                  ]
-                },
-                "height": 150,
-                "hideHandles": false,
-                "inactive": false,
-                "label": "Firewall",
-                "paletteId": "firewall",
-                "supportedConnections": [
-                  "standard",
-                  "rest",
-                  "gateway-network",
-                  "opc-ua",
-                  "mqtt",
-                  "kafka",
-                  "client",
-                  "opc-com",
-                  "mongodb",
-                  "device-driver",
-                  "db"
-                ],
-                "tooltip": "",
-                "typeId": "network-component",
-                "width": 150,
-                "x": 270,
-                "y": 390
-              },
-              "Idf47061a": {
-                "configs": {
-                  "connections": [
-                    "Ib43c1903"
-                  ],
-                  "image": "ClientKeyboardBlue-Left",
-                  "quantity": 1
-                },
-                "height": 150,
-                "hideHandles": false,
-                "inactive": false,
-                "label": "Client",
-                "paletteId": "KBBlueLeft",
-                "supportedConnections": [
-                  "client",
-                  "rest"
-                ],
-                "tooltip": "",
-                "typeId": "Client",
-                "width": 150,
-                "x": 270,
-                "y": 0
-              }
-            },
+            "nodes": {},
             "oldEdgeTypes": [
               "Standard",
               "Client"
@@ -6218,7 +5821,48 @@
           "handleCount": 5,
           "hierarchy": {
             "areas": [],
-            "nodes": []
+            "nodes": [
+              {
+                "id": "I90408f77",
+                "label": "Standard",
+                "typeId": "standard"
+              },
+              {
+                "id": "Ib604db9f",
+                "label": "Standard",
+                "typeId": "standard"
+              },
+              {
+                "id": "I58590322",
+                "label": "Client",
+                "typeId": "Client"
+              },
+              {
+                "id": "Ib104f231",
+                "label": "Client",
+                "typeId": "Client"
+              },
+              {
+                "id": "Idf47061a",
+                "label": "Client",
+                "typeId": "Client"
+              },
+              {
+                "id": "I93cf4a0c",
+                "label": "Client",
+                "typeId": "Client"
+              },
+              {
+                "id": "I50fb97a9",
+                "label": "Client",
+                "typeId": "Client"
+              },
+              {
+                "id": "Iddf52891",
+                "label": "Firewall",
+                "typeId": "network-component"
+              }
+            ]
           },
           "paletteItems": [
             {
@@ -8067,7 +7711,7 @@
           "name": "Tools"
         },
         "position": {
-          "basis": "200px"
+          "shrink": 0
         },
         "type": "ia.container.flex"
       }
