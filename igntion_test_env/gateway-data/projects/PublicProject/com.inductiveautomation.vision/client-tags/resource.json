@@ -1,5 +1,5 @@
 {
-  "scope": "A",
+  "scope": "C",
   "version": 1,
   "restricted": false,
   "overridable": true,
@@ -7,10 +7,10 @@
     "data.bin"
   ],
   "attributes": {
-    "lastModificationSignature": "e753847612b4025fbcd5d338634d69dc8a4d8d0ba3f54b5a07d92fa23030b445",
+    "lastModificationSignature": "d6de597a7f822399a38ceff80d855b511172fea563bdaf6ac3b5f8d74a6d949c",
     "lastModification": {
       "actor": "admin",
-      "timestamp": "2026-06-11T15:38:31Z"
+      "timestamp": "2026-06-12T12:51:07Z"
     }
   }
 }

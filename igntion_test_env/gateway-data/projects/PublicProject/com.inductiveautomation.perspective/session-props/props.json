@@ -1,7 +1,5 @@
 {
-  "custom": {
-    "key": "value"
-  },
+  "custom": {},
   "propConfig": {
     "props.auth": {
       "access": "PRIVATE",
