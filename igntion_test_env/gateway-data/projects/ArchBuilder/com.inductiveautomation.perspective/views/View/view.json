@@ -1,0 +1,36 @@
+{
+  "custom": {},
+  "params": {},
+  "props": {
+    "defaultSize": {
+      "height": 969,
+      "width": 1260
+    }
+  },
+  "root": {
+    "children": [
+      {
+        "meta": {
+          "name": "ArchitectureBuilder"
+        },
+        "position": {
+          "height": 810,
+          "width": 1065,
+          "x": 472,
+          "y": 615
+        },
+        "props": {
+          "hierarchy": {
+            "areas": [],
+            "nodes": []
+          }
+        },
+        "type": "com.wargoetz.reactflow.architecturebuilder"
+      }
+    ],
+    "meta": {
+      "name": "root"
+    },
+    "type": "ia.container.coord"
+  }
+}

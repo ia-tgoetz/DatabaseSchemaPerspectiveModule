@@ -4,14 +4,13 @@
   "restricted": false,
   "overridable": true,
   "files": [
-    "code.py"
+    "data.bin"
   ],
   "attributes": {
-    "hintScope": 2,
-    "lastModificationSignature": "01f069be93d407991fe65a5763368b2fad8b5644eafc14f4403f6aa29bd25adc",
+    "lastModificationSignature": "6ed5a44d790cc694de522ad5ec0a244e9dd07736a6f8c26b064f8c42150d95da",
     "lastModification": {
       "actor": "admin",
-      "timestamp": "2026-06-12T10:34:20Z"
+      "timestamp": "2026-06-12T12:51:05Z"
     }
   }
 }
