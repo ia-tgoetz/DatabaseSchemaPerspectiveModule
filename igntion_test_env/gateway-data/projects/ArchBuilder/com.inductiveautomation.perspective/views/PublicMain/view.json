@@ -2609,15 +2609,15 @@
     },
     "key": [
       "edgeWidth",
-      "snapPixels",
       "nodes",
       "snapEnabled",
+      "snapPixels",
       "edges",
       "oldEdgeTypes",
       "enableOnClickEvents",
       "enabled",
-      "oldNodeTypes",
-      "handleCount"
+      "handleCount",
+      "oldNodeTypes"
     ],
     "palleteItems": [
       {
@@ -6860,7 +6860,8 @@
           "name": "ArchitectureBuilder"
         },
         "position": {
-          "basis": "600px"
+          "basis": "600px",
+          "grow": 1
         },
         "propConfig": {
           "props.paletteItems": {
@@ -6875,248 +6876,7 @@
         "props": {
           "handleCount": 5,
           "hierarchy": {
-            "areas": [
-              {
-                "areas": [],
-                "id": "I13238561",
-                "label": "Remote Site",
-                "nodes": [
-                  {
-                    "id": "Id2251fcb",
-                    "label": "Clients",
-                    "typeId": "Client"
-                  },
-                  {
-                    "id": "I0e6ef0c1",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "I6307a45f",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "I87755fdb",
-                    "label": "Remote Gateway",
-                    "typeId": "edge-panel"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [],
-                "id": "I660ca312",
-                "label": "Medium",
-                "nodes": [
-                  {
-                    "id": "I3adadd93",
-                    "label": "Backend",
-                    "typeId": "standard"
-                  },
-                  {
-                    "id": "Ia54fc2b0",
-                    "label": "Frontend",
-                    "typeId": "standard"
-                  },
-                  {
-                    "id": "I8b8ac19b",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "Iafa7907d",
-                    "label": "Clients",
-                    "typeId": "Client"
-                  },
-                  {
-                    "id": "I59b0c692",
-                    "label": "Device",
-                    "typeId": "Device"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [],
-                "id": "I602ba698",
-                "label": "site",
-                "nodes": [
-                  {
-                    "id": "Ie76c8021",
-                    "label": "Standard",
-                    "typeId": "standard"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [],
-                "id": "I1101586b",
-                "label": "IT Site",
-                "nodes": [
-                  {
-                    "id": "I9bb8526b",
-                    "label": "Central Gateway",
-                    "typeId": "standard"
-                  },
-                  {
-                    "id": "I3ae45942",
-                    "label": "IIoT",
-                    "typeId": "Broker"
-                  },
-                  {
-                    "id": "I5a32e2c0",
-                    "label": "Database",
-                    "typeId": "Database"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [],
-                "id": "I57c1a80b",
-                "label": "Remote Site",
-                "nodes": [
-                  {
-                    "id": "Ie96a5e40",
-                    "label": "Remote Gateway",
-                    "typeId": "edge-panel"
-                  },
-                  {
-                    "id": "I0777b949",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "I1b000114",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "Ice664ec5",
-                    "label": "Clients",
-                    "typeId": "Client"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [],
-                "id": "Iae285dba",
-                "label": "Small",
-                "nodes": [
-                  {
-                    "id": "I934a5aa7",
-                    "label": "Database",
-                    "typeId": "Database"
-                  },
-                  {
-                    "id": "I08fe295e",
-                    "label": "Single Gateway",
-                    "typeId": "standard"
-                  },
-                  {
-                    "id": "I98920bdc",
-                    "label": "Clients",
-                    "typeId": "Client"
-                  },
-                  {
-                    "id": "I587e7231",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "I423df14f",
-                    "label": "Device",
-                    "typeId": "Device"
-                  }
-                ],
-                "typeId": "container"
-              },
-              {
-                "areas": [
-                  {
-                    "areas": [],
-                    "id": "Idbd79394",
-                    "label": "Critical Equipment",
-                    "nodes": [
-                      {
-                        "id": "Ieaa164d6",
-                        "label": "Device",
-                        "typeId": "Device"
-                      },
-                      {
-                        "id": "Ieb78f060",
-                        "label": "Edge IIoT",
-                        "typeId": "edge-panel"
-                      },
-                      {
-                        "id": "I31e314a6",
-                        "label": "Client",
-                        "typeId": "Client"
-                      }
-                    ],
-                    "typeId": "container"
-                  }
-                ],
-                "id": "I729fedb1",
-                "label": "Large (Complex Site)",
-                "nodes": [
-                  {
-                    "id": "Ia2fb8b21",
-                    "label": "Frontend 1",
-                    "typeId": "standard"
-                  },
-                  {
-                    "id": "I91f1e65b",
-                    "label": "Frontend 2",
-                    "typeId": "standard"
-                  },
-                  {
-                    "id": "I5017de58",
-                    "label": "Database",
-                    "typeId": "Database"
-                  },
-                  {
-                    "id": "Ibc40ed73",
-                    "label": "Backend 2",
-                    "typeId": "standard"
-                  },
-                  {
-                    "id": "I610752ac",
-                    "label": "Backend 1",
-                    "typeId": "standard"
-                  },
-                  {
-                    "id": "I8cee68e5",
-                    "label": "Clients",
-                    "typeId": "Client"
-                  },
-                  {
-                    "id": "I4050a1c7",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "I75c82912",
-                    "label": "Database",
-                    "typeId": "Database"
-                  },
-                  {
-                    "id": "Id24911d8",
-                    "label": "Device",
-                    "typeId": "Device"
-                  },
-                  {
-                    "id": "Id434f994",
-                    "label": "Load Balancer",
-                    "typeId": "network-component"
-                  }
-                ],
-                "typeId": "container"
-              }
-            ],
+            "areas": [],
             "nodes": []
           }
         },

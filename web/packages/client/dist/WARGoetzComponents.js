@@ -15836,11 +15836,11 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isEnabled, selectedId, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
-    const _e = props.props.style || {}, { classes } = _e, ignitionStyles = __rest(_e, ["classes"]);
-    const containerStyle = Object.assign({ display: 'flex', width: '100%', height: '100%', backgroundColor: 'var(--neutral-00)' }, ignitionStyles);
+    const { classes } = props.props.style || {};
+    const emitProps = props.emit({ classes });
     // ─── Render ────────────────────────────────────────────────────────────
     return (React.createElement(ComponentErrorBoundary_1.ComponentErrorBoundary, { componentEvents: props.componentEvents },
-        React.createElement("div", Object.assign({}, props.emit({ classes }), { style: containerStyle, tabIndex: 0 }),
+        React.createElement("div", Object.assign({}, emitProps, { style: Object.assign(Object.assign({}, emitProps.style), { display: 'flex', backgroundColor: 'var(--neutral-00)' }), tabIndex: 0 }),
             React.createElement("style", null, `
                 .arch-theme-wrapper {
                     display: flex; flex-direction: row; flex: 1; width: 100%; height: 100%;
