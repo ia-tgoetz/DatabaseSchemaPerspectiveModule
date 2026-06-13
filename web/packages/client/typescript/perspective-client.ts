@@ -73,7 +73,7 @@ export class JsonEditorMeta implements ComponentMeta {
 // --- ARCHITECTURE BUILDER (NEW) ---
 export class ArchitectureBuilderMeta implements ComponentMeta {
     getComponentType(): string {
-        return 'com.wargoetz.reactflow.architecturebuilder'; 
+        return 'com.wargoetz.reactflow.architecturebuilder';
     }
     getViewComponent(): any {
         return ArchitectureBuilder as any;
@@ -82,12 +82,15 @@ export class ArchitectureBuilderMeta implements ComponentMeta {
         return { width: 800, height: 600 };
     }
     getPropsReducer(tree: any): any {
+        const rawHandleCount = tree.read('handleCount', 3);
+        const clampedHandleCount = Math.max(1, Math.min(5, Number(rawHandleCount) || 3));
+
         return {
             nodes: tree.read('nodes'),
             edges: tree.read('edges'),
             paletteItems: tree.read('paletteItems'),
             connectionTypes: tree.read('connectionTypes'),
-            
+
             // These must exactly match the keys in your architecturebuilder.props.json
             enabled: tree.read('enabled', true),
             enableOnClickEvents: tree.read('enableOnClickEvents', true),
@@ -95,7 +98,7 @@ export class ArchitectureBuilderMeta implements ComponentMeta {
             snapPixels: tree.read('snapPixels', 15),
             edgeWidth: tree.read('edgeWidth', 6),
             hideHandles: tree.read('hideHandles', false),
-            handleCount: tree.read('handleCount', 3),
+            handleCount: clampedHandleCount,
             refreshHierarchy: tree.read('refreshHierarchy', false),
             style: tree.read('style')
         };

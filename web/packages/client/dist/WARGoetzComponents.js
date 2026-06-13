@@ -15702,7 +15702,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
     const paletteItems = React.useMemo(() => JSON.parse(paletteItemsJson), [paletteItemsJson]);
     const rawConfig = React.useMemo(() => JSON.parse(rawConfigJson), [rawConfigJson]);
     const globalHideHandles = rawConfig.hideHandles === true || String((_a = rawConfig.hideHandles) !== null && _a !== void 0 ? _a : '').toLowerCase() === 'true';
-    const globalHandleCount = Number(rawConfig.handleCount) || 3;
+    const globalHandleCount = Math.max(1, Math.min(5, Number(rawConfig.handleCount) || 3));
     const isEnabled = rawConfig.enabled !== false && String((_b = rawConfig.enabled) !== null && _b !== void 0 ? _b : 'true').toLowerCase() !== 'false';
     const enableOnClickEvents = rawConfig.enableOnClickEvents !== false && String((_c = rawConfig.enableOnClickEvents) !== null && _c !== void 0 ? _c : 'true').toLowerCase() !== 'false';
     const snapEnabled = rawConfig.snapEnabled !== false && String((_d = rawConfig.snapEnabled) !== null && _d !== void 0 ? _d : 'true').toLowerCase() !== 'false';
@@ -16063,7 +16063,7 @@ const ArchitectureNode = ({ id, data, selected }) => {
         zIndex: 20,
         '--hit-size': `${hitSize}px`
     };
-    const handleCount = (_d = data.handleCount) !== null && _d !== void 0 ? _d : 3;
+    const handleCount = Math.max(1, Math.min(5, (_d = data.handleCount) !== null && _d !== void 0 ? _d : 3));
     const positions = Array.from({ length: handleCount }, (_, i) => `${((i + 0.5) / handleCount) * 100}%`);
     const highlighted = new Set(data.highlightedHandles || []);
     const handleClass = (id) => {
@@ -19420,6 +19420,8 @@ class ArchitectureBuilderMeta {
         return { width: 800, height: 600 };
     }
     getPropsReducer(tree) {
+        const rawHandleCount = tree.read('handleCount', 3);
+        const clampedHandleCount = Math.max(1, Math.min(5, Number(rawHandleCount) || 3));
         return {
             nodes: tree.read('nodes'),
             edges: tree.read('edges'),
@@ -19432,7 +19434,7 @@ class ArchitectureBuilderMeta {
             snapPixels: tree.read('snapPixels', 15),
             edgeWidth: tree.read('edgeWidth', 6),
             hideHandles: tree.read('hideHandles', false),
-            handleCount: tree.read('handleCount', 3),
+            handleCount: clampedHandleCount,
             refreshHierarchy: tree.read('refreshHierarchy', false),
             style: tree.read('style')
         };
