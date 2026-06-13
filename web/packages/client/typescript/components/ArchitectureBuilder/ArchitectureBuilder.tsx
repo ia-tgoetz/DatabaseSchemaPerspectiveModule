@@ -416,14 +416,14 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isEnabled, selectedId, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
 
-    const { classes, ...ignitionStyles } = props.props.style || {};
-    const containerStyle: React.CSSProperties = { display: 'flex', width: '100%', height: '100%', backgroundColor: 'var(--neutral-00)', ...ignitionStyles };
+    const { classes } = props.props.style || {};
+    const emitProps = props.emit({ classes });
 
     // ─── Render ────────────────────────────────────────────────────────────
 
     return (
         <ComponentErrorBoundary componentEvents={props.componentEvents}>
-            <div {...props.emit({ classes })} style={containerStyle} tabIndex={0}>
+            <div {...emitProps} style={{ ...emitProps.style, display: 'flex', backgroundColor: 'var(--neutral-00)' }} tabIndex={0}>
                 <style>{`
                 .arch-theme-wrapper {
                     display: flex; flex-direction: row; flex: 1; width: 100%; height: 100%;
