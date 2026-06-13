@@ -15788,6 +15788,30 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
             setLocalEdges(flowEdges);
         }
     }, [flowEdges, isUpdatingEdge, isDraggingNode]);
+    React.useEffect(() => {
+        var _a, _b;
+        let hasChanges = false;
+        const corrected = {};
+        for (const [edgeId, edge] of Object.entries(rawEdgesDict)) {
+            const updated = Object.assign({}, edge);
+            const srcParts = (_a = edge.sourceHandle) === null || _a === void 0 ? void 0 : _a.split('-');
+            if (srcParts && parseInt(srcParts[1], 10) >= globalHandleCount) {
+                updated.sourceHandle = `${srcParts[0]}-${globalHandleCount - 1}`;
+                updated.waypoints = [];
+                hasChanges = true;
+            }
+            const tgtParts = (_b = edge.targetHandle) === null || _b === void 0 ? void 0 : _b.split('-');
+            if (tgtParts && parseInt(tgtParts[1], 10) >= globalHandleCount) {
+                updated.targetHandle = `${tgtParts[0]}-${globalHandleCount - 1}`;
+                updated.waypoints = [];
+                hasChanges = true;
+            }
+            corrected[edgeId] = updated;
+        }
+        if (hasChanges) {
+            props.store.props.write('edges', corrected);
+        }
+    }, [globalHandleCount]);
     const displayEdges = React.useMemo(() => {
         const localMap = new Map(localEdges.map((e) => [e.id, e]));
         return flowEdges.filter(e => !isUpdatingEdge || e.id !== updatingEdgeRef.current).map((fresh) => {

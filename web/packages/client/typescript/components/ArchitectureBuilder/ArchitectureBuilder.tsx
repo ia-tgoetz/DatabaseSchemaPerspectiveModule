@@ -370,6 +370,35 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         }
     }, [flowEdges, isUpdatingEdge, isDraggingNode]);
 
+    React.useEffect(() => {
+        let hasChanges = false;
+        const corrected: Record<string, any> = {};
+
+        for (const [edgeId, edge] of Object.entries(rawEdgesDict)) {
+            const updated: any = { ...edge };
+
+            const srcParts = (edge.sourceHandle as string)?.split('-');
+            if (srcParts && parseInt(srcParts[1], 10) >= globalHandleCount) {
+                updated.sourceHandle = `${srcParts[0]}-${globalHandleCount - 1}`;
+                updated.waypoints = [];
+                hasChanges = true;
+            }
+
+            const tgtParts = (edge.targetHandle as string)?.split('-');
+            if (tgtParts && parseInt(tgtParts[1], 10) >= globalHandleCount) {
+                updated.targetHandle = `${tgtParts[0]}-${globalHandleCount - 1}`;
+                updated.waypoints = [];
+                hasChanges = true;
+            }
+
+            corrected[edgeId] = updated;
+        }
+
+        if (hasChanges) {
+            props.store.props.write('edges', corrected);
+        }
+    }, [globalHandleCount]);
+
     const displayEdges = React.useMemo(() => {
         const localMap = new Map(localEdges.map((e: any) => [e.id, e]));
         return flowEdges.filter(e => !isUpdatingEdge || e.id !== updatingEdgeRef.current).map((fresh: any) => {
