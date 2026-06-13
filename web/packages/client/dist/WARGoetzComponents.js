@@ -16629,7 +16629,8 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
     };
     // ─── Render ───────────────────────────────────────────────────────────
     const segHandlePts = [{ x: sx, y: sy }, ...pinnedWaypoints, { x: tx, y: ty }];
-    const animation = (_b = data === null || data === void 0 ? void 0 : data.animation) !== null && _b !== void 0 ? _b : 'none';
+    const isDashed = (data === null || data === void 0 ? void 0 : data.dashed) === true;
+    const animation = isDashed ? 'none' : ((_b = data === null || data === void 0 ? void 0 : data.animation) !== null && _b !== void 0 ? _b : 'none');
     // Shared overlay style for particles
     const overlayBaseStyle = Object.assign(Object.assign({}, style), { fill: 'none', stroke: 'rgba(255, 255, 255, 0.95)', strokeWidth: Math.max(3, ((style === null || style === void 0 ? void 0 : style.strokeWidth) || 6) * 0.5), pointerEvents: 'none', strokeLinecap: 'round' });
     return (React.createElement(React.Fragment, null,
@@ -16836,6 +16837,7 @@ const mapIgnitionToReactFlowEdges = (ignitionEdges, ignitionNodes, connectionTyp
                 animation: effectiveAnimation,
                 snapEnabled: snapEnabled !== null && snapEnabled !== void 0 ? snapEnabled : true,
                 snapPixels: snapPixels !== null && snapPixels !== void 0 ? snapPixels : 15,
+                dashed: edgeData.dashed === true,
                 onWaypointsChange: onWaypointsChange
                     ? (wps) => onWaypointsChange(id, wps)
                     : undefined,

@@ -173,7 +173,8 @@ export const CustomEdge = ({
     // ─── Render ───────────────────────────────────────────────────────────
 
     const segHandlePts: Waypoint[] = [{ x: sx, y: sy }, ...pinnedWaypoints, { x: tx, y: ty }];
-    const animation = data?.animation ?? 'none';
+    const isDashed = data?.dashed === true;
+    const animation = isDashed ? 'none' : (data?.animation ?? 'none');
     
     // Shared overlay style for particles
     const overlayBaseStyle: React.CSSProperties = { 
