@@ -98,7 +98,7 @@ export const ArchitectureNode = ({ id, data, selected }: NodeProps<ArchitectureN
         '--hit-size': `${hitSize}px`
     };
 
-    const handleCount = data.handleCount ?? 3;
+    const handleCount = Math.max(1, Math.min(5, data.handleCount ?? 3));
     const positions = Array.from({ length: handleCount }, (_, i) => `${((i + 0.5) / handleCount) * 100}%`);
     const highlighted = new Set(data.highlightedHandles || []);
     const handleClass = (id: string) => {

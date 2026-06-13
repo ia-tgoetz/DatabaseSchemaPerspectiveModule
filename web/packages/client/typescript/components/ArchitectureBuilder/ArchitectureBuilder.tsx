@@ -256,7 +256,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     const rawConfig = React.useMemo(() => JSON.parse(rawConfigJson), [rawConfigJson]);
 
     const globalHideHandles = rawConfig.hideHandles === true || String(rawConfig.hideHandles ?? '').toLowerCase() === 'true';
-    const globalHandleCount = Number(rawConfig.handleCount) || 3;
+    const globalHandleCount = Math.max(1, Math.min(5, Number(rawConfig.handleCount) || 3));
     const isEnabled = rawConfig.enabled !== false && String(rawConfig.enabled ?? 'true').toLowerCase() !== 'false';
     const enableOnClickEvents = rawConfig.enableOnClickEvents !== false && String(rawConfig.enableOnClickEvents ?? 'true').toLowerCase() !== 'false';
     const snapEnabled = rawConfig.snapEnabled !== false && String(rawConfig.snapEnabled ?? 'true').toLowerCase() !== 'false';
@@ -369,6 +369,35 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
             setLocalEdges(flowEdges);
         }
     }, [flowEdges, isUpdatingEdge, isDraggingNode]);
+
+    React.useEffect(() => {
+        let hasChanges = false;
+        const corrected: Record<string, any> = {};
+
+        for (const [edgeId, edge] of Object.entries(rawEdgesDict)) {
+            const updated: any = { ...edge };
+
+            const srcParts = (edge.sourceHandle as string)?.split('-');
+            if (srcParts && parseInt(srcParts[1], 10) >= globalHandleCount) {
+                updated.sourceHandle = `${srcParts[0]}-${globalHandleCount - 1}`;
+                updated.waypoints = [];
+                hasChanges = true;
+            }
+
+            const tgtParts = (edge.targetHandle as string)?.split('-');
+            if (tgtParts && parseInt(tgtParts[1], 10) >= globalHandleCount) {
+                updated.targetHandle = `${tgtParts[0]}-${globalHandleCount - 1}`;
+                updated.waypoints = [];
+                hasChanges = true;
+            }
+
+            corrected[edgeId] = updated;
+        }
+
+        if (hasChanges) {
+            props.store.props.write('edges', corrected);
+        }
+    }, [globalHandleCount]);
 
     const displayEdges = React.useMemo(() => {
         const localMap = new Map(localEdges.map((e: any) => [e.id, e]));
