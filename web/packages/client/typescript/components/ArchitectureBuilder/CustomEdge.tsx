@@ -180,8 +180,8 @@ export const CustomEdge = ({
         setEditingText(label);
     };
 
-    const handleLabelInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
+    const handleLabelInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && e.ctrlKey) {
             e.preventDefault();
             if (editingText !== label && data?.onLabelChange) {
                 data.onLabelChange(editingText);
@@ -191,6 +191,12 @@ export const CustomEdge = ({
             e.preventDefault();
             setIsEditing(false);
         }
+    };
+
+    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setEditingText(e.target.value);
+        e.target.style.height = 'auto';
+        e.target.style.height = `${e.target.scrollHeight}px`;
     };
 
     const handleLabelInputBlur = () => {
@@ -285,20 +291,21 @@ export const CustomEdge = ({
             {label && showLabel && (
                 <EdgeLabelRenderer>
                     {isEditing ? (
-                        <input
-                            type="text"
+                        <textarea
                             value={editingText}
-                            onChange={(e) => setEditingText(e.target.value)}
+                            onChange={handleTextareaChange}
                             onKeyDown={handleLabelInputKeyDown}
                             onBlur={handleLabelInputBlur}
                             autoFocus
                             style={{
                                 position: 'absolute',
                                 transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                                backgroundColor: 'var(--neutral-10)', padding: '2px 6px', borderRadius: '4px',
-                                border: `1px solid var(--primary)`, fontSize: '12px', fontWeight: 'bold',
+                                backgroundColor: 'var(--neutral-10)', padding: '4px 8px', borderRadius: '4px',
+                                border: `2px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
                                 color: style?.stroke || 'var(--neutral-90)', zIndex: 1003,
-                                outline: 'none',
+                                outline: 'none', resize: 'none', overflow: 'hidden', minHeight: '20px',
+                                fontFamily: 'inherit', whiteSpace: 'pre-wrap',
+                                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
                             }}
                             className="nodrag nopan"
                         />
@@ -311,7 +318,7 @@ export const CustomEdge = ({
                                 backgroundColor: 'var(--neutral-10)', padding: '2px 8px', borderRadius: '4px',
                                 border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
                                 color: style?.stroke || 'var(--neutral-90)', pointerEvents: 'auto',
-                                zIndex: 1002, cursor: 'text',
+                                zIndex: 1002, cursor: 'text', whiteSpace: 'pre-wrap', textAlign: 'center',
                             }}
                             className="nodrag nopan"
                         >

@@ -16746,7 +16746,7 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
         setEditingText(label);
     };
     const handleLabelInputKeyDown = (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && e.ctrlKey) {
             e.preventDefault();
             if (editingText !== label && (data === null || data === void 0 ? void 0 : data.onLabelChange)) {
                 data.onLabelChange(editingText);
@@ -16757,6 +16757,11 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
             e.preventDefault();
             setIsEditing(false);
         }
+    };
+    const handleTextareaChange = (e) => {
+        setEditingText(e.target.value);
+        e.target.style.height = 'auto';
+        e.target.style.height = `${e.target.scrollHeight}px`;
     };
     const handleLabelInputBlur = () => {
         if (editingText !== label && (data === null || data === void 0 ? void 0 : data.onLabelChange)) {
@@ -16791,14 +16796,16 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
                             drop-shadow(0px 1px 0px rgba(0, 0, 0, 1)) 
                             drop-shadow(0px -1px 0px rgba(0, 0, 0, 1))
                             ` }) }))),
-        label && showLabel && (React.createElement(reactflow_1.EdgeLabelRenderer, null, isEditing ? (React.createElement("input", { type: "text", value: editingText, onChange: (e) => setEditingText(e.target.value), onKeyDown: handleLabelInputKeyDown, onBlur: handleLabelInputBlur, autoFocus: true, style: {
+        label && showLabel && (React.createElement(reactflow_1.EdgeLabelRenderer, null, isEditing ? (React.createElement("textarea", { value: editingText, onChange: handleTextareaChange, onKeyDown: handleLabelInputKeyDown, onBlur: handleLabelInputBlur, autoFocus: true, style: {
                 position: 'absolute',
                 transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                backgroundColor: 'var(--neutral-10)', padding: '2px 6px', borderRadius: '4px',
-                border: `1px solid var(--primary)`, fontSize: '12px', fontWeight: 'bold',
+                backgroundColor: 'var(--neutral-10)', padding: '4px 8px', borderRadius: '4px',
+                border: `2px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
                 color: (style === null || style === void 0 ? void 0 : style.stroke) || 'var(--neutral-90)',
                 zIndex: 1003,
-                outline: 'none',
+                outline: 'none', resize: 'none', overflow: 'hidden', minHeight: '20px',
+                fontFamily: 'inherit', whiteSpace: 'pre-wrap',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
             }, className: "nodrag nopan" })) : (React.createElement("div", { onDoubleClick: handleLabelDoubleClick, style: {
                 position: 'absolute',
                 transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
@@ -16806,7 +16813,7 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
                 border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
                 color: (style === null || style === void 0 ? void 0 : style.stroke) || 'var(--neutral-90)',
                 pointerEvents: 'auto',
-                zIndex: 1002, cursor: 'text',
+                zIndex: 1002, cursor: 'text', whiteSpace: 'pre-wrap', textAlign: 'center',
             }, className: "nodrag nopan" }, label)))),
         canEdit && segHandlePts.length >= 4 && (React.createElement(reactflow_1.EdgeLabelRenderer, null, segHandlePts.slice(0, -1).map((pt, i) => {
             const next = segHandlePts[i + 1];
