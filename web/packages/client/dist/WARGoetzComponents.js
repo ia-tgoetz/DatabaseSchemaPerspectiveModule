@@ -15732,7 +15732,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         props.store.props.write('refreshHierarchy', false);
     }, [props.props.refreshHierarchy, props.store]);
     // ─── Handlers hook ─────────────────────────────────────────────────────
-    const { isUpdatingEdge, isDraggingNode, updatingEdgeRef, rawNodesDictRef, closeContextMenu, getValidIntersection, isValidConnection, handleWaypointsChange, onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd, onEdgesDelete, onEdgeContextMenu, onEdgeClick, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, handleGearClick, handlePaletteItemClick, handleResizeEnd, handleTextChange, onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onNodeContextMenu, onNodeClick, executeCopy, executePaste, onDragOver, onDrop, onMoveStart, onPaneClick, onPaneContextMenu, handleNodeSwap, handleContextMenuAction, } = useArchitectureFlowHandlers_1.useArchitectureFlowHandlers({
+    const { isUpdatingEdge, isDraggingNode, updatingEdgeRef, rawNodesDictRef, closeContextMenu, getValidIntersection, isValidConnection, handleWaypointsChange, handleLabelChange, onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd, onEdgesDelete, onEdgeContextMenu, onEdgeClick, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, handleGearClick, handlePaletteItemClick, handleResizeEnd, handleTextChange, onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onNodeContextMenu, onNodeClick, executeCopy, executePaste, onDragOver, onDrop, onMoveStart, onPaneClick, onPaneContextMenu, handleNodeSwap, handleContextMenuAction, } = useArchitectureFlowHandlers_1.useArchitectureFlowHandlers({
         store: props.store,
         componentEvents: props.componentEvents,
         rawNodesDict,
@@ -15778,7 +15778,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         return map;
     }, [rawEdgesDict]);
     const flowNodes = React.useMemo(() => mapIgnitionToReactFlowNodes(rawNodesDict, paletteItems, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled), [rawNodesDict, paletteItems, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled]);
-    const flowEdges = React.useMemo(() => EdgeUtils_1.mapIgnitionToReactFlowEdges(rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth), [rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth]);
+    const flowEdges = React.useMemo(() => EdgeUtils_1.mapIgnitionToReactFlowEdges(rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, handleLabelChange, snapEnabled, snapPixels, globalEdgeWidth), [rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, handleLabelChange, snapEnabled, snapPixels, globalEdgeWidth]);
     React.useEffect(() => {
         if (!isDraggingNode) {
             setLocalNodes(flowNodes);
@@ -16622,6 +16622,8 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
     // null = at rest (derive from props); non-null = user is actively dragging.
     const [liveWaypoints, setLiveWaypoints] = React.useState(null);
     const dragState = React.useRef(null);
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [editingText, setEditingText] = React.useState(label);
     const isStepType = (data === null || data === void 0 ? void 0 : data.lineType) === 'step' || (data === null || data === void 0 ? void 0 : data.lineType) === 'smoothstep' || !(data === null || data === void 0 ? void 0 : data.lineType);
     const isHorizSrc = sourcePosition === 'right' || sourcePosition === 'left';
     const isHorizTgt = targetPosition === 'right' || targetPosition === 'left';
@@ -16738,6 +16740,30 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
         dragState.current = null;
         setLiveWaypoints(null);
     };
+    // ─── Label editing ───────────────────────────────────────────────────
+    const handleLabelDoubleClick = () => {
+        setIsEditing(true);
+        setEditingText(label);
+    };
+    const handleLabelInputKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (editingText !== label && (data === null || data === void 0 ? void 0 : data.onLabelChange)) {
+                data.onLabelChange(editingText);
+            }
+            setIsEditing(false);
+        }
+        else if (e.key === 'Escape') {
+            e.preventDefault();
+            setIsEditing(false);
+        }
+    };
+    const handleLabelInputBlur = () => {
+        if (editingText !== label && (data === null || data === void 0 ? void 0 : data.onLabelChange)) {
+            data.onLabelChange(editingText);
+        }
+        setIsEditing(false);
+    };
     // ─── Render ───────────────────────────────────────────────────────────
     const segHandlePts = [{ x: sx, y: sy }, ...pinnedWaypoints, { x: tx, y: ty }];
     const isDashed = (data === null || data === void 0 ? void 0 : data.dashed) === true;
@@ -16765,16 +16791,23 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
                             drop-shadow(0px 1px 0px rgba(0, 0, 0, 1)) 
                             drop-shadow(0px -1px 0px rgba(0, 0, 0, 1))
                             ` }) }))),
-        label && showLabel && (React.createElement(reactflow_1.EdgeLabelRenderer, null,
-            React.createElement("div", { style: {
-                    position: 'absolute',
-                    transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                    backgroundColor: 'var(--neutral-10)', padding: '2px 8px', borderRadius: '4px',
-                    border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
-                    color: (style === null || style === void 0 ? void 0 : style.stroke) || 'var(--neutral-90)',
-                    pointerEvents: 'none',
-                    zIndex: 1002,
-                }, className: "nodrag nopan" }, label))),
+        label && showLabel && (React.createElement(reactflow_1.EdgeLabelRenderer, null, isEditing ? (React.createElement("input", { type: "text", value: editingText, onChange: (e) => setEditingText(e.target.value), onKeyDown: handleLabelInputKeyDown, onBlur: handleLabelInputBlur, autoFocus: true, style: {
+                position: 'absolute',
+                transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+                backgroundColor: 'var(--neutral-10)', padding: '2px 6px', borderRadius: '4px',
+                border: `1px solid var(--primary)`, fontSize: '12px', fontWeight: 'bold',
+                color: (style === null || style === void 0 ? void 0 : style.stroke) || 'var(--neutral-90)',
+                zIndex: 1003,
+                outline: 'none',
+            }, className: "nodrag nopan" })) : (React.createElement("div", { onDoubleClick: handleLabelDoubleClick, style: {
+                position: 'absolute',
+                transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+                backgroundColor: 'var(--neutral-10)', padding: '2px 8px', borderRadius: '4px',
+                border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
+                color: (style === null || style === void 0 ? void 0 : style.stroke) || 'var(--neutral-90)',
+                pointerEvents: 'auto',
+                zIndex: 1002, cursor: 'text',
+            }, className: "nodrag nopan" }, label)))),
         canEdit && segHandlePts.length >= 4 && (React.createElement(reactflow_1.EdgeLabelRenderer, null, segHandlePts.slice(0, -1).map((pt, i) => {
             const next = segHandlePts[i + 1];
             if (i === 0 || i === segHandlePts.length - 2)
@@ -16914,7 +16947,7 @@ const computeAutoWaypoints = (sx, sy, sp, tx, ty, tp) => {
     return [{ x: sx, y: ey }, { x: midX, y: ey }, { x: midX, y: fy }, { x: tx, y: fy }];
 };
 exports.computeAutoWaypoints = computeAutoWaypoints;
-const mapIgnitionToReactFlowEdges = (ignitionEdges, ignitionNodes, connectionTypes, selectedId, onWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth) => {
+const mapIgnitionToReactFlowEdges = (ignitionEdges, ignitionNodes, connectionTypes, selectedId, onWaypointsChange, onLabelChange, snapEnabled, snapPixels, globalEdgeWidth) => {
     const baseWidth = globalEdgeWidth !== null && globalEdgeWidth !== void 0 ? globalEdgeWidth : 6;
     if (!ignitionEdges)
         return [];
@@ -16952,7 +16985,10 @@ const mapIgnitionToReactFlowEdges = (ignitionEdges, ignitionNodes, connectionTyp
                 onWaypointsChange: onWaypointsChange
                     ? (wps) => onWaypointsChange(id, wps)
                     : undefined,
-            }, label: typeConfig.label || edgeData.connectionType || '', style: strokeStyle, markerEnd: arrowMarker, interactionWidth: 20 });
+                onLabelChange: onLabelChange
+                    ? (labelText) => onLabelChange(id, labelText)
+                    : undefined,
+            }, label: edgeData.labelText || typeConfig.label || edgeData.connectionType || '', style: strokeStyle, markerEnd: arrowMarker, interactionWidth: 20 });
     });
 };
 exports.mapIgnitionToReactFlowEdges = mapIgnitionToReactFlowEdges;
@@ -18428,7 +18464,7 @@ const useEdgeHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, c
             const selectedType = validTypes[0];
             const typeDef = connectionTypes[selectedType] || {};
             if (store === null || store === void 0 ? void 0 : store.props) {
-                store.props.write('edges', Object.assign(Object.assign({}, rawEdgesDict), { [utils_1.generateShortId()]: Object.assign(Object.assign({}, connectionParams), { lineType: 'smoothstep', dashed: false, arrow: typeDef.arrow !== false, showLabel: false, connectionType: selectedType, waypoints: [] }) }));
+                store.props.write('edges', Object.assign(Object.assign({}, rawEdgesDict), { [utils_1.generateShortId()]: Object.assign(Object.assign({}, connectionParams), { lineType: 'smoothstep', dashed: false, arrow: typeDef.arrow !== false, showLabel: false, labelText: '', connectionType: selectedType, waypoints: [] }) }));
             }
         }
         catch (error) {
@@ -18584,6 +18620,22 @@ const useEdgeHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, c
                 componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleAnimationChange'));
         }
     }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
+    const handleLabelChange = React.useCallback((edgeId, labelText) => {
+        try {
+            if (!(store === null || store === void 0 ? void 0 : store.props))
+                return;
+            const nextEdges = Object.assign({}, rawEdgesDict);
+            if (nextEdges[edgeId]) {
+                nextEdges[edgeId] = Object.assign(Object.assign({}, nextEdges[edgeId]), { labelText });
+                store.props.write('edges', nextEdges);
+            }
+        }
+        catch (error) {
+            console.error("Error in handleLabelChange:", error);
+            if (componentEvents === null || componentEvents === void 0 ? void 0 : componentEvents.fireComponentEvent)
+                componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'handleLabelChange'));
+        }
+    }, [store, rawEdgesDict, componentEvents]);
     return {
         isUpdatingEdge,
         updatingEdgeRef,
@@ -18602,6 +18654,7 @@ const useEdgeHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, c
         handleLineTypeChange,
         handleConnectionTypeChange,
         handleAnimationChange,
+        handleLabelChange,
     };
 };
 exports.useEdgeHandlers = useEdgeHandlers;

@@ -91,7 +91,7 @@ export const useEdgeHandlers = ({
             if (store?.props) {
                 store.props.write('edges', {
                     ...rawEdgesDict,
-                    [generateShortId()]: { ...connectionParams, lineType: 'smoothstep', dashed: false, arrow: typeDef.arrow !== false, showLabel: false, connectionType: selectedType, waypoints: [] },
+                    [generateShortId()]: { ...connectionParams, lineType: 'smoothstep', dashed: false, arrow: typeDef.arrow !== false, showLabel: false, labelText: '', connectionType: selectedType, waypoints: [] },
                 });
             }
         } catch (error: any) {
@@ -235,6 +235,20 @@ export const useEdgeHandlers = ({
         }
     }, [contextMenu, componentEvents, rawEdgesDict, store, closeContextMenu]);
 
+    const handleLabelChange = React.useCallback((edgeId: string, labelText: string) => {
+        try {
+            if (!store?.props) return;
+            const nextEdges = { ...rawEdgesDict };
+            if (nextEdges[edgeId]) {
+                nextEdges[edgeId] = { ...nextEdges[edgeId], labelText };
+                store.props.write('edges', nextEdges);
+            }
+        } catch (error: any) {
+            console.error("Error in handleLabelChange:", error);
+            if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'handleLabelChange'));
+        }
+    }, [store, rawEdgesDict, componentEvents]);
+
     return {
         isUpdatingEdge,
         updatingEdgeRef,
@@ -253,5 +267,6 @@ export const useEdgeHandlers = ({
         handleLineTypeChange,
         handleConnectionTypeChange,
         handleAnimationChange,
+        handleLabelChange,
     };
 };

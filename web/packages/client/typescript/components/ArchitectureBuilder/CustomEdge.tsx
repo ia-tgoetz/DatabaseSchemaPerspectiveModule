@@ -45,6 +45,9 @@ export const CustomEdge = ({
     const [liveWaypoints, setLiveWaypoints] = React.useState<Waypoint[] | null>(null);
     const dragState = React.useRef<DragState | null>(null);
 
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [editingText, setEditingText] = React.useState(label);
+
     const isStepType = data?.lineType === 'step' || data?.lineType === 'smoothstep' || !data?.lineType;
     const isHorizSrc = sourcePosition === 'right' || sourcePosition === 'left';
     const isHorizTgt = targetPosition === 'right' || targetPosition === 'left';
@@ -170,6 +173,33 @@ export const CustomEdge = ({
         setLiveWaypoints(null);
     };
 
+    // ─── Label editing ───────────────────────────────────────────────────
+
+    const handleLabelDoubleClick = () => {
+        setIsEditing(true);
+        setEditingText(label);
+    };
+
+    const handleLabelInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (editingText !== label && data?.onLabelChange) {
+                data.onLabelChange(editingText);
+            }
+            setIsEditing(false);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            setIsEditing(false);
+        }
+    };
+
+    const handleLabelInputBlur = () => {
+        if (editingText !== label && data?.onLabelChange) {
+            data.onLabelChange(editingText);
+        }
+        setIsEditing(false);
+    };
+
     // ─── Render ───────────────────────────────────────────────────────────
 
     const segHandlePts: Waypoint[] = [{ x: sx, y: sy }, ...pinnedWaypoints, { x: tx, y: ty }];
@@ -254,19 +284,40 @@ export const CustomEdge = ({
 
             {label && showLabel && (
                 <EdgeLabelRenderer>
-                    <div
-                        style={{
-                            position: 'absolute',
-                            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                            backgroundColor: 'var(--neutral-10)', padding: '2px 8px', borderRadius: '4px',
-                            border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
-                            color: style?.stroke || 'var(--neutral-90)', pointerEvents: 'none',
-                            zIndex: 1002,
-                        }}
-                        className="nodrag nopan"
-                    >
-                        {label}
-                    </div>
+                    {isEditing ? (
+                        <input
+                            type="text"
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            onKeyDown={handleLabelInputKeyDown}
+                            onBlur={handleLabelInputBlur}
+                            autoFocus
+                            style={{
+                                position: 'absolute',
+                                transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+                                backgroundColor: 'var(--neutral-10)', padding: '2px 6px', borderRadius: '4px',
+                                border: `1px solid var(--primary)`, fontSize: '12px', fontWeight: 'bold',
+                                color: style?.stroke || 'var(--neutral-90)', zIndex: 1003,
+                                outline: 'none',
+                            }}
+                            className="nodrag nopan"
+                        />
+                    ) : (
+                        <div
+                            onDoubleClick={handleLabelDoubleClick}
+                            style={{
+                                position: 'absolute',
+                                transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+                                backgroundColor: 'var(--neutral-10)', padding: '2px 8px', borderRadius: '4px',
+                                border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
+                                color: style?.stroke || 'var(--neutral-90)', pointerEvents: 'auto',
+                                zIndex: 1002, cursor: 'text',
+                            }}
+                            className="nodrag nopan"
+                        >
+                            {label}
+                        </div>
+                    )}
                 </EdgeLabelRenderer>
             )}
             {canEdit && segHandlePts.length >= 4 && (
