@@ -16,6 +16,7 @@ import { TEXT_NODE_PALETTE_IDS } from './constants';
 import { ContextMenuState } from './types';
 import { StyleEditorModal } from './StyleEditorModal';
 import { ContextMenu } from './ContextMenu';
+import { useLongPress } from './useLongPress';
 
 // ─── Node types registration ──────────────────────────────────────────────────
 
@@ -304,7 +305,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop,
         onNodesDelete, onNodeContextMenu, onNodeClick,
         executeCopy, executePaste,
-        onDragOver, onDrop, onPaneClick, onPaneContextMenu,
+        onDragOver, onDrop, onMoveStart, onPaneClick, onPaneContextMenu,
         handleNodeSwap, handleContextMenuAction,
     } = useArchitectureFlowHandlers({
         store: props.store,
@@ -445,6 +446,49 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isEnabled, selectedId, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
 
+    // ─── Long-press context menu (mobile/touch support) ─────────────────────
+
+    const handleLongPress = React.useCallback((clientX: number, clientY: number, target: Element) => {
+        if (!isEnabled) return;
+        const bounds = reactFlowWrapper.current?.getBoundingClientRect();
+        if (!bounds) return;
+
+        const top = clientY - bounds.top;
+        const left = clientX - bounds.left;
+
+        // Try to detect node
+        const nodeEl = target.closest('.react-flow__node');
+        if (nodeEl) {
+            const id = nodeEl.getAttribute('data-id');
+            if (id && rawNodesDictRef.current[id]) {
+                setSelectedId(id);
+                const isContainer = rawNodesDictRef.current[id].paletteId === 'container';
+                setContextMenu({ id, top, left, type: 'node', isContainer, clientX, clientY });
+                setActiveSubMenu(null);
+                return;
+            }
+        }
+
+        // Try to detect edge
+        const edgeEl = target.closest('.react-flow__edge');
+        if (edgeEl) {
+            const id = edgeEl.getAttribute('data-testid')?.replace('rf__edge-', '');
+            if (id && rawEdgesDictRef.current[id]) {
+                setContextMenu({ id, top, left, type: 'edge', clientX, clientY });
+                setActiveSubMenu(null);
+                return;
+            }
+        }
+
+        // Fallback: pane
+        if (reactFlowInstance) {
+            setContextMenu({ id: 'pane', top, left, type: 'pane', clientX, clientY });
+            setActiveSubMenu(null);
+        }
+    }, [isEnabled, reactFlowInstance, setContextMenu, setActiveSubMenu, setSelectedId]);
+
+    const longPressHandlers = useLongPress(handleLongPress);
+
     const { classes } = props.props.style || {};
     const emitProps = props.emit({ classes });
 
@@ -560,7 +604,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                 <div className="arch-theme-wrapper">
                     {isEnabled && <Sidebar paletteItems={paletteItems} isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onDragStartItem={(item) => { draggedItemRef.current = item; }} onItemClick={handlePaletteItemClick} />}
 
-                    <div role="main" aria-label="Architecture Builder Canvas" style={{ flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }} ref={reactFlowWrapper} className={isUpdatingEdge ? 'arch-moving-edge' : ''}>
+                    <div role="main" aria-label="Architecture Builder Canvas" style={{ flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }} ref={reactFlowWrapper} className={isUpdatingEdge ? 'arch-moving-edge' : ''} {...longPressHandlers}>
                         <ReactFlowProvider>
                             <ReactFlow
                                 nodes={localNodes} edges={displayEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
@@ -578,7 +622,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                 onNodeContextMenu={isEnabled ? onNodeContextMenu : undefined} onEdgeContextMenu={isEnabled ? onEdgeContextMenu : undefined}
                                 onEdgeMouseEnter={(_evt, edge) => setHoveredEdgeId(edge.id)}
                                 onEdgeMouseLeave={() => setHoveredEdgeId(null)}
-                                onPaneClick={onPaneClick} onPaneContextMenu={isEnabled ? onPaneContextMenu : undefined}
+                                onPaneClick={onPaneClick} onPaneContextMenu={isEnabled ? onPaneContextMenu : undefined} onMoveStart={onMoveStart}
                                 nodesDraggable={isEnabled} nodesConnectable={isEnabled} elementsSelectable={isEnabled}
                                 connectionMode={ConnectionMode.Loose} snapToGrid={snapEnabled} snapGrid={snapGrid}
                                 connectionLineStyle={{ stroke: '#cccccc', strokeWidth: 6, fill: 'none' }}

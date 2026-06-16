@@ -22,7 +22,7 @@
 .DS_Store
 Thumbs.db
 Desktop.ini
-
+lessons-learned/
 # Project-specific ignores
 reports
 .claude/
