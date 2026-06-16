@@ -180,13 +180,18 @@ export const CustomEdge = ({
         setEditingText(label);
     };
 
+
+    const handleSave = () => {
+        if (editingText !== label && data?.onLabelChange) {
+            data.onLabelChange(editingText);
+        }
+        setIsEditing(false);
+    };
+
     const handleLabelInputKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && e.ctrlKey) {
             e.preventDefault();
-            if (editingText !== label && data?.onLabelChange) {
-                data.onLabelChange(editingText);
-            }
-            setIsEditing(false);
+            handleSave();
         } else if (e.key === 'Escape') {
             e.preventDefault();
             setIsEditing(false);
@@ -195,16 +200,8 @@ export const CustomEdge = ({
 
     const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setEditingText(e.target.value);
-        e.target.style.height = 'auto';
-        e.target.style.height = `${e.target.scrollHeight}px`;
     };
 
-    const handleLabelInputBlur = () => {
-        if (editingText !== label && data?.onLabelChange) {
-            data.onLabelChange(editingText);
-        }
-        setIsEditing(false);
-    };
 
     // ─── Render ───────────────────────────────────────────────────────────
 
@@ -290,41 +287,99 @@ export const CustomEdge = ({
 
             {label && showLabel && (
                 <EdgeLabelRenderer>
-                    {isEditing ? (
-                        <textarea
-                            value={editingText}
-                            onChange={handleTextareaChange}
-                            onKeyDown={handleLabelInputKeyDown}
-                            onBlur={handleLabelInputBlur}
-                            autoFocus
-                            style={{
-                                position: 'absolute',
-                                transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                                backgroundColor: 'var(--neutral-10)', padding: '4px 8px', borderRadius: '4px',
-                                border: `2px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
-                                color: style?.stroke || 'var(--neutral-90)', zIndex: 1003,
-                                outline: 'none', resize: 'none', overflow: 'hidden', minHeight: '20px',
-                                fontFamily: 'inherit', whiteSpace: 'pre-wrap',
-                                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
-                            }}
-                            className="nodrag nopan"
-                        />
-                    ) : (
-                        <div
-                            onDoubleClick={handleLabelDoubleClick}
-                            style={{
-                                position: 'absolute',
-                                transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                                backgroundColor: 'var(--neutral-10)', padding: '2px 8px', borderRadius: '4px',
-                                border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
-                                color: style?.stroke || 'var(--neutral-90)', pointerEvents: 'auto',
-                                zIndex: 1002, cursor: 'text', whiteSpace: 'pre-wrap', textAlign: 'center',
-                            }}
-                            className="nodrag nopan"
-                        >
-                            {label}
+                    <div
+                        onDoubleClick={handleLabelDoubleClick}
+                        style={{
+                            position: 'absolute',
+                            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+                            backgroundColor: 'var(--neutral-10)', padding: '2px 8px', borderRadius: '4px',
+                            border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
+                            color: style?.stroke || 'var(--neutral-90)', pointerEvents: 'auto',
+                            zIndex: 1002, cursor: 'pointer', whiteSpace: 'pre-wrap', textAlign: 'center',
+                        }}
+                        className="nodrag nopan"
+                    >
+                        {label}
+                    </div>
+                </EdgeLabelRenderer>
+            )}
+            {isEditing && (
+                <EdgeLabelRenderer>
+                    <div
+                        className="nodrag nopan"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            position: 'fixed',
+                            top: 0, left: 0, right: 0, bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+                            zIndex: 9999,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            pointerEvents: 'auto',
+                        }}
+                    >
+                        <div style={{
+                            backgroundColor: 'var(--neutral-10)',
+                            borderRadius: '8px',
+                            padding: '16px',
+                            border: '1px solid var(--neutral-40)',
+                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.35)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '10px',
+                            minWidth: '220px',
+                        }}>
+                            <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--neutral-70)' }}>
+                                Edit Label
+                            </div>
+                            <textarea
+                                value={editingText}
+                                onChange={handleTextareaChange}
+                                onKeyDown={handleLabelInputKeyDown}
+                                autoFocus
+                                rows={3}
+                                style={{
+                                    backgroundColor: 'var(--neutral-20)',
+                                    padding: '6px 8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid var(--neutral-40)',
+                                    fontSize: '12px',
+                                    color: 'var(--neutral-90)',
+                                    outline: 'none',
+                                    resize: 'vertical',
+                                    fontFamily: 'inherit',
+                                    pointerEvents: 'auto',
+                                }}
+                            />
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                <button
+                                    onClick={() => setIsEditing(false)}
+                                    style={{
+                                        padding: '4px 14px', borderRadius: '4px',
+                                        border: '1px solid var(--neutral-40)',
+                                        backgroundColor: 'var(--neutral-20)',
+                                        color: 'var(--neutral-90)',
+                                        fontSize: '12px', cursor: 'pointer',
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    style={{
+                                        padding: '4px 14px', borderRadius: '4px',
+                                        border: 'none',
+                                        backgroundColor: 'var(--callToAction)',
+                                        color: 'white',
+                                        fontSize: '12px', fontWeight: 'bold', cursor: 'pointer',
+                                    }}
+                                >
+                                    Confirm
+                                </button>
+                            </div>
                         </div>
-                    )}
+                    </div>
                 </EdgeLabelRenderer>
             )}
             {canEdit && segHandlePts.length >= 4 && (
@@ -356,7 +411,7 @@ export const CustomEdge = ({
                                     backgroundColor: 'var(--callToAction)',
                                     opacity: 0.85,
                                     cursor: isH ? 'ns-resize' : 'ew-resize',
-                                    zIndex: 1001,
+                                    zIndex: 1003,
                                     pointerEvents: 'all',
                                     touchAction: 'none',
                                     boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
