@@ -15508,6 +15508,7 @@ const constants_1 = __webpack_require__(/*! ./constants */ "./typescript/compone
 const StyleEditorModal_1 = __webpack_require__(/*! ./StyleEditorModal */ "./typescript/components/ArchitectureBuilder/StyleEditorModal.tsx");
 const ContextMenu_1 = __webpack_require__(/*! ./ContextMenu */ "./typescript/components/ArchitectureBuilder/ContextMenu.tsx");
 const useLongPress_1 = __webpack_require__(/*! ./useLongPress */ "./typescript/components/ArchitectureBuilder/useLongPress.ts");
+const CanvasSearch_1 = __webpack_require__(/*! ./CanvasSearch */ "./typescript/components/ArchitectureBuilder/CanvasSearch.tsx");
 // ─── Node types registration ──────────────────────────────────────────────────
 const nodeTypes = { architecture: ArchitectureNode_1.ArchitectureNode, container: ContainerNode_1.ContainerNode, Note: NoteLabelNode_1.NoteLabelNode, Label: NoteLabelNode_1.NoteLabelNode };
 // ─── Utility functions (used only by ArchitectureBuilder) ─────────────────────
@@ -15631,6 +15632,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
     const [contextMenu, setContextMenu] = React.useState(null);
     const [activeSubMenu, setActiveSubMenu] = React.useState(null);
     const [selectedId, setSelectedId] = React.useState(null);
+    const [canvasSearchOpen, setCanvasSearchOpen] = React.useState(false);
     const [localNodes, setLocalNodes] = React.useState([]);
     const [localEdges, setLocalEdges] = React.useState([]);
     const [hoveredEdgeId, setHoveredEdgeId] = React.useState(null);
@@ -15838,6 +15840,12 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
             if (e.key === 'Escape') {
                 closeContextMenu();
                 setStyleEditorNodeId(null);
+                setCanvasSearchOpen(false);
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                setCanvasSearchOpen(open => !open);
                 return;
             }
             if (!isEnabled)
@@ -15861,6 +15869,13 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isEnabled, selectedId, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
+    const flyToNode = React.useCallback((nodeId, x, y, w, h) => {
+        if (reactFlowInstance) {
+            reactFlowInstance.fitBounds({ x, y, width: w, height: h }, { padding: 0.5, duration: 600 });
+        }
+        setSelectedId(nodeId);
+        setCanvasSearchOpen(false);
+    }, [reactFlowInstance]);
     // ─── Long-press context menu (mobile/touch support) ─────────────────────
     const handleLongPress = React.useCallback((clientX, clientY, target) => {
         var _a, _b;
@@ -16015,6 +16030,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                         React.createElement(reactflow_1.default, { nodes: localNodes, edges: displayEdges, nodeTypes: nodeTypes, edgeTypes: CustomEdge_1.edgeTypes, isValidConnection: isValidConnection, onInit: setReactFlowInstance, onDrop: isEnabled ? onDrop : undefined, onDragOver: isEnabled ? onDragOver : undefined, onConnect: isEnabled ? onConnect : undefined, onEdgeUpdate: isEnabled ? onEdgeUpdate : undefined, onEdgeUpdateStart: isEnabled ? onEdgeUpdateStart : undefined, onEdgeUpdateEnd: isEnabled ? onEdgeUpdateEnd : undefined, onConnectStart: isEnabled ? onConnectStart : undefined, onConnectEnd: isEnabled ? onConnectEnd : undefined, onNodeDragStart: isEnabled ? onNodeDragStart : undefined, onNodeDrag: isEnabled ? onNodeDrag : undefined, onNodeDragStop: isEnabled ? onNodeDragStop : undefined, onNodesChange: onNodesChange, onNodeClick: onNodeClick, onEdgeClick: onEdgeClick, onNodesDelete: isEnabled ? onNodesDelete : undefined, onEdgesDelete: isEnabled ? onEdgesDelete : undefined, onNodeContextMenu: isEnabled ? onNodeContextMenu : undefined, onEdgeContextMenu: isEnabled ? onEdgeContextMenu : undefined, onEdgeMouseEnter: (_evt, edge) => setHoveredEdgeId(edge.id), onEdgeMouseLeave: () => setHoveredEdgeId(null), onPaneClick: onPaneClick, onPaneContextMenu: isEnabled ? onPaneContextMenu : undefined, onMoveStart: onMoveStart, nodesDraggable: isEnabled, nodesConnectable: isEnabled, elementsSelectable: isEnabled, connectionMode: reactflow_1.ConnectionMode.Loose, snapToGrid: snapEnabled, snapGrid: snapGrid, connectionLineStyle: { stroke: '#cccccc', strokeWidth: 6, fill: 'none' }, elevateNodesOnSelect: false, minZoom: 0.05, panOnScroll: false, zoomOnScroll: true, panOnDrag: true, selectionOnDrag: false, deleteKeyCode: ['Delete', 'Backspace'] },
                             React.createElement(reactflow_1.Background, { gap: snapPixels }),
                             React.createElement(reactflow_1.Controls, { showInteractive: false }))),
+                    canvasSearchOpen && (React.createElement(CanvasSearch_1.CanvasSearch, { nodes: rawNodesDict, paletteItems: paletteItems, onFlyTo: flyToNode, onClose: () => setCanvasSearchOpen(false) })),
                     styleEditorNodeId && rawNodesDict[styleEditorNodeId] && (React.createElement(StyleEditorModal_1.StyleEditorModal, { node: rawNodesDict[styleEditorNodeId], onSave: (newStyle, newLabelStyle, newTextStyle) => {
                             var _a;
                             if ((_a = props.store) === null || _a === void 0 ? void 0 : _a.props) {
@@ -16136,6 +16152,121 @@ const ArchitectureNode = ({ id, data, selected }) => {
             react_1.default.createElement(NodeImage, { src: data.image, label: data.label })))));
 };
 exports.ArchitectureNode = ArchitectureNode;
+
+
+/***/ }),
+
+/***/ "./typescript/components/ArchitectureBuilder/CanvasSearch.tsx":
+/*!********************************************************************!*\
+  !*** ./typescript/components/ArchitectureBuilder/CanvasSearch.tsx ***!
+  \********************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CanvasSearch = void 0;
+const react_1 = __importStar(__webpack_require__(/*! react */ "react"));
+const constants_1 = __webpack_require__(/*! ./constants */ "./typescript/components/ArchitectureBuilder/constants.ts");
+const CanvasSearch = ({ nodes, paletteItems, onFlyTo, onClose }) => {
+    const [query, setQuery] = react_1.useState('');
+    const [highlightedIndex, setHighlightedIndex] = react_1.useState(0);
+    const inputRef = react_1.useRef(null);
+    const listRef = react_1.useRef(null);
+    react_1.useEffect(() => { var _a; (_a = inputRef.current) === null || _a === void 0 ? void 0 : _a.focus(); }, []);
+    const paletteMap = react_1.useMemo(() => {
+        const map = {};
+        paletteItems.forEach(p => { map[p.id] = p.label; });
+        return map;
+    }, [paletteItems]);
+    const results = react_1.useMemo(() => {
+        const q = query.trim().toLowerCase();
+        if (!q)
+            return [];
+        return Object.entries(nodes)
+            .filter(([, node]) => {
+            const label = (node.label || '').toLowerCase();
+            const paletteId = (node.paletteId || '').toLowerCase();
+            const typeId = (node.typeId || '').toLowerCase();
+            return label.includes(q) || paletteId.includes(q) || typeId.includes(q);
+        })
+            .map(([id, node]) => ({
+            id,
+            label: node.label || id,
+            typeName: paletteMap[node.paletteId] || node.paletteId || '',
+            x: node.x || 0,
+            y: node.y || 0,
+            w: node.width || 150,
+            h: node.height || 150,
+        }));
+    }, [nodes, paletteMap, query]);
+    react_1.useEffect(() => { setHighlightedIndex(0); }, [results.length]);
+    // Scroll highlighted item into view
+    react_1.useEffect(() => {
+        const list = listRef.current;
+        if (!list || results.length === 0)
+            return;
+        const item = list.children[highlightedIndex];
+        if (item)
+            item.scrollIntoView({ block: 'nearest' });
+    }, [highlightedIndex, results.length]);
+    const selectResult = (result) => {
+        onFlyTo(result.id, result.x, result.y, result.w, result.h);
+    };
+    const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+            onClose();
+            return;
+        }
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setHighlightedIndex(i => Math.min(i + 1, results.length - 1));
+        }
+        else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setHighlightedIndex(i => Math.max(i - 1, 0));
+        }
+        else if (e.key === 'Enter' && results[highlightedIndex]) {
+            selectResult(results[highlightedIndex]);
+        }
+    };
+    return (react_1.default.createElement("div", { style: { position: 'absolute', top: '12px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, width: '320px' } },
+        react_1.default.createElement("div", { style: { backgroundColor: 'var(--neutral-10)', border: '1px solid var(--neutral-40)', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,0.25)', overflow: 'hidden' } },
+            react_1.default.createElement("div", { style: { position: 'relative', padding: '8px' } },
+                react_1.default.createElement("input", { ref: inputRef, type: "text", placeholder: "Search canvas... (Esc to close)", value: query, onChange: e => setQuery(e.target.value), onKeyDown: handleKeyDown, style: Object.assign(Object.assign({}, constants_1.sharedInputStyle), { paddingRight: query ? '24px' : '8px' }) }),
+                query && (react_1.default.createElement("span", { onClick: () => { var _a; setQuery(''); (_a = inputRef.current) === null || _a === void 0 ? void 0 : _a.focus(); }, style: { position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: 'var(--neutral-60)', fontSize: '14px' } }, "\u00D7"))),
+            results.length > 0 && (react_1.default.createElement("div", { ref: listRef, style: { maxHeight: '300px', overflowY: 'auto', borderTop: '1px solid var(--neutral-40)' } }, results.map((result, i) => (react_1.default.createElement("div", { key: result.id, onClick: () => selectResult(result), onMouseEnter: () => setHighlightedIndex(i), style: {
+                    padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    backgroundColor: i === highlightedIndex ? 'var(--neutral-30)' : 'transparent',
+                    borderBottom: i < results.length - 1 ? '1px solid var(--neutral-40)' : 'none',
+                } },
+                react_1.default.createElement("span", { style: { color: 'var(--neutral-90)', fontSize: '13px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 } }, result.label),
+                result.typeName && (react_1.default.createElement("span", { style: { fontSize: '11px', color: 'var(--neutral-60)', backgroundColor: 'var(--neutral-30)', borderRadius: '3px', padding: '2px 6px', marginLeft: '8px', whiteSpace: 'nowrap', flexShrink: 0 } }, result.typeName))))))),
+            query.trim() && results.length === 0 && (react_1.default.createElement("div", { style: { padding: '12px', color: 'var(--neutral-60)', fontSize: '13px', textAlign: 'center', borderTop: '1px solid var(--neutral-40)' } },
+                "No nodes match \"",
+                query,
+                "\"")))));
+};
+exports.CanvasSearch = CanvasSearch;
 
 
 /***/ }),
@@ -17202,6 +17333,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Sidebar = void 0;
 const react_1 = __importStar(__webpack_require__(/*! react */ "react"));
 const svgSanitize_1 = __webpack_require__(/*! ./svgSanitize */ "./typescript/components/ArchitectureBuilder/svgSanitize.ts");
+const constants_1 = __webpack_require__(/*! ./constants */ "./typescript/components/ArchitectureBuilder/constants.ts");
 const PaletteThumb = ({ src, label }) => {
     const scopeId = react_1.default.useMemo(() => svgSanitize_1.nextSvgScopeId(), []);
     const svgHtml = react_1.default.useMemo(() => svgSanitize_1.extractSvgMarkup(src, scopeId), [src, scopeId]);
@@ -17213,10 +17345,14 @@ const PaletteThumb = ({ src, label }) => {
 };
 const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemClick }) => {
     const [collapsedCategories, setCollapsedCategories] = react_1.useState({});
+    const [searchQuery, setSearchQuery] = react_1.useState('');
     const { containerItems, groupedItems } = react_1.useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
         const containers = [];
         const groups = {};
         paletteItems.forEach(item => {
+            if (q && !item.label.toLowerCase().includes(q))
+                return;
             if (item.id === 'container') {
                 containers.push(item);
             }
@@ -17228,7 +17364,7 @@ const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemC
             }
         });
         return { containerItems: containers, groupedItems: groups };
-    }, [paletteItems]);
+    }, [paletteItems, searchQuery]);
     const toggleCategory = (category) => {
         setCollapsedCategories((prev) => (Object.assign(Object.assign({}, prev), { [category]: prev[category] === false })));
     };
@@ -17257,6 +17393,9 @@ const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemC
         react_1.default.createElement("div", { style: { width: isOpen ? '250px' : '0px', backgroundColor: 'var(--neutral-20)', borderRight: isOpen ? '1px solid var(--neutral-40)' : 'none', overflowY: 'auto', overflowX: 'hidden', transition: 'width 0.3s ease', display: 'flex', flexDirection: 'column' } },
             react_1.default.createElement("div", { style: { padding: '15px', whiteSpace: 'nowrap' } },
                 react_1.default.createElement("h3", { style: { marginTop: 0, color: 'var(--neutral-90)' } }, "Palette"),
+                react_1.default.createElement("div", { style: { marginBottom: '12px', position: 'relative' } },
+                    react_1.default.createElement("input", { type: "text", placeholder: "Search palette...", value: searchQuery, onChange: (e) => setSearchQuery(e.target.value), style: Object.assign(Object.assign({}, constants_1.sharedInputStyle), { paddingRight: searchQuery ? '24px' : '8px' }) }),
+                    searchQuery && (react_1.default.createElement("span", { onClick: () => setSearchQuery(''), style: { position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: 'var(--neutral-60)', fontSize: '14px', lineHeight: 1 } }, "\u00D7"))),
                 containerItems.length > 0 && (react_1.default.createElement("div", { style: { marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid var(--neutral-40)' } }, containerItems.map((item) => {
                     const _a = item.style || {}, { classes: _c, backgroundColor: imageBg } = _a, itemStyle = __rest(_a, ["classes", "backgroundColor"]);
                     const _b = item.labelStyle || {}, { classes: _lc } = _b, labelStyle = __rest(_b, ["classes"]);
@@ -17266,7 +17405,7 @@ const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemC
                         react_1.default.createElement("span", { style: Object.assign({ color: 'var(--neutral-90)', fontSize: '14px' }, labelStyle) }, item.label)));
                 }))),
                 Object.entries(groupedItems).map(([category, items]) => {
-                    const isCollapsed = collapsedCategories[category] !== false;
+                    const isCollapsed = searchQuery.trim() ? false : collapsedCategories[category] !== false;
                     return (react_1.default.createElement("div", { key: category, style: { marginBottom: '15px' } },
                         react_1.default.createElement("div", { onClick: () => toggleCategory(category), style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', backgroundColor: 'var(--neutral-30)', padding: '8px 10px', borderRadius: '4px', marginBottom: '8px', fontWeight: 'bold', color: 'var(--neutral-90)', userSelect: 'none' } },
                             react_1.default.createElement("span", null, category),
@@ -17279,7 +17418,11 @@ const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemC
                                     react_1.default.createElement(PaletteThumb, { src: item.image, label: item.label })),
                                 react_1.default.createElement("span", { style: Object.assign({ color: 'var(--neutral-90)', fontSize: '14px' }, labelStyle) }, item.label)));
                         })))));
-                }))),
+                }),
+                searchQuery.trim() && Object.keys(groupedItems).length === 0 && containerItems.length === 0 && (react_1.default.createElement("div", { style: { color: 'var(--neutral-60)', fontSize: '13px', textAlign: 'center', padding: '20px 0' } },
+                    "No components match \"",
+                    searchQuery,
+                    "\"")))),
         react_1.default.createElement("div", { onClick: toggleSidebar, style: { width: '20px', height: '50px', backgroundColor: 'var(--neutral-40)', border: '1px solid var(--neutral-50)', borderLeft: 'none', borderRadius: '0 4px 4px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', marginTop: '20px', color: 'var(--neutral-90)' } }, isOpen ? '◀' : '▶')));
 };
 exports.Sidebar = Sidebar;

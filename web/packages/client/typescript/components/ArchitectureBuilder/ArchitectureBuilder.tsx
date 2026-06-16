@@ -17,6 +17,7 @@ import { ContextMenuState } from './types';
 import { StyleEditorModal } from './StyleEditorModal';
 import { ContextMenu } from './ContextMenu';
 import { useLongPress } from './useLongPress';
+import { CanvasSearch } from './CanvasSearch';
 
 // ─── Node types registration ──────────────────────────────────────────────────
 
@@ -164,6 +165,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     const [contextMenu, setContextMenu] = React.useState<ContextMenuState | null>(null);
     const [activeSubMenu, setActiveSubMenu] = React.useState<'lineType' | 'connectionType' | 'animation' | 'swapNode' | 'order' | null>(null);
     const [selectedId, setSelectedId] = React.useState<string | null>(null);
+    const [canvasSearchOpen, setCanvasSearchOpen] = React.useState(false);
     const [localNodes, setLocalNodes] = React.useState<any[]>([]);
     const [localEdges, setLocalEdges] = React.useState<any[]>([]);
     const [hoveredEdgeId, setHoveredEdgeId] = React.useState<string | null>(null);
@@ -429,7 +431,8 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
 
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') { closeContextMenu(); setStyleEditorNodeId(null); return; }
+            if (e.key === 'Escape') { closeContextMenu(); setStyleEditorNodeId(null); setCanvasSearchOpen(false); return; }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault(); setCanvasSearchOpen(open => !open); return; }
             if (!isEnabled) return;
             if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return;
             if ((e.ctrlKey || e.metaKey) && e.key === 'c') { if (selectedId && rawNodesDictRef.current[selectedId]) executeCopy(selectedId); }
@@ -446,6 +449,14 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isEnabled, selectedId, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
+
+    const flyToNode = React.useCallback((nodeId: string, x: number, y: number, w: number, h: number) => {
+        if (reactFlowInstance) {
+            reactFlowInstance.fitBounds({ x, y, width: w, height: h }, { padding: 0.5, duration: 600 });
+        }
+        setSelectedId(nodeId);
+        setCanvasSearchOpen(false);
+    }, [reactFlowInstance]);
 
     // ─── Long-press context menu (mobile/touch support) ─────────────────────
 
@@ -639,6 +650,15 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                 <Controls showInteractive={false} />
                             </ReactFlow>
                         </ReactFlowProvider>
+
+                        {canvasSearchOpen && (
+                            <CanvasSearch
+                                nodes={rawNodesDict}
+                                paletteItems={paletteItems}
+                                onFlyTo={flyToNode}
+                                onClose={() => setCanvasSearchOpen(false)}
+                            />
+                        )}
 
                         {styleEditorNodeId && rawNodesDict[styleEditorNodeId] && (
                             <StyleEditorModal
