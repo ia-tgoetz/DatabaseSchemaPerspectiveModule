@@ -58,6 +58,66 @@ export const ContextMenu = React.memo(({
     handleConnectionTypeChange,
     handleAnimationChange,
 }: ContextMenuProps) => {
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const flyoutRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
+    const [adjustment, setAdjustment] = React.useState({ dx: 0, dy: 0 });
+    const [flyoutOffsets, setFlyoutOffsets] = React.useState<Record<string, number>>({});
+    const isTouchDevice = React.useRef(
+        typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+    );
+
+    // Measure menu dimensions and clamp to viewport bounds (wrapper-local coordinates)
+    React.useLayoutEffect(() => {
+        if (!containerRef.current || !wrapperRef.current) return;
+
+        // offsetWidth/offsetHeight = natural element size (not clipped by overflow: hidden on parent)
+        const menuW = containerRef.current.offsetWidth;
+        const menuH = containerRef.current.offsetHeight;
+        const wrapW = wrapperRef.current.clientWidth;
+        const wrapH = wrapperRef.current.clientHeight;
+
+        // All arithmetic is in wrapper-local space (same coordinate system as contextMenu.top/left)
+        let dx = 0, dy = 0;
+        if (contextMenu.left + menuW > wrapW - 8) dx = wrapW - 8 - (contextMenu.left + menuW);
+        if (contextMenu.top + menuH > wrapH - 8) dy = wrapH - 8 - (contextMenu.top + menuH);
+        if (contextMenu.left + dx < 8) dx = 8 - contextMenu.left;
+        if (contextMenu.top + dy < 8) dy = 8 - contextMenu.top;
+
+        setAdjustment({ dx, dy });
+    }, [contextMenu.top, contextMenu.left]);
+
+    // Measure flyouts and position them to fit within bounds (shift upward if needed)
+    React.useLayoutEffect(() => {
+        if (!wrapperRef.current || !containerRef.current) return;
+        const newOffsets: Record<string, number> = {};
+        const wrapH = wrapperRef.current.clientHeight;
+        const menuTop = contextMenu.top + adjustment.dy;
+        const menuH = containerRef.current.offsetHeight;
+        const menuBottom = menuTop + menuH;
+
+        // Measure each flyout and calculate its top offset
+        Object.entries(flyoutRefs.current).forEach(([key, flyout]) => {
+            if (!flyout) return;
+            const flyoutH = flyout.offsetHeight;
+
+            // Space below the menu
+            const spaceBelow = wrapH - menuBottom - 8;
+            // If flyout doesn't fit below, position it above
+            if (flyoutH > spaceBelow) {
+                // Get submenu item height for upward positioning
+                const parent = flyout.parentElement;
+                const itemH = parent?.firstElementChild ? (parent.firstElementChild as HTMLElement).offsetHeight : 24;
+                // Above: shift up by flyout height, but keep it adjacent to item
+                newOffsets[key] = itemH - flyoutH;
+            } else {
+                // Below: original position that worked
+                newOffsets[key] = 0;
+            }
+        });
+
+        setFlyoutOffsets(newOffsets);
+    }, [activeSubMenu, adjustment, contextMenu.top]);
+
     // Memoize derived edge state — avoids recomputing getValidIntersection on every render
     const availableConnections = React.useMemo(() => {
         if (contextMenu.type !== 'edge') return [];
@@ -81,12 +141,34 @@ export const ContextMenu = React.memo(({
         return paletteItems.filter((p: any) => currentPaletteItem.swappableWith.includes(p.id));
     }, [contextMenu, rawNodesDict, paletteItems]);
 
-    const flyoutStyle: React.CSSProperties = (wrapperRef.current && contextMenu.left + 310 > wrapperRef.current.clientWidth)
-        ? { position: 'absolute', top: '-0px', right: '100%', marginRight: '0px' }
-        : { position: 'absolute', top: '-0px', left: '100%', marginLeft: '0px' };
+    const flyoutFlipsLeft = wrapperRef.current
+        ? (contextMenu.left + adjustment.dx + 310 > wrapperRef.current.clientWidth)
+        : false;
+
+    const flyoutFlipsUp = (wrapperRef.current && containerRef.current)
+        ? (contextMenu.top + adjustment.dy + containerRef.current.offsetHeight > wrapperRef.current.clientHeight - 8)
+        : false;
+
+    // Build flyout style with dynamic positioning
+    const getFlyoutStyle = (submenuKey: string): React.CSSProperties => {
+        const topOffset = flyoutOffsets[submenuKey] ?? 0;
+        return {
+            position: 'absolute',
+            top: topOffset === 0 ? '-0px' : topOffset + 'px',
+            ...(flyoutFlipsLeft ? { right: '100%' } : { left: '100%' }),
+        };
+    };
 
     return (
-        <div style={{ ...CONTAINER_STYLE, top: contextMenu.top, left: contextMenu.left }}>
+        <div
+            ref={containerRef}
+            style={{
+                ...CONTAINER_STYLE,
+                top: contextMenu.top,
+                left: contextMenu.left,
+                transform: `translate(${adjustment.dx}px, ${adjustment.dy}px)`,
+            }}
+        >
 
             {contextMenu.type === 'pane' && (
                 <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>
@@ -129,12 +211,16 @@ export const ContextMenu = React.memo(({
                             {contextMenu.isContainer && (
                                 <div style={{ padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }} onClick={() => { if (clipboardRef.current) handleContextMenuAction('paste'); }}>📋 Paste</div>
                             )}
-                            <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('order')}>
+                            <div
+                                style={{ position: 'relative' }}
+                                onMouseEnter={() => !isTouchDevice.current && setActiveSubMenu('order')}
+                                onClick={() => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'order' ? null : 'order')}
+                            >
                                 <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'order' ? 'var(--neutral-30)' : 'transparent' }}>
                                     <span>📑 Order</span><span>▶</span>
                                 </div>
                                 {activeSubMenu === 'order' && (
-                                    <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '150px' }}>
+                                    <div ref={(el) => { if (el) flyoutRefs.current['order'] = el; }} style={{ ...getFlyoutStyle('order'), ...FLYOUT_PANEL_STYLE, minWidth: '150px' }}>
                                         <div style={MENU_ITEM_STYLE} onClick={() => handleContextMenuAction('bringToFront')}>⏫ Bring to Front</div>
                                         <div style={MENU_ITEM_STYLE} onClick={() => handleContextMenuAction('bringForward')}>🔼 Bring Forward</div>
                                         <div style={MENU_ITEM_STYLE} onClick={() => handleContextMenuAction('sendBackward')}>🔽 Send Backward</div>
@@ -143,12 +229,16 @@ export const ContextMenu = React.memo(({
                                 )}
                             </div>
                             {validSwapItems.length > 0 && (
-                                <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('swapNode')}>
+                                <div
+                                    style={{ position: 'relative' }}
+                                    onMouseEnter={() => !isTouchDevice.current && setActiveSubMenu('swapNode')}
+                                    onClick={() => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'swapNode' ? null : 'swapNode')}
+                                >
                                     <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'swapNode' ? 'var(--neutral-30)' : 'transparent' }}>
                                         <span>🔄 Swap Node</span><span>▶</span>
                                     </div>
                                     {activeSubMenu === 'swapNode' && (
-                                        <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '150px' }}>
+                                        <div ref={(el) => { if (el) flyoutRefs.current['swapNode'] = el; }} style={{ ...getFlyoutStyle('swapNode'), ...FLYOUT_PANEL_STYLE, minWidth: '150px' }}>
                                             {validSwapItems.map((targetItem: any) => (
                                                 <div key={targetItem.id} style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center' }} onClick={() => handleNodeSwap(targetItem.id)}>
                                                     <div style={{ width: '16px', height: '16px', marginRight: '6px', display: 'flex', alignItems: 'center' }}>{targetItem.image && <SwapIcon image={targetItem.image} label={targetItem.label} />}</div>
@@ -185,12 +275,16 @@ export const ContextMenu = React.memo(({
                                 ) : null;
                             })()}
                             <div style={MENU_DIVIDER_STYLE} />
-                            <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('lineType')}>
+                            <div
+                                style={{ position: 'relative' }}
+                                onMouseEnter={() => !isTouchDevice.current && setActiveSubMenu('lineType')}
+                                onClick={() => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'lineType' ? null : 'lineType')}
+                            >
                                 <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'lineType' ? 'var(--neutral-30)' : 'transparent' }}>
                                     <span>〰️ Line Type</span><span>▶</span>
                                 </div>
                                 {activeSubMenu === 'lineType' && (
-                                    <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '120px' }}>
+                                    <div ref={(el) => { if (el) flyoutRefs.current['lineType'] = el; }} style={{ ...getFlyoutStyle('lineType'), ...FLYOUT_PANEL_STYLE, minWidth: '120px' }}>
                                         <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleLineTypeChange('smoothstep')}><span>〰️ Smooth</span><span>{currentLineType === 'smoothstep' ? '✓' : ''}</span></div>
                                         <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleLineTypeChange('step')}><span>🔲 Stepped</span><span>{currentLineType === 'step' ? '✓' : ''}</span></div>
                                         <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleLineTypeChange('straight')}><span>📏 Straight</span><span>{currentLineType === 'straight' ? '✓' : ''}</span></div>
@@ -198,24 +292,32 @@ export const ContextMenu = React.memo(({
                                     </div>
                                 )}
                             </div>
-                            <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('animation')}>
+                            <div
+                                style={{ position: 'relative' }}
+                                onMouseEnter={() => !isTouchDevice.current && setActiveSubMenu('animation')}
+                                onClick={() => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'animation' ? null : 'animation')}
+                            >
                                 <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'animation' ? 'var(--neutral-30)' : 'transparent' }}>
                                     <span>✨ Animation</span><span>▶</span>
                                 </div>
                                 {activeSubMenu === 'animation' && (
-                                    <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '140px' }}>
+                                    <div ref={(el) => { if (el) flyoutRefs.current['animation'] = el; }} style={{ ...getFlyoutStyle('animation'), ...FLYOUT_PANEL_STYLE, minWidth: '140px' }}>
                                         <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleAnimationChange('none')}><span>🚫 None</span><span>{(rawEdgesDict[contextMenu.id]?.animation || 'none') === 'none' ? '✓' : ''}</span></div>
                                         <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleAnimationChange('forward')}><span>➡️ Forward</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'forward' ? '✓' : ''}</span></div>
                                         <div style={{ ...MENU_ITEM_FLEX_STYLE, whiteSpace: 'nowrap' }} onClick={() => handleAnimationChange('bidirectional')}><span>↔️ Bidirectional</span><span>{rawEdgesDict[contextMenu.id]?.animation === 'bidirectional' ? '✓' : ''}</span></div>
                                     </div>
                                 )}
                             </div>
-                            <div style={{ position: 'relative' }} onMouseEnter={() => setActiveSubMenu('connectionType')}>
+                            <div
+                                style={{ position: 'relative' }}
+                                onMouseEnter={() => !isTouchDevice.current && setActiveSubMenu('connectionType')}
+                                onClick={() => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'connectionType' ? null : 'connectionType')}
+                            >
                                 <div style={{ padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'connectionType' ? 'var(--neutral-30)' : 'transparent' }}>
                                     <span>🔗 Connection</span><span>▶</span>
                                 </div>
                                 {activeSubMenu === 'connectionType' && (
-                                    <div style={{ ...flyoutStyle, ...FLYOUT_PANEL_STYLE, minWidth: '140px' }}>
+                                    <div ref={(el) => { if (el) flyoutRefs.current['connectionType'] = el; }} style={{ ...getFlyoutStyle('connectionType'), ...FLYOUT_PANEL_STYLE, minWidth: '140px' }}>
                                         {availableConnections.length === 0
                                             ? <div style={{ padding: '5px 8px', color: 'var(--neutral-60)' }}>No valid connections</div>
                                             : availableConnections.map(c => (

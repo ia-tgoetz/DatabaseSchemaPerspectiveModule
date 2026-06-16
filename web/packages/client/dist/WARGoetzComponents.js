@@ -15507,6 +15507,7 @@ const ComponentErrorBoundary_1 = __webpack_require__(/*! ../common/ComponentErro
 const constants_1 = __webpack_require__(/*! ./constants */ "./typescript/components/ArchitectureBuilder/constants.ts");
 const StyleEditorModal_1 = __webpack_require__(/*! ./StyleEditorModal */ "./typescript/components/ArchitectureBuilder/StyleEditorModal.tsx");
 const ContextMenu_1 = __webpack_require__(/*! ./ContextMenu */ "./typescript/components/ArchitectureBuilder/ContextMenu.tsx");
+const useLongPress_1 = __webpack_require__(/*! ./useLongPress */ "./typescript/components/ArchitectureBuilder/useLongPress.ts");
 // ─── Node types registration ──────────────────────────────────────────────────
 const nodeTypes = { architecture: ArchitectureNode_1.ArchitectureNode, container: ContainerNode_1.ContainerNode, Note: NoteLabelNode_1.NoteLabelNode, Label: NoteLabelNode_1.NoteLabelNode };
 // ─── Utility functions (used only by ArchitectureBuilder) ─────────────────────
@@ -15860,6 +15861,45 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isEnabled, selectedId, snapEnabled, snapPixels, props.store, executeCopy, executePaste, closeContextMenu]);
+    // ─── Long-press context menu (mobile/touch support) ─────────────────────
+    const handleLongPress = React.useCallback((clientX, clientY, target) => {
+        var _a, _b;
+        if (!isEnabled)
+            return;
+        const bounds = (_a = reactFlowWrapper.current) === null || _a === void 0 ? void 0 : _a.getBoundingClientRect();
+        if (!bounds)
+            return;
+        const top = clientY - bounds.top;
+        const left = clientX - bounds.left;
+        // Try to detect node
+        const nodeEl = target.closest('.react-flow__node');
+        if (nodeEl) {
+            const id = nodeEl.getAttribute('data-id');
+            if (id && rawNodesDictRef.current[id]) {
+                setSelectedId(id);
+                const isContainer = rawNodesDictRef.current[id].paletteId === 'container';
+                setContextMenu({ id, top, left, type: 'node', isContainer, clientX, clientY });
+                setActiveSubMenu(null);
+                return;
+            }
+        }
+        // Try to detect edge
+        const edgeEl = target.closest('.react-flow__edge');
+        if (edgeEl) {
+            const id = (_b = edgeEl.getAttribute('data-testid')) === null || _b === void 0 ? void 0 : _b.replace('rf__edge-', '');
+            if (id && rawEdgesDictRef.current[id]) {
+                setContextMenu({ id, top, left, type: 'edge', clientX, clientY });
+                setActiveSubMenu(null);
+                return;
+            }
+        }
+        // Fallback: pane
+        if (reactFlowInstance) {
+            setContextMenu({ id: 'pane', top, left, type: 'pane', clientX, clientY });
+            setActiveSubMenu(null);
+        }
+    }, [isEnabled, reactFlowInstance, setContextMenu, setActiveSubMenu, setSelectedId]);
+    const longPressHandlers = useLongPress_1.useLongPress(handleLongPress);
     const { classes } = props.props.style || {};
     const emitProps = props.emit({ classes });
     // ─── Render ────────────────────────────────────────────────────────────
@@ -15970,7 +16010,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                 `),
             React.createElement("div", { className: "arch-theme-wrapper" },
                 isEnabled && React.createElement(Sidebar_1.Sidebar, { paletteItems: paletteItems, isOpen: isSidebarOpen, toggleSidebar: () => setIsSidebarOpen(!isSidebarOpen), onDragStartItem: (item) => { draggedItemRef.current = item; }, onItemClick: handlePaletteItemClick }),
-                React.createElement("div", { role: "main", "aria-label": "Architecture Builder Canvas", style: { flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }, ref: reactFlowWrapper, className: isUpdatingEdge ? 'arch-moving-edge' : '' },
+                React.createElement("div", Object.assign({ role: "main", "aria-label": "Architecture Builder Canvas", style: { flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }, ref: reactFlowWrapper, className: isUpdatingEdge ? 'arch-moving-edge' : '' }, longPressHandlers),
                     React.createElement(reactflow_1.ReactFlowProvider, null,
                         React.createElement(reactflow_1.default, { nodes: localNodes, edges: displayEdges, nodeTypes: nodeTypes, edgeTypes: CustomEdge_1.edgeTypes, isValidConnection: isValidConnection, onInit: setReactFlowInstance, onDrop: isEnabled ? onDrop : undefined, onDragOver: isEnabled ? onDragOver : undefined, onConnect: isEnabled ? onConnect : undefined, onEdgeUpdate: isEnabled ? onEdgeUpdate : undefined, onEdgeUpdateStart: isEnabled ? onEdgeUpdateStart : undefined, onEdgeUpdateEnd: isEnabled ? onEdgeUpdateEnd : undefined, onConnectStart: isEnabled ? onConnectStart : undefined, onConnectEnd: isEnabled ? onConnectEnd : undefined, onNodeDragStart: isEnabled ? onNodeDragStart : undefined, onNodeDrag: isEnabled ? onNodeDrag : undefined, onNodeDragStop: isEnabled ? onNodeDragStop : undefined, onNodesChange: onNodesChange, onNodeClick: onNodeClick, onEdgeClick: onEdgeClick, onNodesDelete: isEnabled ? onNodesDelete : undefined, onEdgesDelete: isEnabled ? onEdgesDelete : undefined, onNodeContextMenu: isEnabled ? onNodeContextMenu : undefined, onEdgeContextMenu: isEnabled ? onEdgeContextMenu : undefined, onEdgeMouseEnter: (_evt, edge) => setHoveredEdgeId(edge.id), onEdgeMouseLeave: () => setHoveredEdgeId(null), onPaneClick: onPaneClick, onPaneContextMenu: isEnabled ? onPaneContextMenu : undefined, nodesDraggable: isEnabled, nodesConnectable: isEnabled, elementsSelectable: isEnabled, connectionMode: reactflow_1.ConnectionMode.Loose, snapToGrid: snapEnabled, snapGrid: snapGrid, connectionLineStyle: { stroke: '#cccccc', strokeWidth: 6, fill: 'none' }, elevateNodesOnSelect: false, minZoom: 0.05, panOnScroll: false, zoomOnScroll: true, panOnDrag: true, selectionOnDrag: false, deleteKeyCode: ['Delete', 'Backspace'] },
                             React.createElement(reactflow_1.Background, { gap: snapPixels }),
@@ -16319,6 +16359,63 @@ const SwapIcon = ({ image, label }) => {
 };
 exports.ContextMenu = React.memo(({ contextMenu, activeSubMenu, setActiveSubMenu, rawNodesDict, rawEdgesDict, paletteItems, connectionTypes, clipboardRef, wrapperRef, getValidIntersection, handleContextMenuAction, handleNodeSwap, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, }) => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+    const containerRef = React.useRef(null);
+    const flyoutRefs = React.useRef({});
+    const [adjustment, setAdjustment] = React.useState({ dx: 0, dy: 0 });
+    const [flyoutOffsets, setFlyoutOffsets] = React.useState({});
+    const isTouchDevice = React.useRef(typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0));
+    // Measure menu dimensions and clamp to viewport bounds (wrapper-local coordinates)
+    React.useLayoutEffect(() => {
+        if (!containerRef.current || !wrapperRef.current)
+            return;
+        // offsetWidth/offsetHeight = natural element size (not clipped by overflow: hidden on parent)
+        const menuW = containerRef.current.offsetWidth;
+        const menuH = containerRef.current.offsetHeight;
+        const wrapW = wrapperRef.current.clientWidth;
+        const wrapH = wrapperRef.current.clientHeight;
+        // All arithmetic is in wrapper-local space (same coordinate system as contextMenu.top/left)
+        let dx = 0, dy = 0;
+        if (contextMenu.left + menuW > wrapW - 8)
+            dx = wrapW - 8 - (contextMenu.left + menuW);
+        if (contextMenu.top + menuH > wrapH - 8)
+            dy = wrapH - 8 - (contextMenu.top + menuH);
+        if (contextMenu.left + dx < 8)
+            dx = 8 - contextMenu.left;
+        if (contextMenu.top + dy < 8)
+            dy = 8 - contextMenu.top;
+        setAdjustment({ dx, dy });
+    }, [contextMenu.top, contextMenu.left]);
+    // Measure flyouts and position them to fit within bounds (shift upward if needed)
+    React.useLayoutEffect(() => {
+        if (!wrapperRef.current || !containerRef.current)
+            return;
+        const newOffsets = {};
+        const wrapH = wrapperRef.current.clientHeight;
+        const menuTop = contextMenu.top + adjustment.dy;
+        const menuH = containerRef.current.offsetHeight;
+        const menuBottom = menuTop + menuH;
+        // Measure each flyout and calculate its top offset
+        Object.entries(flyoutRefs.current).forEach(([key, flyout]) => {
+            if (!flyout)
+                return;
+            const flyoutH = flyout.offsetHeight;
+            // Space below the menu
+            const spaceBelow = wrapH - menuBottom - 8;
+            // If flyout doesn't fit below, position it above
+            if (flyoutH > spaceBelow) {
+                // Get submenu item height for upward positioning
+                const parent = flyout.parentElement;
+                const itemH = (parent === null || parent === void 0 ? void 0 : parent.firstElementChild) ? parent.firstElementChild.offsetHeight : 24;
+                // Above: shift up by flyout height, but keep it adjacent to item
+                newOffsets[key] = itemH - flyoutH;
+            }
+            else {
+                // Below: original position that worked
+                newOffsets[key] = 0;
+            }
+        });
+        setFlyoutOffsets(newOffsets);
+    }, [activeSubMenu, adjustment, contextMenu.top]);
     // Memoize derived edge state — avoids recomputing getValidIntersection on every render
     const availableConnections = React.useMemo(() => {
         if (contextMenu.type !== 'edge')
@@ -16345,10 +16442,19 @@ exports.ContextMenu = React.memo(({ contextMenu, activeSubMenu, setActiveSubMenu
             return [];
         return paletteItems.filter((p) => currentPaletteItem.swappableWith.includes(p.id));
     }, [contextMenu, rawNodesDict, paletteItems]);
-    const flyoutStyle = (wrapperRef.current && contextMenu.left + 310 > wrapperRef.current.clientWidth)
-        ? { position: 'absolute', top: '-0px', right: '100%', marginRight: '0px' }
-        : { position: 'absolute', top: '-0px', left: '100%', marginLeft: '0px' };
-    return (React.createElement("div", { style: Object.assign(Object.assign({}, CONTAINER_STYLE), { top: contextMenu.top, left: contextMenu.left }) },
+    const flyoutFlipsLeft = wrapperRef.current
+        ? (contextMenu.left + adjustment.dx + 310 > wrapperRef.current.clientWidth)
+        : false;
+    const flyoutFlipsUp = (wrapperRef.current && containerRef.current)
+        ? (contextMenu.top + adjustment.dy + containerRef.current.offsetHeight > wrapperRef.current.clientHeight - 8)
+        : false;
+    // Build flyout style with dynamic positioning
+    const getFlyoutStyle = (submenuKey) => {
+        var _a;
+        const topOffset = (_a = flyoutOffsets[submenuKey]) !== null && _a !== void 0 ? _a : 0;
+        return Object.assign({ position: 'absolute', top: topOffset === 0 ? '-0px' : topOffset + 'px' }, (flyoutFlipsLeft ? { right: '100%' } : { left: '100%' }));
+    };
+    return (React.createElement("div", { ref: containerRef, style: Object.assign(Object.assign({}, CONTAINER_STYLE), { top: contextMenu.top, left: contextMenu.left, transform: `translate(${adjustment.dx}px, ${adjustment.dy}px)` }) },
         contextMenu.type === 'pane' && (React.createElement("div", { style: { padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }, onClick: () => { if (clipboardRef.current)
                 handleContextMenuAction('paste'); } }, "\uD83D\uDCCB Paste")),
         contextMenu.type !== 'pane' && (React.createElement(React.Fragment, null,
@@ -16373,20 +16479,22 @@ exports.ContextMenu = React.memo(({ contextMenu, activeSubMenu, setActiveSubMenu
                 React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('copy') }, "\uD83D\uDCCB Copy"),
                 contextMenu.isContainer && (React.createElement("div", { style: { padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }, onClick: () => { if (clipboardRef.current)
                         handleContextMenuAction('paste'); } }, "\uD83D\uDCCB Paste")),
-                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('order') },
+                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => !isTouchDevice.current && setActiveSubMenu('order'), onClick: () => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'order' ? null : 'order') },
                     React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'order' ? 'var(--neutral-30)' : 'transparent' } },
                         React.createElement("span", null, "\uD83D\uDCD1 Order"),
                         React.createElement("span", null, "\u25B6")),
-                    activeSubMenu === 'order' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '150px' }) },
+                    activeSubMenu === 'order' && (React.createElement("div", { ref: (el) => { if (el)
+                            flyoutRefs.current['order'] = el; }, style: Object.assign(Object.assign(Object.assign({}, getFlyoutStyle('order')), FLYOUT_PANEL_STYLE), { minWidth: '150px' }) },
                         React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('bringToFront') }, "\u23EB Bring to Front"),
                         React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('bringForward') }, "\uD83D\uDD3C Bring Forward"),
                         React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('sendBackward') }, "\uD83D\uDD3D Send Backward"),
                         React.createElement("div", { style: MENU_ITEM_STYLE, onClick: () => handleContextMenuAction('sendToBack') }, "\u23EC Send to Back")))),
-                validSwapItems.length > 0 && (React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('swapNode') },
+                validSwapItems.length > 0 && (React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => !isTouchDevice.current && setActiveSubMenu('swapNode'), onClick: () => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'swapNode' ? null : 'swapNode') },
                     React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'swapNode' ? 'var(--neutral-30)' : 'transparent' } },
                         React.createElement("span", null, "\uD83D\uDD04 Swap Node"),
                         React.createElement("span", null, "\u25B6")),
-                    activeSubMenu === 'swapNode' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '150px' }) }, validSwapItems.map((targetItem) => (React.createElement("div", { key: targetItem.id, style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center' }, onClick: () => handleNodeSwap(targetItem.id) },
+                    activeSubMenu === 'swapNode' && (React.createElement("div", { ref: (el) => { if (el)
+                            flyoutRefs.current['swapNode'] = el; }, style: Object.assign(Object.assign(Object.assign({}, getFlyoutStyle('swapNode')), FLYOUT_PANEL_STYLE), { minWidth: '150px' }) }, validSwapItems.map((targetItem) => (React.createElement("div", { key: targetItem.id, style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', alignItems: 'center' }, onClick: () => handleNodeSwap(targetItem.id) },
                         React.createElement("div", { style: { width: '16px', height: '16px', marginRight: '6px', display: 'flex', alignItems: 'center' } }, targetItem.image && React.createElement(SwapIcon, { image: targetItem.image, label: targetItem.label })),
                         React.createElement("span", null, targetItem.label)))))))))),
             contextMenu.type === 'edge' && (React.createElement(React.Fragment, null,
@@ -16407,11 +16515,12 @@ exports.ContextMenu = React.memo(({ contextMenu, activeSubMenu, setActiveSubMenu
                         ")")) : null;
                 })(),
                 React.createElement("div", { style: MENU_DIVIDER_STYLE }),
-                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('lineType') },
+                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => !isTouchDevice.current && setActiveSubMenu('lineType'), onClick: () => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'lineType' ? null : 'lineType') },
                     React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'lineType' ? 'var(--neutral-30)' : 'transparent' } },
                         React.createElement("span", null, "\u3030\uFE0F Line Type"),
                         React.createElement("span", null, "\u25B6")),
-                    activeSubMenu === 'lineType' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '120px' }) },
+                    activeSubMenu === 'lineType' && (React.createElement("div", { ref: (el) => { if (el)
+                            flyoutRefs.current['lineType'] = el; }, style: Object.assign(Object.assign(Object.assign({}, getFlyoutStyle('lineType')), FLYOUT_PANEL_STYLE), { minWidth: '120px' }) },
                         React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('smoothstep') },
                             React.createElement("span", null, "\u3030\uFE0F Smooth"),
                             React.createElement("span", null, currentLineType === 'smoothstep' ? '✓' : '')),
@@ -16424,11 +16533,12 @@ exports.ContextMenu = React.memo(({ contextMenu, activeSubMenu, setActiveSubMenu
                         React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleLineTypeChange('default') },
                             React.createElement("span", null, "\u27B0 Bezier"),
                             React.createElement("span", null, currentLineType === 'default' ? '✓' : ''))))),
-                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('animation') },
+                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => !isTouchDevice.current && setActiveSubMenu('animation'), onClick: () => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'animation' ? null : 'animation') },
                     React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'animation' ? 'var(--neutral-30)' : 'transparent' } },
                         React.createElement("span", null, "\u2728 Animation"),
                         React.createElement("span", null, "\u25B6")),
-                    activeSubMenu === 'animation' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '140px' }) },
+                    activeSubMenu === 'animation' && (React.createElement("div", { ref: (el) => { if (el)
+                            flyoutRefs.current['animation'] = el; }, style: Object.assign(Object.assign(Object.assign({}, getFlyoutStyle('animation')), FLYOUT_PANEL_STYLE), { minWidth: '140px' }) },
                         React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleAnimationChange('none') },
                             React.createElement("span", null, "\uD83D\uDEAB None"),
                             React.createElement("span", null, (((_o = rawEdgesDict[contextMenu.id]) === null || _o === void 0 ? void 0 : _o.animation) || 'none') === 'none' ? '✓' : '')),
@@ -16438,11 +16548,12 @@ exports.ContextMenu = React.memo(({ contextMenu, activeSubMenu, setActiveSubMenu
                         React.createElement("div", { style: Object.assign(Object.assign({}, MENU_ITEM_FLEX_STYLE), { whiteSpace: 'nowrap' }), onClick: () => handleAnimationChange('bidirectional') },
                             React.createElement("span", null, "\u2194\uFE0F Bidirectional"),
                             React.createElement("span", null, ((_q = rawEdgesDict[contextMenu.id]) === null || _q === void 0 ? void 0 : _q.animation) === 'bidirectional' ? '✓' : ''))))),
-                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => setActiveSubMenu('connectionType') },
+                React.createElement("div", { style: { position: 'relative' }, onMouseEnter: () => !isTouchDevice.current && setActiveSubMenu('connectionType'), onClick: () => isTouchDevice.current && setActiveSubMenu(activeSubMenu === 'connectionType' ? null : 'connectionType') },
                     React.createElement("div", { style: { padding: '5px 8px', cursor: 'pointer', color: 'var(--neutral-90)', display: 'flex', justifyContent: 'space-between', backgroundColor: activeSubMenu === 'connectionType' ? 'var(--neutral-30)' : 'transparent' } },
                         React.createElement("span", null, "\uD83D\uDD17 Connection"),
                         React.createElement("span", null, "\u25B6")),
-                    activeSubMenu === 'connectionType' && (React.createElement("div", { style: Object.assign(Object.assign(Object.assign({}, flyoutStyle), FLYOUT_PANEL_STYLE), { minWidth: '140px' }) }, availableConnections.length === 0
+                    activeSubMenu === 'connectionType' && (React.createElement("div", { ref: (el) => { if (el)
+                            flyoutRefs.current['connectionType'] = el; }, style: Object.assign(Object.assign(Object.assign({}, getFlyoutStyle('connectionType')), FLYOUT_PANEL_STYLE), { minWidth: '140px' }) }, availableConnections.length === 0
                         ? React.createElement("div", { style: { padding: '5px 8px', color: 'var(--neutral-60)' } }, "No valid connections")
                         : availableConnections.map(c => {
                             var _a, _b;
@@ -18487,6 +18598,44 @@ const useEdgeHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, c
     };
 };
 exports.useEdgeHandlers = useEdgeHandlers;
+
+
+/***/ }),
+
+/***/ "./typescript/components/ArchitectureBuilder/useLongPress.ts":
+/*!*******************************************************************!*\
+  !*** ./typescript/components/ArchitectureBuilder/useLongPress.ts ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.useLongPress = void 0;
+const react_1 = __webpack_require__(/*! react */ "react");
+const LONG_PRESS_MS = 600;
+function useLongPress(onLongPress) {
+    const timerRef = react_1.useRef(null);
+    const onPointerDown = react_1.useCallback((e) => {
+        if (e.button !== 0)
+            return; // primary button only
+        const { clientX, clientY, target } = e;
+        timerRef.current = setTimeout(() => {
+            onLongPress(clientX, clientY, target);
+        }, LONG_PRESS_MS);
+    }, [onLongPress]);
+    const cancel = react_1.useCallback(() => {
+        if (timerRef.current)
+            clearTimeout(timerRef.current);
+    }, []);
+    return {
+        onPointerDown,
+        onPointerUp: cancel,
+        onPointerCancel: cancel,
+        onPointerMove: cancel,
+    };
+}
+exports.useLongPress = useLongPress;
 
 
 /***/ }),
