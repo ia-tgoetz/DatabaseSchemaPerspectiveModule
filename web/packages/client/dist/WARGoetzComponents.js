@@ -17202,6 +17202,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Sidebar = void 0;
 const react_1 = __importStar(__webpack_require__(/*! react */ "react"));
 const svgSanitize_1 = __webpack_require__(/*! ./svgSanitize */ "./typescript/components/ArchitectureBuilder/svgSanitize.ts");
+const constants_1 = __webpack_require__(/*! ./constants */ "./typescript/components/ArchitectureBuilder/constants.ts");
 const PaletteThumb = ({ src, label }) => {
     const scopeId = react_1.default.useMemo(() => svgSanitize_1.nextSvgScopeId(), []);
     const svgHtml = react_1.default.useMemo(() => svgSanitize_1.extractSvgMarkup(src, scopeId), [src, scopeId]);
@@ -17213,10 +17214,14 @@ const PaletteThumb = ({ src, label }) => {
 };
 const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemClick }) => {
     const [collapsedCategories, setCollapsedCategories] = react_1.useState({});
+    const [searchQuery, setSearchQuery] = react_1.useState('');
     const { containerItems, groupedItems } = react_1.useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
         const containers = [];
         const groups = {};
         paletteItems.forEach(item => {
+            if (q && !item.label.toLowerCase().includes(q))
+                return;
             if (item.id === 'container') {
                 containers.push(item);
             }
@@ -17228,7 +17233,7 @@ const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemC
             }
         });
         return { containerItems: containers, groupedItems: groups };
-    }, [paletteItems]);
+    }, [paletteItems, searchQuery]);
     const toggleCategory = (category) => {
         setCollapsedCategories((prev) => (Object.assign(Object.assign({}, prev), { [category]: prev[category] === false })));
     };
@@ -17257,6 +17262,9 @@ const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemC
         react_1.default.createElement("div", { style: { width: isOpen ? '250px' : '0px', backgroundColor: 'var(--neutral-20)', borderRight: isOpen ? '1px solid var(--neutral-40)' : 'none', overflowY: 'auto', overflowX: 'hidden', transition: 'width 0.3s ease', display: 'flex', flexDirection: 'column' } },
             react_1.default.createElement("div", { style: { padding: '15px', whiteSpace: 'nowrap' } },
                 react_1.default.createElement("h3", { style: { marginTop: 0, color: 'var(--neutral-90)' } }, "Palette"),
+                react_1.default.createElement("div", { style: { marginBottom: '12px', position: 'relative' } },
+                    react_1.default.createElement("input", { type: "text", placeholder: "Search palette...", value: searchQuery, onChange: (e) => setSearchQuery(e.target.value), style: Object.assign(Object.assign({}, constants_1.sharedInputStyle), { paddingRight: searchQuery ? '24px' : '8px' }) }),
+                    searchQuery && (react_1.default.createElement("span", { onClick: () => setSearchQuery(''), style: { position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: 'var(--neutral-60)', fontSize: '14px', lineHeight: 1 } }, "\u00D7"))),
                 containerItems.length > 0 && (react_1.default.createElement("div", { style: { marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid var(--neutral-40)' } }, containerItems.map((item) => {
                     const _a = item.style || {}, { classes: _c, backgroundColor: imageBg } = _a, itemStyle = __rest(_a, ["classes", "backgroundColor"]);
                     const _b = item.labelStyle || {}, { classes: _lc } = _b, labelStyle = __rest(_b, ["classes"]);
@@ -17266,7 +17274,7 @@ const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemC
                         react_1.default.createElement("span", { style: Object.assign({ color: 'var(--neutral-90)', fontSize: '14px' }, labelStyle) }, item.label)));
                 }))),
                 Object.entries(groupedItems).map(([category, items]) => {
-                    const isCollapsed = collapsedCategories[category] !== false;
+                    const isCollapsed = searchQuery.trim() ? false : collapsedCategories[category] !== false;
                     return (react_1.default.createElement("div", { key: category, style: { marginBottom: '15px' } },
                         react_1.default.createElement("div", { onClick: () => toggleCategory(category), style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', backgroundColor: 'var(--neutral-30)', padding: '8px 10px', borderRadius: '4px', marginBottom: '8px', fontWeight: 'bold', color: 'var(--neutral-90)', userSelect: 'none' } },
                             react_1.default.createElement("span", null, category),
@@ -17279,7 +17287,11 @@ const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemC
                                     react_1.default.createElement(PaletteThumb, { src: item.image, label: item.label })),
                                 react_1.default.createElement("span", { style: Object.assign({ color: 'var(--neutral-90)', fontSize: '14px' }, labelStyle) }, item.label)));
                         })))));
-                }))),
+                }),
+                searchQuery.trim() && Object.keys(groupedItems).length === 0 && containerItems.length === 0 && (react_1.default.createElement("div", { style: { color: 'var(--neutral-60)', fontSize: '13px', textAlign: 'center', padding: '20px 0' } },
+                    "No components match \"",
+                    searchQuery,
+                    "\"")))),
         react_1.default.createElement("div", { onClick: toggleSidebar, style: { width: '20px', height: '50px', backgroundColor: 'var(--neutral-40)', border: '1px solid var(--neutral-50)', borderLeft: 'none', borderRadius: '0 4px 4px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', marginTop: '20px', color: 'var(--neutral-90)' } }, isOpen ? '◀' : '▶')));
 };
 exports.Sidebar = Sidebar;

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { extractSvgMarkup, toSafeDataUri, nextSvgScopeId } from './svgSanitize';
+import { sharedInputStyle } from './constants';
 
 const PaletteThumb = ({ src, label }: { src: string, label: string }) => {
     const scopeId = React.useMemo(() => nextSvgScopeId(), []);
@@ -44,12 +45,15 @@ export interface SidebarProps {
 
 export const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, onItemClick }: SidebarProps) => {
     const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+    const [searchQuery, setSearchQuery] = useState('');
 
     const { containerItems, groupedItems } = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase();
         const containers: PaletteItem[] = [];
         const groups: Record<string, PaletteItem[]> = {};
 
         paletteItems.forEach(item => {
+            if (q && !item.label.toLowerCase().includes(q)) return;
             if (item.id === 'container') {
                 containers.push(item);
             } else {
@@ -59,7 +63,7 @@ export const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, 
             }
         });
         return { containerItems: containers, groupedItems: groups };
-    }, [paletteItems]);
+    }, [paletteItems, searchQuery]);
 
     const toggleCategory = (category: string) => {
         setCollapsedCategories((prev) => ({ ...prev, [category]: prev[category] === false }));
@@ -92,7 +96,23 @@ export const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, 
             <div style={{ width: isOpen ? '250px' : '0px', backgroundColor: 'var(--neutral-20)', borderRight: isOpen ? '1px solid var(--neutral-40)' : 'none', overflowY: 'auto', overflowX: 'hidden', transition: 'width 0.3s ease', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ padding: '15px', whiteSpace: 'nowrap' }}>
                     <h3 style={{ marginTop: 0, color: 'var(--neutral-90)' }}>Palette</h3>
-                    
+
+                    <div style={{ marginBottom: '12px', position: 'relative' }}>
+                        <input
+                            type="text"
+                            placeholder="Search palette..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ ...sharedInputStyle, paddingRight: searchQuery ? '24px' : '8px' }}
+                        />
+                        {searchQuery && (
+                            <span
+                                onClick={() => setSearchQuery('')}
+                                style={{ position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: 'var(--neutral-60)', fontSize: '14px', lineHeight: 1 }}
+                            >×</span>
+                        )}
+                    </div>
+
                     {containerItems.length > 0 && (
                         <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid var(--neutral-40)' }}>
                             {containerItems.map((item) => {
@@ -115,7 +135,7 @@ export const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, 
                     )}
 
                     {Object.entries(groupedItems).map(([category, items]) => {
-                        const isCollapsed = collapsedCategories[category] !== false;
+                        const isCollapsed = searchQuery.trim() ? false : collapsedCategories[category] !== false;
                         return (
                             <div key={category} style={{ marginBottom: '15px' }}>
                                 <div onClick={() => toggleCategory(category)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', backgroundColor: 'var(--neutral-30)', padding: '8px 10px', borderRadius: '4px', marginBottom: '8px', fontWeight: 'bold', color: 'var(--neutral-90)', userSelect: 'none' }}>
@@ -144,6 +164,11 @@ export const Sidebar = ({ paletteItems, isOpen, toggleSidebar, onDragStartItem, 
                             </div>
                         );
                     })}
+                    {searchQuery.trim() && Object.keys(groupedItems).length === 0 && containerItems.length === 0 && (
+                        <div style={{ color: 'var(--neutral-60)', fontSize: '13px', textAlign: 'center', padding: '20px 0' }}>
+                            No components match "{searchQuery}"
+                        </div>
+                    )}
                 </div>
             </div>
             <div onClick={toggleSidebar} style={{ width: '20px', height: '50px', backgroundColor: 'var(--neutral-40)', border: '1px solid var(--neutral-50)', borderLeft: 'none', borderRadius: '0 4px 4px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', marginTop: '20px', color: 'var(--neutral-90)' }}>
