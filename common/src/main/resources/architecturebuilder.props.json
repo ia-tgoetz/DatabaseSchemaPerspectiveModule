@@ -1876,6 +1876,10 @@
               "type": "boolean",
               "default": false
             },
+            "labelText": {
+              "type": "string",
+              "default": ""
+            },
             "waypoints": {
               "type": "array",
               "description": "Explicit orthogonal routing waypoints. Empty means auto-routed from handle positions.",

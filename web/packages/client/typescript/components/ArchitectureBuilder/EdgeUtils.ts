@@ -103,6 +103,7 @@ export const mapIgnitionToReactFlowEdges = (
     connectionTypes: any,
     selectedId: string | null,
     onWaypointsChange?: (id: string, wps: { x: number; y: number }[]) => void,
+    onLabelChange?: (id: string, labelText: string) => void,
     snapEnabled?: boolean,
     snapPixels?: number,
     globalEdgeWidth?: number
@@ -150,8 +151,11 @@ export const mapIgnitionToReactFlowEdges = (
                     onWaypointsChange: onWaypointsChange
                         ? (wps: { x: number; y: number }[]) => onWaypointsChange(id, wps)
                         : undefined,
+                    onLabelChange: onLabelChange
+                        ? (labelText: string) => onLabelChange(id, labelText)
+                        : undefined,
                 },
-                label: typeConfig.label || edgeData.connectionType || '',
+                label: edgeData.labelText || typeConfig.label || edgeData.connectionType || '',
                 style: strokeStyle,
                 markerEnd: arrowMarker,
                 interactionWidth: 20,

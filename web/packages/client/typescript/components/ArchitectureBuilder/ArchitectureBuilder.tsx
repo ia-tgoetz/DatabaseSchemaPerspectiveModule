@@ -298,6 +298,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         getValidIntersection,
         isValidConnection,
         handleWaypointsChange,
+        handleLabelChange,
         onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd,
         onEdgesDelete, onEdgeContextMenu, onEdgeClick,
         handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange,
@@ -355,8 +356,8 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         [rawNodesDict, paletteItems, handleGearClick, handleResizeEnd, handleTextChange, selectedId, globalHideHandles, globalHandleCount, highlightedHandlesMap, isEnabled]
     );
     const flowEdges = React.useMemo(() =>
-        mapIgnitionToReactFlowEdges(rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth),
-        [rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, snapEnabled, snapPixels, globalEdgeWidth]
+        mapIgnitionToReactFlowEdges(rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, handleLabelChange, snapEnabled, snapPixels, globalEdgeWidth),
+        [rawEdgesDict, rawNodesDict, connectionTypes, selectedId, handleWaypointsChange, handleLabelChange, snapEnabled, snapPixels, globalEdgeWidth]
     );
 
     React.useEffect(() => {
