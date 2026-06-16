@@ -15732,7 +15732,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         props.store.props.write('refreshHierarchy', false);
     }, [props.props.refreshHierarchy, props.store]);
     // ─── Handlers hook ─────────────────────────────────────────────────────
-    const { isUpdatingEdge, isDraggingNode, updatingEdgeRef, rawNodesDictRef, closeContextMenu, getValidIntersection, isValidConnection, handleWaypointsChange, onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd, onEdgesDelete, onEdgeContextMenu, onEdgeClick, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, handleGearClick, handlePaletteItemClick, handleResizeEnd, handleTextChange, onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onNodeContextMenu, onNodeClick, executeCopy, executePaste, onDragOver, onDrop, onPaneClick, onPaneContextMenu, handleNodeSwap, handleContextMenuAction, } = useArchitectureFlowHandlers_1.useArchitectureFlowHandlers({
+    const { isUpdatingEdge, isDraggingNode, updatingEdgeRef, rawNodesDictRef, closeContextMenu, getValidIntersection, isValidConnection, handleWaypointsChange, onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd, onEdgesDelete, onEdgeContextMenu, onEdgeClick, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, handleGearClick, handlePaletteItemClick, handleResizeEnd, handleTextChange, onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onNodeContextMenu, onNodeClick, executeCopy, executePaste, onDragOver, onDrop, onMoveStart, onPaneClick, onPaneContextMenu, handleNodeSwap, handleContextMenuAction, } = useArchitectureFlowHandlers_1.useArchitectureFlowHandlers({
         store: props.store,
         componentEvents: props.componentEvents,
         rawNodesDict,
@@ -16012,7 +16012,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
                 isEnabled && React.createElement(Sidebar_1.Sidebar, { paletteItems: paletteItems, isOpen: isSidebarOpen, toggleSidebar: () => setIsSidebarOpen(!isSidebarOpen), onDragStartItem: (item) => { draggedItemRef.current = item; }, onItemClick: handlePaletteItemClick }),
                 React.createElement("div", Object.assign({ role: "main", "aria-label": "Architecture Builder Canvas", style: { flexGrow: 1, height: '100%', position: 'relative', overflow: 'hidden' }, ref: reactFlowWrapper, className: isUpdatingEdge ? 'arch-moving-edge' : '' }, longPressHandlers),
                     React.createElement(reactflow_1.ReactFlowProvider, null,
-                        React.createElement(reactflow_1.default, { nodes: localNodes, edges: displayEdges, nodeTypes: nodeTypes, edgeTypes: CustomEdge_1.edgeTypes, isValidConnection: isValidConnection, onInit: setReactFlowInstance, onDrop: isEnabled ? onDrop : undefined, onDragOver: isEnabled ? onDragOver : undefined, onConnect: isEnabled ? onConnect : undefined, onEdgeUpdate: isEnabled ? onEdgeUpdate : undefined, onEdgeUpdateStart: isEnabled ? onEdgeUpdateStart : undefined, onEdgeUpdateEnd: isEnabled ? onEdgeUpdateEnd : undefined, onConnectStart: isEnabled ? onConnectStart : undefined, onConnectEnd: isEnabled ? onConnectEnd : undefined, onNodeDragStart: isEnabled ? onNodeDragStart : undefined, onNodeDrag: isEnabled ? onNodeDrag : undefined, onNodeDragStop: isEnabled ? onNodeDragStop : undefined, onNodesChange: onNodesChange, onNodeClick: onNodeClick, onEdgeClick: onEdgeClick, onNodesDelete: isEnabled ? onNodesDelete : undefined, onEdgesDelete: isEnabled ? onEdgesDelete : undefined, onNodeContextMenu: isEnabled ? onNodeContextMenu : undefined, onEdgeContextMenu: isEnabled ? onEdgeContextMenu : undefined, onEdgeMouseEnter: (_evt, edge) => setHoveredEdgeId(edge.id), onEdgeMouseLeave: () => setHoveredEdgeId(null), onPaneClick: onPaneClick, onPaneContextMenu: isEnabled ? onPaneContextMenu : undefined, nodesDraggable: isEnabled, nodesConnectable: isEnabled, elementsSelectable: isEnabled, connectionMode: reactflow_1.ConnectionMode.Loose, snapToGrid: snapEnabled, snapGrid: snapGrid, connectionLineStyle: { stroke: '#cccccc', strokeWidth: 6, fill: 'none' }, elevateNodesOnSelect: false, minZoom: 0.05, panOnScroll: false, zoomOnScroll: true, panOnDrag: true, selectionOnDrag: false, deleteKeyCode: ['Delete', 'Backspace'] },
+                        React.createElement(reactflow_1.default, { nodes: localNodes, edges: displayEdges, nodeTypes: nodeTypes, edgeTypes: CustomEdge_1.edgeTypes, isValidConnection: isValidConnection, onInit: setReactFlowInstance, onDrop: isEnabled ? onDrop : undefined, onDragOver: isEnabled ? onDragOver : undefined, onConnect: isEnabled ? onConnect : undefined, onEdgeUpdate: isEnabled ? onEdgeUpdate : undefined, onEdgeUpdateStart: isEnabled ? onEdgeUpdateStart : undefined, onEdgeUpdateEnd: isEnabled ? onEdgeUpdateEnd : undefined, onConnectStart: isEnabled ? onConnectStart : undefined, onConnectEnd: isEnabled ? onConnectEnd : undefined, onNodeDragStart: isEnabled ? onNodeDragStart : undefined, onNodeDrag: isEnabled ? onNodeDrag : undefined, onNodeDragStop: isEnabled ? onNodeDragStop : undefined, onNodesChange: onNodesChange, onNodeClick: onNodeClick, onEdgeClick: onEdgeClick, onNodesDelete: isEnabled ? onNodesDelete : undefined, onEdgesDelete: isEnabled ? onEdgesDelete : undefined, onNodeContextMenu: isEnabled ? onNodeContextMenu : undefined, onEdgeContextMenu: isEnabled ? onEdgeContextMenu : undefined, onEdgeMouseEnter: (_evt, edge) => setHoveredEdgeId(edge.id), onEdgeMouseLeave: () => setHoveredEdgeId(null), onPaneClick: onPaneClick, onPaneContextMenu: isEnabled ? onPaneContextMenu : undefined, onMoveStart: onMoveStart, nodesDraggable: isEnabled, nodesConnectable: isEnabled, elementsSelectable: isEnabled, connectionMode: reactflow_1.ConnectionMode.Loose, snapToGrid: snapEnabled, snapGrid: snapGrid, connectionLineStyle: { stroke: '#cccccc', strokeWidth: 6, fill: 'none' }, elevateNodesOnSelect: false, minZoom: 0.05, panOnScroll: false, zoomOnScroll: true, panOnDrag: true, selectionOnDrag: false, deleteKeyCode: ['Delete', 'Backspace'] },
                             React.createElement(reactflow_1.Background, { gap: snapPixels }),
                             React.createElement(reactflow_1.Controls, { showInteractive: false }))),
                     styleEditorNodeId && rawNodesDict[styleEditorNodeId] && (React.createElement(StyleEditorModal_1.StyleEditorModal, { node: rawNodesDict[styleEditorNodeId], onSave: (newStyle, newLabelStyle, newTextStyle) => {
@@ -17709,6 +17709,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
     }, [setLocalNodes]);
     const onNodeDragStart = React.useCallback((event, node) => {
         var _a;
+        closeContextMenu();
         setIsDraggingNode(true);
         const rawNode = rawNodesDict[node.id];
         if ((rawNode === null || rawNode === void 0 ? void 0 : rawNode.paletteId) === 'container' && !((_a = rawNode === null || rawNode === void 0 ? void 0 : rawNode.configs) === null || _a === void 0 ? void 0 : _a.unlinked)) {
@@ -17852,11 +17853,12 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         }
     }, [rawNodesDict, reactFlowWrapper, setSelectedId, setContextMenu, setActiveSubMenu]);
     const onNodeClick = React.useCallback((event, node) => {
+        closeContextMenu();
         setSelectedId(node.id);
         const rawNode = rawNodesDict[node.id];
         if (componentEvents)
             componentEvents.fireComponentEvent('onNodeClick', { id: node.id, paletteId: rawNode === null || rawNode === void 0 ? void 0 : rawNode.paletteId, typeId: rawNode === null || rawNode === void 0 ? void 0 : rawNode.typeId, type: 'node' });
-    }, [componentEvents, rawNodesDict, setSelectedId]);
+    }, [componentEvents, rawNodesDict, setSelectedId, closeContextMenu]);
     // ─── Clipboard ────────────────────────────────────────────────────────────
     const executeCopy = React.useCallback((id) => {
         var _a;
@@ -17978,6 +17980,9 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
                 componentEvents.fireComponentEvent('onCanvasError', utils_1.getSafeError(error, 'onDrop'));
         }
     }, [store, rawNodesDict, snapEnabled, snapPixels, reactFlowInstance, setSelectedId, draggedItemRef, componentEvents]);
+    const onMoveStart = React.useCallback(() => {
+        closeContextMenu();
+    }, [closeContextMenu]);
     const onPaneClick = React.useCallback(() => {
         setSelectedId(null);
         closeContextMenu();
@@ -18325,6 +18330,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         // Pane
         onDragOver,
         onDrop,
+        onMoveStart,
         onPaneClick,
         onPaneContextMenu,
         // Context menu
@@ -18504,11 +18510,12 @@ const useEdgeHandlers = ({ store, componentEvents, rawNodesDict, rawEdgesDict, c
         }
     }, [reactFlowWrapper, setSelectedId, setContextMenu, setActiveSubMenu]);
     const onEdgeClick = React.useCallback((event, edge) => {
+        closeContextMenu();
         setSelectedId(edge.id);
         const rawEdge = rawEdgesDict[edge.id];
         if (componentEvents)
             componentEvents.fireComponentEvent('onEdgeClick', { id: edge.id, paletteId: rawEdge === null || rawEdge === void 0 ? void 0 : rawEdge.connectionType, type: 'edge' });
-    }, [componentEvents, rawEdgesDict, setSelectedId]);
+    }, [componentEvents, rawEdgesDict, setSelectedId, closeContextMenu]);
     const handleLineTypeChange = React.useCallback((newLineType) => {
         var _a;
         try {

@@ -305,7 +305,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop,
         onNodesDelete, onNodeContextMenu, onNodeClick,
         executeCopy, executePaste,
-        onDragOver, onDrop, onPaneClick, onPaneContextMenu,
+        onDragOver, onDrop, onMoveStart, onPaneClick, onPaneContextMenu,
         handleNodeSwap, handleContextMenuAction,
     } = useArchitectureFlowHandlers({
         store: props.store,
@@ -622,7 +622,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
                                 onNodeContextMenu={isEnabled ? onNodeContextMenu : undefined} onEdgeContextMenu={isEnabled ? onEdgeContextMenu : undefined}
                                 onEdgeMouseEnter={(_evt, edge) => setHoveredEdgeId(edge.id)}
                                 onEdgeMouseLeave={() => setHoveredEdgeId(null)}
-                                onPaneClick={onPaneClick} onPaneContextMenu={isEnabled ? onPaneContextMenu : undefined}
+                                onPaneClick={onPaneClick} onPaneContextMenu={isEnabled ? onPaneContextMenu : undefined} onMoveStart={onMoveStart}
                                 nodesDraggable={isEnabled} nodesConnectable={isEnabled} elementsSelectable={isEnabled}
                                 connectionMode={ConnectionMode.Loose} snapToGrid={snapEnabled} snapGrid={snapGrid}
                                 connectionLineStyle={{ stroke: '#cccccc', strokeWidth: 6, fill: 'none' }}

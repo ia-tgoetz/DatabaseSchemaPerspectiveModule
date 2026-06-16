@@ -170,6 +170,7 @@ export const useArchitectureFlowHandlers = ({
     }, [setLocalNodes]);
 
     const onNodeDragStart = React.useCallback((event: any, node: any) => {
+        closeContextMenu();
         setIsDraggingNode(true);
         const rawNode = rawNodesDict[node.id];
         if (rawNode?.paletteId === 'container' && !rawNode?.configs?.unlinked) {
@@ -311,10 +312,11 @@ export const useArchitectureFlowHandlers = ({
     }, [rawNodesDict, reactFlowWrapper, setSelectedId, setContextMenu, setActiveSubMenu]);
 
     const onNodeClick = React.useCallback((event: any, node: any) => {
+        closeContextMenu();
         setSelectedId(node.id);
         const rawNode = rawNodesDict[node.id];
         if (componentEvents) componentEvents.fireComponentEvent('onNodeClick', { id: node.id, paletteId: rawNode?.paletteId, typeId: rawNode?.typeId, type: 'node' });
-    }, [componentEvents, rawNodesDict, setSelectedId]);
+    }, [componentEvents, rawNodesDict, setSelectedId, closeContextMenu]);
 
     // ─── Clipboard ────────────────────────────────────────────────────────────
 
@@ -427,6 +429,10 @@ export const useArchitectureFlowHandlers = ({
             if (componentEvents?.fireComponentEvent) componentEvents.fireComponentEvent('onCanvasError', getSafeError(error, 'onDrop'));
         }
     }, [store, rawNodesDict, snapEnabled, snapPixels, reactFlowInstance, setSelectedId, draggedItemRef, componentEvents]);
+
+    const onMoveStart = React.useCallback(() => {
+        closeContextMenu();
+    }, [closeContextMenu]);
 
     const onPaneClick = React.useCallback(() => {
         setSelectedId(null);
@@ -704,6 +710,7 @@ export const useArchitectureFlowHandlers = ({
         // Pane
         onDragOver,
         onDrop,
+        onMoveStart,
         onPaneClick,
         onPaneContextMenu,
         // Context menu

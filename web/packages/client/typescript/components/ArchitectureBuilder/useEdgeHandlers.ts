@@ -176,10 +176,11 @@ export const useEdgeHandlers = ({
     }, [reactFlowWrapper, setSelectedId, setContextMenu, setActiveSubMenu]);
 
     const onEdgeClick = React.useCallback((event: any, edge: any) => {
+        closeContextMenu();
         setSelectedId(edge.id);
         const rawEdge = rawEdgesDict[edge.id];
         if (componentEvents) componentEvents.fireComponentEvent('onEdgeClick', { id: edge.id, paletteId: rawEdge?.connectionType, type: 'edge' });
-    }, [componentEvents, rawEdgesDict, setSelectedId]);
+    }, [componentEvents, rawEdgesDict, setSelectedId, closeContextMenu]);
 
     const handleLineTypeChange = React.useCallback((newLineType: string) => {
         try {
