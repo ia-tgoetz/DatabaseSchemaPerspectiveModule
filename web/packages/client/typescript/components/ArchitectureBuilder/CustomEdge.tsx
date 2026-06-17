@@ -21,7 +21,7 @@ interface DragState {
 export const CustomEdge = ({
     sourceX, sourceY, targetX, targetY,
     sourcePosition, targetPosition,
-    data, markerEnd, style, label, interactionWidth,
+    data, markerEnd, style, label, interactionWidth, zIndex,
 }: any) => {
     const storedWaypoints: Waypoint[] = data?.waypoints ?? [];
     const showLabel = data?.showLabel === true;
@@ -295,7 +295,7 @@ export const CustomEdge = ({
                             backgroundColor: 'var(--neutral-10)', padding: '2px 8px', borderRadius: '4px',
                             border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
                             color: style?.stroke || 'var(--neutral-90)', pointerEvents: 'auto',
-                            zIndex: 1002, cursor: 'pointer', whiteSpace: 'pre-wrap', textAlign: 'center',
+                            zIndex: (zIndex ?? 5000) + 50, cursor: 'pointer', whiteSpace: 'pre-wrap', textAlign: 'center',
                         }}
                         className="nodrag nopan"
                     >
@@ -411,7 +411,7 @@ export const CustomEdge = ({
                                     backgroundColor: 'var(--callToAction)',
                                     opacity: 0.85,
                                     cursor: isH ? 'ns-resize' : 'ew-resize',
-                                    zIndex: 1003,
+                                    zIndex: (zIndex ?? 5000) + 100,
                                     pointerEvents: 'all',
                                     touchAction: 'none',
                                     boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
