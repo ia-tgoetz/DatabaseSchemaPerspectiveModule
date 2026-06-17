@@ -5821,48 +5821,7 @@
           "handleCount": 5,
           "hierarchy": {
             "areas": [],
-            "nodes": [
-              {
-                "id": "I90408f77",
-                "label": "Standard",
-                "typeId": "standard"
-              },
-              {
-                "id": "Ib604db9f",
-                "label": "Standard",
-                "typeId": "standard"
-              },
-              {
-                "id": "I58590322",
-                "label": "Client",
-                "typeId": "Client"
-              },
-              {
-                "id": "Ib104f231",
-                "label": "Client",
-                "typeId": "Client"
-              },
-              {
-                "id": "Idf47061a",
-                "label": "Client",
-                "typeId": "Client"
-              },
-              {
-                "id": "I93cf4a0c",
-                "label": "Client",
-                "typeId": "Client"
-              },
-              {
-                "id": "I50fb97a9",
-                "label": "Client",
-                "typeId": "Client"
-              },
-              {
-                "id": "Iddf52891",
-                "label": "Firewall",
-                "typeId": "network-component"
-              }
-            ]
+            "nodes": []
           },
           "paletteItems": [
             {

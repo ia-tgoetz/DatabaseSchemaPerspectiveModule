@@ -65,7 +65,7 @@
     }
   },
   "props": {
-    "address": "172.18.0.3",
+    "address": "172.18.0.2",
     "appBar": {
       "togglePosition": "hidden"
     },
