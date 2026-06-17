@@ -15544,7 +15544,7 @@ const mapIgnitionToReactFlowNodes = (ignitionNodes, paletteItems, handleGearClic
         return {
             id, type, selected: id === selectedId,
             position: { x: nodeData.x || 0, y: nodeData.y || 0 },
-            zIndex: isContainer ? ((_b = nodeData.zIndex) !== null && _b !== void 0 ? _b : -1) : 1000,
+            zIndex: isContainer ? ((_b = nodeData.zIndex) !== null && _b !== void 0 ? _b : -100) : 1000,
             style: {
                 width: nodeData.width || (isContainer ? 300 : (isTextNode ? 150 : 150)),
                 height: nodeData.height || (isContainer ? 300 : (isTextNode ? 80 : 150)),
@@ -15823,11 +15823,11 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
             const isHovered = fresh.id === hoveredEdgeId;
             const isSelected = ((_a = fresh.data) === null || _a === void 0 ? void 0 : _a.isSelected) === true;
             const isAnimated = ((_b = fresh.data) === null || _b === void 0 ? void 0 : _b.animation) !== 'none';
-            let zIndex = fresh.zIndex || 0;
+            let zIndex = fresh.zIndex || 2000;
             if (isHovered)
-                zIndex = Math.max(zIndex, 500);
+                zIndex = Math.max(zIndex, 4000);
             if (isAnimated)
-                zIndex = 1000;
+                zIndex = 5000;
             const strokeWidth = (isHovered || isSelected) ? globalEdgeWidth + 2 : globalEdgeWidth;
             const waypoints = (_d = (_c = local === null || local === void 0 ? void 0 : local.data) === null || _c === void 0 ? void 0 : _c.waypoints) !== null && _d !== void 0 ? _d : (_e = fresh.data) === null || _e === void 0 ? void 0 : _e.waypoints;
             return Object.assign(Object.assign({}, fresh), { updatable: isEnabled, zIndex, style: Object.assign(Object.assign({}, fresh.style), { strokeWidth }), data: Object.assign(Object.assign({}, fresh.data), { waypoints, isEditable: isEnabled }) });
@@ -17140,7 +17140,7 @@ const mapIgnitionToReactFlowEdges = (ignitionEdges, ignitionNodes, connectionTyp
             ? 'none'
             : (edgeData.animation || 'none');
         const isAnimated = effectiveAnimation !== 'none';
-        const zIndex = isAnimated ? 1000 : (isSelected ? 10 : 0);
+        const zIndex = isAnimated ? 5000 : (isSelected ? 3000 : 2000);
         const strokeStyle = { stroke: typeConfig.color || '#888', strokeWidth: isSelected ? baseWidth + 2 : baseWidth };
         if (edgeData.dashed)
             strokeStyle.strokeDasharray = '10 15';
@@ -18186,7 +18186,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
                 if (paletteItem.id === 'container') {
                     newNodeData.width = 300;
                     newNodeData.height = 300;
-                    newNodeData.zIndex = -1;
+                    newNodeData.zIndex = -100;
                 }
                 const nextNodes = Object.assign({}, rawNodesDict);
                 nextNodes[newNodeId] = newNodeData;
@@ -18456,19 +18456,19 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
             if (['bringToFront', 'bringForward', 'sendBackward', 'sendToBack'].includes(action) && isNode) {
                 if (store === null || store === void 0 ? void 0 : store.props) {
                     const nextNodes = Object.assign({}, rawNodesDict);
-                    const currentZ = (_d = nextNodes[contextMenu.id].zIndex) !== null && _d !== void 0 ? _d : -1;
+                    const currentZ = (_d = nextNodes[contextMenu.id].zIndex) !== null && _d !== void 0 ? _d : -100;
                     if (action === 'bringForward') {
-                        nextNodes[contextMenu.id].zIndex = Math.min(currentZ + 1, 999);
+                        nextNodes[contextMenu.id].zIndex = Math.min(currentZ + 1, -100);
                     }
                     else if (action === 'sendBackward') {
-                        nextNodes[contextMenu.id].zIndex = currentZ - 1;
+                        nextNodes[contextMenu.id].zIndex = Math.max(currentZ - 1, -1000);
                     }
                     else {
-                        const containerZIndices = Object.values(nextNodes).filter((n) => n.paletteId === 'container').map((n) => { var _a; return (_a = n.zIndex) !== null && _a !== void 0 ? _a : -1; });
+                        const containerZIndices = Object.values(nextNodes).filter((n) => n.paletteId === 'container').map((n) => { var _a; return (_a = n.zIndex) !== null && _a !== void 0 ? _a : -100; });
                         if (action === 'bringToFront')
-                            nextNodes[contextMenu.id].zIndex = Math.min(Math.max(...containerZIndices, -1) + 1, 999);
+                            nextNodes[contextMenu.id].zIndex = Math.min(Math.max(...containerZIndices, -1000) + 1, -100);
                         else if (action === 'sendToBack')
-                            nextNodes[contextMenu.id].zIndex = Math.min(...containerZIndices, -1) - 1;
+                            nextNodes[contextMenu.id].zIndex = Math.max(Math.min(...containerZIndices, -100) - 1, -1000);
                     }
                     store.props.write('nodes', nextNodes);
                 }

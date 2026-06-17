@@ -64,7 +64,7 @@ const mapIgnitionToReactFlowNodes = (
             return {
                 id, type, selected: id === selectedId,
                 position: { x: nodeData.x || 0, y: nodeData.y || 0 },
-                zIndex: isContainer ? (nodeData.zIndex ?? -1) : 1000,
+                zIndex: isContainer ? (nodeData.zIndex ?? -100) : 1000,
                 style: {
                     width: nodeData.width || (isContainer ? 300 : (isTextNode ? 150 : 150)),
                     height: nodeData.height || (isContainer ? 300 : (isTextNode ? 80 : 150)),
@@ -411,9 +411,9 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
             const isSelected = fresh.data?.isSelected === true;
             const isAnimated = fresh.data?.animation !== 'none';
 
-            let zIndex = fresh.zIndex || 0;
-            if (isHovered) zIndex = Math.max(zIndex, 500);
-            if (isAnimated) zIndex = 1000;
+            let zIndex = fresh.zIndex || 2000;
+            if (isHovered) zIndex = Math.max(zIndex, 4000);
+            if (isAnimated) zIndex = 5000;
 
             const strokeWidth = (isHovered || isSelected) ? globalEdgeWidth + 2 : globalEdgeWidth;
             const waypoints = local?.data?.waypoints ?? fresh.data?.waypoints;
