@@ -416,7 +416,7 @@ export const useArchitectureFlowHandlers = ({
                     useOverrideImage: paletteItem.useOverrideImage || false,
                     inactive: paletteItem.inactive || false,
                 };
-                if (paletteItem.id === 'container') { newNodeData.width = 300; newNodeData.height = 300; newNodeData.zIndex = -1; }
+                if (paletteItem.id === 'container') { newNodeData.width = 300; newNodeData.height = 300; newNodeData.zIndex = -100; }
                 const nextNodes = { ...rawNodesDict };
                 nextNodes[newNodeId] = newNodeData;
                 console.log("DEBUG: Writing nodes to store:", JSON.stringify(nextNodes));
@@ -644,15 +644,15 @@ export const useArchitectureFlowHandlers = ({
             if (['bringToFront', 'bringForward', 'sendBackward', 'sendToBack'].includes(action) && isNode) {
                 if (store?.props) {
                     const nextNodes = { ...rawNodesDict };
-                    const currentZ = nextNodes[contextMenu.id].zIndex ?? -1;
+                    const currentZ = nextNodes[contextMenu.id].zIndex ?? -100;
                     if (action === 'bringForward') {
-                        nextNodes[contextMenu.id].zIndex = Math.min(currentZ + 1, 999);
+                        nextNodes[contextMenu.id].zIndex = Math.min(currentZ + 1, -100);
                     } else if (action === 'sendBackward') {
-                        nextNodes[contextMenu.id].zIndex = currentZ - 1;
+                        nextNodes[contextMenu.id].zIndex = Math.max(currentZ - 1, -1000);
                     } else {
-                        const containerZIndices = Object.values(nextNodes).filter((n: any) => n.paletteId === 'container').map((n: any) => n.zIndex ?? -1);
-                        if (action === 'bringToFront') nextNodes[contextMenu.id].zIndex = Math.min(Math.max(...containerZIndices, -1) + 1, 999);
-                        else if (action === 'sendToBack') nextNodes[contextMenu.id].zIndex = Math.min(...containerZIndices, -1) - 1;
+                        const containerZIndices = Object.values(nextNodes).filter((n: any) => n.paletteId === 'container').map((n: any) => n.zIndex ?? -100);
+                        if (action === 'bringToFront') nextNodes[contextMenu.id].zIndex = Math.min(Math.max(...containerZIndices, -1000) + 1, -100);
+                        else if (action === 'sendToBack') nextNodes[contextMenu.id].zIndex = Math.max(Math.min(...containerZIndices, -100) - 1, -1000);
                     }
                     store.props.write('nodes', nextNodes);
                 }
@@ -688,6 +688,7 @@ export const useArchitectureFlowHandlers = ({
         isDraggingNode,
         // Refs
         rawNodesDictRef,
+        rawEdgesDictRef,
         // Shared
         closeContextMenu,
         // Edge handlers (delegated)

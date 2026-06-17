@@ -128,7 +128,7 @@ export const mapIgnitionToReactFlowEdges = (
                 : (edgeData.animation || 'none');
 
             const isAnimated = effectiveAnimation !== 'none';
-            const zIndex = isAnimated ? 1000 : (isSelected ? 10 : 0);
+            const zIndex = isAnimated ? 5000 : (isSelected ? 3000 : 2000);
 
             const strokeStyle: any = { stroke: typeConfig.color || '#888', strokeWidth: isSelected ? baseWidth + 2 : baseWidth };
             if (edgeData.dashed) strokeStyle.strokeDasharray = '10 15';

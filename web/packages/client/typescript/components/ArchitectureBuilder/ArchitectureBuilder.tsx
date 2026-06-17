@@ -64,7 +64,7 @@ const mapIgnitionToReactFlowNodes = (
             return {
                 id, type, selected: id === selectedId,
                 position: { x: nodeData.x || 0, y: nodeData.y || 0 },
-                zIndex: isContainer ? (nodeData.zIndex ?? -1) : 1000,
+                zIndex: isContainer ? (nodeData.zIndex ?? -100) : 1000,
                 style: {
                     width: nodeData.width || (isContainer ? 300 : (isTextNode ? 150 : 150)),
                     height: nodeData.height || (isContainer ? 300 : (isTextNode ? 80 : 150)),
@@ -261,7 +261,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     const globalHideHandles = rawConfig.hideHandles === true || String(rawConfig.hideHandles ?? '').toLowerCase() === 'true';
     const globalHandleCount = Math.max(1, Math.min(5, Number(rawConfig.handleCount) || 3));
     const isEnabled = rawConfig.enabled !== false && String(rawConfig.enabled ?? 'true').toLowerCase() !== 'false';
-    const enableOnClickEvents = rawConfig.enableOnClickEvents !== false && String(rawConfig.enableOnClickEvents ?? 'true').toLowerCase() !== 'false';
+    const _enableOnClickEvents = rawConfig.enableOnClickEvents !== false && String(rawConfig.enableOnClickEvents ?? 'true').toLowerCase() !== 'false';
     const snapEnabled = rawConfig.snapEnabled !== false && String(rawConfig.snapEnabled ?? 'true').toLowerCase() !== 'false';
     const snapPixels = Number(rawConfig.snapPixels) || 15;
     const snapGrid = React.useMemo<[number, number]>(() => [snapPixels, snapPixels], [snapPixels]);
@@ -296,6 +296,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
     const {
         isUpdatingEdge, isDraggingNode, updatingEdgeRef,
         rawNodesDictRef,
+        rawEdgesDictRef,
         closeContextMenu,
         getValidIntersection,
         isValidConnection,
@@ -378,7 +379,7 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
         let hasChanges = false;
         const corrected: Record<string, any> = {};
 
-        for (const [edgeId, edge] of Object.entries(rawEdgesDict)) {
+        for (const [edgeId, edge] of Object.entries(rawEdgesDict as Record<string, any>)) {
             const updated: any = { ...edge };
 
             const srcParts = (edge.sourceHandle as string)?.split('-');
@@ -411,9 +412,9 @@ export const ArchitectureBuilder = observer((props: ComponentProps<ArchitectureB
             const isSelected = fresh.data?.isSelected === true;
             const isAnimated = fresh.data?.animation !== 'none';
 
-            let zIndex = fresh.zIndex || 0;
-            if (isHovered) zIndex = Math.max(zIndex, 500);
-            if (isAnimated) zIndex = 1000;
+            let zIndex = fresh.zIndex || 2000;
+            if (isHovered) zIndex = Math.max(zIndex, 4000);
+            if (isAnimated) zIndex = 5000;
 
             const strokeWidth = (isHovered || isSelected) ? globalEdgeWidth + 2 : globalEdgeWidth;
             const waypoints = local?.data?.waypoints ?? fresh.data?.waypoints;
