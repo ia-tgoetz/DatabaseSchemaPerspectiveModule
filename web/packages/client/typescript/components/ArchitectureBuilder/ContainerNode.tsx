@@ -85,7 +85,7 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                         borderTopRightRadius: '7px', 
                         borderBottomRightRadius: '8px',
                         fontSize: '12px', fontWeight: 'bold', color: finalLabelColor,
-                        cursor: isUnlocked ? 'inherit' : 'grab', 
+                        cursor: 'pointer',
                         display: 'flex', alignItems: 'center', gap: '6px',
                         overflow: 'hidden',
                         transition: 'background-color 0.2s ease',
@@ -96,13 +96,11 @@ export const ContainerNode = ({ id, data, selected }: NodeProps<ContainerNodeDat
                     onMouseEnter={(e) => {
                         if (!data.unlockMovement) {
                             (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--neutral-40)';
-                            (e.currentTarget as HTMLElement).style.cursor = 'pointer';
                         }
                     }}
                     onMouseLeave={(e) => {
                         if (!data.unlockMovement) {
                             (e.currentTarget as HTMLElement).style.backgroundColor = finalLabelBg;
-                            (e.currentTarget as HTMLElement).style.cursor = 'drag';
                         }
                     }}
                     onClick={(e) => {
