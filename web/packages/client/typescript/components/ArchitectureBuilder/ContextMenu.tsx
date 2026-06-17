@@ -191,19 +191,27 @@ export const ContextMenu = React.memo(({
                                     <div style={MENU_DIVIDER_STYLE} />
                                     <div style={MENU_ITEM_FLEX_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleUnlocked')}>
                                         {rawNodesDict[contextMenu.id]?.configs?.unlocked ? (
-                                            <><span>🔒 Lock Interaction</span><span>✓</span></>
+                                            <><span>🔓 Interaction Unlocked</span><span></span></>
                                         ) : (
-                                            <><span>🔓 Unlock Interaction</span><span></span></>
+                                            <><span>🔒 Interaction Locked</span><span></span></>
                                         )}
                                     </div>
                                     <div style={MENU_ITEM_FLEX_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleLink')}>
-                                        <span>🔗 Link Contents</span><span>{!rawNodesDict[contextMenu.id]?.configs?.unlinked ? '✓' : ''}</span>
+                                        {!rawNodesDict[contextMenu.id]?.configs?.unlinked ? (
+                                            <><span>🔗 Content Linked</span><span></span></>
+                                        ) : (
+                                            <><span>⛓️‍💥 Content Not Linked</span><span></span></>
+                                        )}
                                     </div>
                                 </>
                             )}
                             {!contextMenu.isContainer && !TEXT_NODE_PALETTE_IDS.has(rawNodesDict[contextMenu.id]?.paletteId) && (
                                 <div style={MENU_ITEM_FLEX_STYLE} onMouseEnter={() => setActiveSubMenu(null)} onClick={() => handleContextMenuAction('toggleGrayscale')}>
-                                    <span>⬜ Toggle Inactive</span><span>{rawNodesDict[contextMenu.id]?.inactive ? '✓' : ''}</span>
+                                    {rawNodesDict[contextMenu.id]?.inactive ? (
+                                        <><span>🔴 Node Inactive</span><span>✓</span></>
+                                    ) : (
+                                        <><span>🟢 Node Active</span><span></span></>
+                                    )}
                                 </div>
                             )}
                             <div style={MENU_DIVIDER_STYLE} />

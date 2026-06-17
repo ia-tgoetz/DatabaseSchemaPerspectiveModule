@@ -16416,15 +16416,13 @@ const ContainerNode = ({ id, data, selected }) => {
             /* Locked Icon */
             react_1.default.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", height: "18px", viewBox: "0 -960 960 960", width: "18px", fill: "currentColor" },
                 react_1.default.createElement("path", { d: "M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H240v400Zm240-120q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80ZM240-160v-400 400Z" })))),
-            react_1.default.createElement("div", { className: "custom-drag-handle", onPointerDown: (e) => { e.stopPropagation(); }, style: Object.assign({ position: 'absolute', top: 0, left: 0, maxWidth: '100%', boxSizing: 'border-box', backgroundColor: finalLabelBg, padding: '4px 8px', borderTopLeftRadius: '7px', borderTopRightRadius: '7px', borderBottomRightRadius: '8px', fontSize: '12px', fontWeight: 'bold', color: finalLabelColor, cursor: isUnlocked ? 'inherit' : 'grab', display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', transition: 'background-color 0.2s ease', zIndex: 10, pointerEvents: 'auto' }, (data.labelStyle || {})), onMouseEnter: (e) => {
+            react_1.default.createElement("div", { className: "custom-drag-handle", onPointerDown: (e) => { e.stopPropagation(); }, style: Object.assign({ position: 'absolute', top: 0, left: 0, maxWidth: '100%', boxSizing: 'border-box', backgroundColor: finalLabelBg, padding: '4px 8px', borderTopLeftRadius: '7px', borderTopRightRadius: '7px', borderBottomRightRadius: '8px', fontSize: '12px', fontWeight: 'bold', color: finalLabelColor, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden', transition: 'background-color 0.2s ease', zIndex: 10, pointerEvents: 'auto' }, (data.labelStyle || {})), onMouseEnter: (e) => {
                     if (!data.unlockMovement) {
                         e.currentTarget.style.backgroundColor = 'var(--neutral-40)';
-                        e.currentTarget.style.cursor = 'pointer';
                     }
                 }, onMouseLeave: (e) => {
                     if (!data.unlockMovement) {
                         e.currentTarget.style.backgroundColor = finalLabelBg;
-                        e.currentTarget.style.cursor = 'drag';
                     }
                 }, onClick: (e) => {
                     e.stopPropagation();
@@ -16596,16 +16594,20 @@ exports.ContextMenu = React.memo(({ contextMenu, activeSubMenu, setActiveSubMenu
                 contextMenu.isContainer && (React.createElement(React.Fragment, null,
                     React.createElement("div", { style: MENU_DIVIDER_STYLE }),
                     React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleUnlocked') }, ((_e = (_d = rawNodesDict[contextMenu.id]) === null || _d === void 0 ? void 0 : _d.configs) === null || _e === void 0 ? void 0 : _e.unlocked) ? (React.createElement(React.Fragment, null,
-                        React.createElement("span", null, "\uD83D\uDD12 Lock Interaction"),
-                        React.createElement("span", null, "\u2713"))) : (React.createElement(React.Fragment, null,
-                        React.createElement("span", null, "\uD83D\uDD13 Unlock Interaction"),
+                        React.createElement("span", null, "\uD83D\uDD13 Interaction Unlocked"),
+                        React.createElement("span", null))) : (React.createElement(React.Fragment, null,
+                        React.createElement("span", null, "\uD83D\uDD12 Interaction Locked"),
                         React.createElement("span", null)))),
-                    React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleLink') },
-                        React.createElement("span", null, "\uD83D\uDD17 Link Contents"),
-                        React.createElement("span", null, !((_g = (_f = rawNodesDict[contextMenu.id]) === null || _f === void 0 ? void 0 : _f.configs) === null || _g === void 0 ? void 0 : _g.unlinked) ? '✓' : '')))),
-                !contextMenu.isContainer && !constants_1.TEXT_NODE_PALETTE_IDS.has((_h = rawNodesDict[contextMenu.id]) === null || _h === void 0 ? void 0 : _h.paletteId) && (React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleGrayscale') },
-                    React.createElement("span", null, "\u2B1C Toggle Inactive"),
-                    React.createElement("span", null, ((_j = rawNodesDict[contextMenu.id]) === null || _j === void 0 ? void 0 : _j.inactive) ? '✓' : ''))),
+                    React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleLink') }, !((_g = (_f = rawNodesDict[contextMenu.id]) === null || _f === void 0 ? void 0 : _f.configs) === null || _g === void 0 ? void 0 : _g.unlinked) ? (React.createElement(React.Fragment, null,
+                        React.createElement("span", null, "\uD83D\uDD17 Content Linked"),
+                        React.createElement("span", null))) : (React.createElement(React.Fragment, null,
+                        React.createElement("span", null, "\u26D3\uFE0F\u200D\uD83D\uDCA5 Content Not Linked"),
+                        React.createElement("span", null)))))),
+                !contextMenu.isContainer && !constants_1.TEXT_NODE_PALETTE_IDS.has((_h = rawNodesDict[contextMenu.id]) === null || _h === void 0 ? void 0 : _h.paletteId) && (React.createElement("div", { style: MENU_ITEM_FLEX_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('toggleGrayscale') }, ((_j = rawNodesDict[contextMenu.id]) === null || _j === void 0 ? void 0 : _j.inactive) ? (React.createElement(React.Fragment, null,
+                    React.createElement("span", null, "\uD83D\uDD34 Node Inactive"),
+                    React.createElement("span", null, "\u2713"))) : (React.createElement(React.Fragment, null,
+                    React.createElement("span", null, "\uD83D\uDFE2 Node Active"),
+                    React.createElement("span", null))))),
                 React.createElement("div", { style: MENU_DIVIDER_STYLE }),
                 React.createElement("div", { style: MENU_ITEM_STYLE, onMouseEnter: () => setActiveSubMenu(null), onClick: () => handleContextMenuAction('copy') }, "\uD83D\uDCCB Copy"),
                 contextMenu.isContainer && (React.createElement("div", { style: { padding: '5px 8px', cursor: clipboardRef.current ? 'pointer' : 'not-allowed', color: clipboardRef.current ? 'var(--neutral-90)' : 'var(--neutral-50)' }, onClick: () => { if (clipboardRef.current)
@@ -16734,7 +16736,7 @@ const React = __importStar(__webpack_require__(/*! react */ "react"));
 // @ts-ignore
 const reactflow_1 = __webpack_require__(/*! reactflow */ "./node_modules/reactflow/dist/umd/index.js");
 const EdgeUtils_1 = __webpack_require__(/*! ./EdgeUtils */ "./typescript/components/ArchitectureBuilder/EdgeUtils.ts");
-const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, markerEnd, style, label, interactionWidth, }) => {
+const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, markerEnd, style, label, interactionWidth, zIndex, }) => {
     var _a, _b;
     const storedWaypoints = (_a = data === null || data === void 0 ? void 0 : data.waypoints) !== null && _a !== void 0 ? _a : [];
     const showLabel = (data === null || data === void 0 ? void 0 : data.showLabel) === true;
@@ -16930,7 +16932,8 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
                     border: `1px solid var(--neutral-40)`, fontSize: '12px', fontWeight: 'bold',
                     color: (style === null || style === void 0 ? void 0 : style.stroke) || 'var(--neutral-90)',
                     pointerEvents: 'auto',
-                    zIndex: 1002, cursor: 'pointer', whiteSpace: 'pre-wrap', textAlign: 'center',
+                    zIndex: (zIndex !== null && zIndex !== void 0 ? zIndex : 5000) + 50,
+                    cursor: 'pointer', whiteSpace: 'pre-wrap', textAlign: 'center',
                 }, className: "nodrag nopan" }, label))),
         isEditing && (React.createElement(reactflow_1.EdgeLabelRenderer, null,
             React.createElement("div", { className: "nodrag nopan", onClick: (e) => e.stopPropagation(), style: {
@@ -17002,7 +17005,7 @@ const CustomEdge = ({ sourceX, sourceY, targetX, targetY, sourcePosition, target
                     backgroundColor: 'var(--callToAction)',
                     opacity: 0.85,
                     cursor: isH ? 'ns-resize' : 'ew-resize',
-                    zIndex: 1003,
+                    zIndex: (zIndex !== null && zIndex !== void 0 ? zIndex : 5000) + 100,
                     pointerEvents: 'all',
                     touchAction: 'none',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
