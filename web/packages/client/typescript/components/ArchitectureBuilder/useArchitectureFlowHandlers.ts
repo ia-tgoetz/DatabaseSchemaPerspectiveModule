@@ -688,6 +688,7 @@ export const useArchitectureFlowHandlers = ({
         isDraggingNode,
         // Refs
         rawNodesDictRef,
+        rawEdgesDictRef,
         // Shared
         closeContextMenu,
         // Edge handlers (delegated)

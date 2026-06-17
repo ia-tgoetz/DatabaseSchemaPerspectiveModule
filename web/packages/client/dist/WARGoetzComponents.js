@@ -15707,7 +15707,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
     const globalHideHandles = rawConfig.hideHandles === true || String((_a = rawConfig.hideHandles) !== null && _a !== void 0 ? _a : '').toLowerCase() === 'true';
     const globalHandleCount = Math.max(1, Math.min(5, Number(rawConfig.handleCount) || 3));
     const isEnabled = rawConfig.enabled !== false && String((_b = rawConfig.enabled) !== null && _b !== void 0 ? _b : 'true').toLowerCase() !== 'false';
-    const enableOnClickEvents = rawConfig.enableOnClickEvents !== false && String((_c = rawConfig.enableOnClickEvents) !== null && _c !== void 0 ? _c : 'true').toLowerCase() !== 'false';
+    const _enableOnClickEvents = rawConfig.enableOnClickEvents !== false && String((_c = rawConfig.enableOnClickEvents) !== null && _c !== void 0 ? _c : 'true').toLowerCase() !== 'false';
     const snapEnabled = rawConfig.snapEnabled !== false && String((_d = rawConfig.snapEnabled) !== null && _d !== void 0 ? _d : 'true').toLowerCase() !== 'false';
     const snapPixels = Number(rawConfig.snapPixels) || 15;
     const snapGrid = React.useMemo(() => [snapPixels, snapPixels], [snapPixels]);
@@ -15734,7 +15734,7 @@ exports.ArchitectureBuilder = mobx_react_1.observer((props) => {
         props.store.props.write('refreshHierarchy', false);
     }, [props.props.refreshHierarchy, props.store]);
     // ─── Handlers hook ─────────────────────────────────────────────────────
-    const { isUpdatingEdge, isDraggingNode, updatingEdgeRef, rawNodesDictRef, closeContextMenu, getValidIntersection, isValidConnection, handleWaypointsChange, handleLabelChange, onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd, onEdgesDelete, onEdgeContextMenu, onEdgeClick, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, handleGearClick, handlePaletteItemClick, handleResizeEnd, handleTextChange, onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onNodeContextMenu, onNodeClick, executeCopy, executePaste, onDragOver, onDrop, onMoveStart, onPaneClick, onPaneContextMenu, handleNodeSwap, handleContextMenuAction, } = useArchitectureFlowHandlers_1.useArchitectureFlowHandlers({
+    const { isUpdatingEdge, isDraggingNode, updatingEdgeRef, rawNodesDictRef, rawEdgesDictRef, closeContextMenu, getValidIntersection, isValidConnection, handleWaypointsChange, handleLabelChange, onConnect, onEdgeUpdate, onEdgeUpdateStart, onEdgeUpdateEnd, onConnectStart, onConnectEnd, onEdgesDelete, onEdgeContextMenu, onEdgeClick, handleLineTypeChange, handleConnectionTypeChange, handleAnimationChange, handleGearClick, handlePaletteItemClick, handleResizeEnd, handleTextChange, onNodesChange, onNodeDragStart, onNodeDrag, onNodeDragStop, onNodesDelete, onNodeContextMenu, onNodeClick, executeCopy, executePaste, onDragOver, onDrop, onMoveStart, onPaneClick, onPaneContextMenu, handleNodeSwap, handleContextMenuAction, } = useArchitectureFlowHandlers_1.useArchitectureFlowHandlers({
         store: props.store,
         componentEvents: props.componentEvents,
         rawNodesDict,
@@ -18532,6 +18532,7 @@ const useArchitectureFlowHandlers = ({ store, componentEvents, rawNodesDict, raw
         isDraggingNode,
         // Refs
         rawNodesDictRef,
+        rawEdgesDictRef,
         // Shared
         closeContextMenu }, edgeHandlers), { 
         // Node handlers
